@@ -128,21 +128,21 @@
                                 </div>
                                 {{-- @if(isset($service) && $service != '') --}}
                                 <div class="form-group row" wire:ignore>
-                                    <section class="col-4">
+                                    <section class="col-12 col-sm-6 col-md-4">
                                         <label>{{ __('Start Date') }}</label>
                                         <input type="date" name="start_date" id="start_date" class="form-control"  class="datepicker-default"
                                         @if(isset($service->start_date) && $service->start_date != '1970-01-01') value="{{ $service->start_date }}"@endisset
                                         @if(null !== old('start_date'))value="{{ old('start_date') }}"@endisset placeholder="{{ __('Select Start Date') }}">
 
                                     </section>
-                                    <section class="col-4">
+                                    <section class="col-12 col-sm-6 col-md-4">
                                         <label>{{ __('End Date') }}</label>
                                         <input type="date" name="end_date" id="end_date" class="form-control"
                                         @if(isset($service->end_date) && $service->end_date != '1970-01-01') value="{{ $service->end_date }}"@endisset
                                         @if(null !== old('end_date'))value="{{ old('end_date') }}"@endisset  placeholder="{{ __('Select End Date') }}">
 
                                     </section>
-                                    <section class="col-4">
+                                    <section class="col-sm-12 col-md-4">
                                         <label>{{ __('Contract type') }}</label>
                                         <input type="text" name="type" id="type" class="form-control"
                                         @isset($service->type) value="{{ $service->type }}"@endisset
@@ -176,7 +176,7 @@
                                 </div> --}}
 
                                 <div class="form-group row">
-                                    <section class="col-3">
+                                    <section class="col-12 col-sm-6 col-md-3">
                                         <label>{{ __('Method of Contract')}}</label>
                                         <select name="selectedTypeContract" id="selectedTypeContract" class="form-control">
                                             <option value="semanalmente" @isset($service->selectedTypeContract) @if($service->selectedTypeContract == "semanalmente") selected @endif @endisset>{{__("Weekly")}}</option>
@@ -184,15 +184,15 @@
                                             <option value="anualmente" @isset($service->selectedTypeContract) @if($service->selectedTypeContract == "anualmente") selected @endif @endisset>{{__("Annually")}}</option>
                                         </select>
                                     </section>
-                                    <section class="col-3">
+                                    <section class="col-12 col-sm-6 col-md-3">
                                         <label>{{ __("Time to repeat")}}</label>
                                         <input type="number" name="time_repeat" id="time_repeat" class="form-control" @isset($service->time_repeat) value="{{ $service->time_repeat }}" @endisset>
                                     </section>
-                                    <section class="col-3">
+                                    <section class="col-5">
                                         <label>{{ __("Number of times") }}</label>
                                         <input type="number" name="number_times" id="number_times" class="form-control" @isset($service->number_times) value="{{ $service->number_times }}" @endisset>
                                     </section>
-                                    <section class="col-3">
+                                    <section class="col-7">
                                         <label>{{ __("Initialization date")}}</label>
                                         <input type="date" name="new_date" id="new_date" class="form-control"  class="datepicker-default"
                                         @if(isset($service->new_date) && $service->new_date != '1970-01-01') value="{{ $service->new_date }}"@endisset
@@ -253,13 +253,13 @@
     <div class="card">
         <div class="card-footer justify-content-between">
             <div class="row">
-                <div class="col text-right">
-                    <a href="{{ route('tenant.services.index') }}" class="btn btn-secondary mr-2">{{
+            <div class="col text-right" style="padding: 0 5px 0 0;">
+                    <a href="{{ route('tenant.services.index') }}" class="btn btn-secondary" style="padding: 9px;font-size: 10px;">{{
                         __('Back') }}
                         <span class="btn-icon-right"><i class="las la-angle-double-left"></i></span>
                     </a>
                     <button type="submit" style="border:none;background:none;">
-                        <a type="submit" class="btn btn-primary"  role="button">
+                    <a type="submit" class="btn btn-primary" style="padding: 9px;font-size: 10px;" role="button">
                             {{ $buttonAction }}
                             <span class="btn-icon-right"><i class="las la-check mr-2"></i></span>
                         </a>

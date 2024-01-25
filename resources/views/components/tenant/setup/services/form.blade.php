@@ -33,7 +33,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <div class="col">
+                                    <div class="col-12 col-sm-6">
                                         <label>{{ __('Description') }}</label>
                                         <input type="text" name="description" id="description" class="form-control"
                                             @isset($description)value="{{ $description }}"@endisset
@@ -42,7 +42,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <div class="col">
+                                    <div class="col-12 col-sm-6">
                                         <label>{{ __('Type') }}</label>
                                         <select name="type" id="type" class="form-control">
                                             <option value="">{{ __('Select type') }}</option>
@@ -124,7 +124,7 @@
                 </a>
                 
                 <button type="submit" class="addServiceButton" style="border:none;background:none;">
-                    <a type="submit" class="btn btn-primary"  role="button">
+                    <a type="submit" class="btn btn-primary" role="button">
                         {{ $buttonAction }}
                         <span class="btn-icon-right"><i class="las la-check mr-2"></i></span>
                     </a>

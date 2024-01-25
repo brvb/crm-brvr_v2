@@ -12,7 +12,7 @@
                         @if ($update)
                             @method('PUT')
                         @endif --}}
-                        <div class="row">
+                        <div class="row" style="margin:10px;">
                             <div class="col-xl-8 col-xs-12 mb-3">
                                 <div class="form-group row">
                                     <label>{{ __('Zone Name') }}</label>
@@ -29,7 +29,6 @@
                                         <input type="text" name="comercial" id="comercial" wire:model.defer="comercial" class="form-control"
                                             @isset($comercial)value="{{ $comercial }}"@endisset
                                             placeholder="{{ __('Comercial') }}">
-
                                 </div>
                             </div>
                         </div>
@@ -42,12 +41,12 @@
     <div class="card-footer justify-content-between">
         <div class="row">
             <div class="col text-right">
-                <a href="{{ route('tenant.setup.zones.index') }}" class="btn btn-secondary mr-2">{{
+                <a href="{{ route('tenant.setup.zones.index') }}" class="btn btn-secondary mr-2" style="padding: 10px;font-size: 11px;">{{
                     __('Back') }}
                     <span class="btn-icon-right"><i class="las la-angle-double-left"></i></span>
                 </a>
                 <button type="submit" style="border:none;background:none;">
-                    <a type="submit" class="btn btn-primary"  role="button">
+                    <a type="submit" class="btn btn-primary"  role="button" style="padding: 10px;font-size: 11px;">
                         {{ $buttonAction }}
                         <span class="btn-icon-right"><i class="las la-check mr-2"></i></span>
                     </a>

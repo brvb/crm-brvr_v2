@@ -1,6 +1,6 @@
-<div class="col-10">
+<div class="col-12">
     <div class="row">
-        <section class="col-6">
+        <section class="col-xs-12 col-md-6">
             <label>{{ __('District') }}</label>
             <select type="text" name="district" id="district" class="form-control" wire:change="$emit('updatedDistrict', $event.target.value)">
                 <option value="">{{ __('Select district') }}</option>
@@ -9,7 +9,7 @@
                 @endforeach
             </select>
         </section>
-        <section class="col-6">
+        <section class="col-xs-12 col-md-6">
             <label>{{ __('City') }}</label>
             <select type="text" name="county" id="county" class="form-control">
                 <option value="" @if(!$county) selected @endif>{{ __('Select city') }}</option>

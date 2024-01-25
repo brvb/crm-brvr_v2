@@ -28,7 +28,7 @@
         </div>
     </div>
     <!-- display dataTable no-footer -->
-    <table id="dataTables-data" class="table table-responsive-lg mb-0 table-striped">
+    <table id="dataTables-data" class="table table-responsive mb-0 table-striped">
         <thead>
             <tr>
                 <th>
@@ -54,9 +54,9 @@
                             <label class="custom-control-label" for="customCheckBox{{ $item->id }}"></label>
                         </div>
                     </td>
-                    <td style="display:flex;"> <span class="badge badge-primary rounded-circle" style="background:{{$item->color}}; padding:10px 10px!important;">
+                    <td style="display:flex;align-items: center;"> <span class="badge badge-primary rounded-circle" style="background:{{$item->color}}; padding:10px 10px !important;width: 10px;height: 10px;margin-right: 10px;">
                         <label style="display:none;"></label>
-                    </span> &nbsp; {{ $item->name }}</td>
+                    </span>{{ $item->name }}</td>
                     <td>{{ $item->mobile_phone }}</td>
                     <td>{{ $item->email }}</td>
                     <td>{{ $item->job }}</td>

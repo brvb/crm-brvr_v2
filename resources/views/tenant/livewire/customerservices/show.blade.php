@@ -1,8 +1,13 @@
 <div>
-<div class="card-header" wire:key="tenantcustomerservicesshowservices">
-    <h4 class="card-title">{{ __('Customer Services') }}</h4>
-    <div class="col-3 text-right pr-0">
-        <a href="{{ route('tenant.services.create') }}" class="btn btn-primary">{{ __('Add Customer Service') }}</a>
+<div class="container text-center" wire:key="tenantcustomerservicesshowservices">
+    <div class="row">
+        <div class="col-12 col-sm-6">
+            <h4 class="card-title">{{ __('Customer Services') }}</h4>
+        </div>
+        
+        <div class="col-12 col-sm-6 align-self-end">
+            <a href="{{ route('tenant.services.create') }}" class="btn btn-primary">{{ __('Add Customer Service') }}</a>
+        </div>
     </div>
 </div>
 <div class="card-body">
@@ -36,7 +41,7 @@
             </div>
         </div>
         <!-- display dataTable no-footer -->
-        <table id="dataTables-data" class="table table-responsive-lg mb-0 table-striped">
+        <table id="dataTables-data" class="table table-responsive mb-0 table-striped">
             <thead>
                 <tr>
                     <th>

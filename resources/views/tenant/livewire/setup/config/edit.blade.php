@@ -36,17 +36,17 @@
                                             </section>
                                         </div>
                                         <div class="row form-group">
-                                            <section class="col-3">
+                                            <section class="col-12 col-md-6 col-lg-3">
                                                 <label for="vat">{{ __('VAT') }}</label>
                                                 <input type="text" name="vat" id="vat" class="form-control"
                                                 value="@if(isset($config->vat)) $config->vat @endif" wire:model.lazy="vat">
                                             </section>
-                                            <section class="col-3">
+                                            <section class="col-12 col-md-6 col-lg-3">
                                                 <label for="contact">{{ __('Phone number') }}</label>
                                                 <input type="text" name="contact" id="contact" class="form-control"
                                                 value="@if(isset($config->contact)) $config->contact @endif" wire:model.lazy="contact">
                                             </section>
-                                            <section class="col-6">
+                                            <section class="col-12 col-md-6">
                                                 <label for="email">{{ __('Primary e-mail address') }}</label>
                                                 <input type="text" name="email" id="email" class="form-control"
                                                 value="@if(isset($config->email)) $config->email @endif" wire:model.lazy="email">
@@ -59,20 +59,20 @@
                                             </section>
                                         </div>
                                         <div class="row ">
-                                            <section class="col-6">
+                                            <section class="col-12 col-lg-6">
                                                 <div class="input-group">
                                                     <div class="input-group-prepend">
                                                         <button class="btn btn-primary btn-sm" type="button">{{__("Image")}}</button>
                                                     </div>
                                                     <div class="custom-file">
                                                         <input type="file" name="uploadFile" id="uploadFile" class="custom-file-input" wire:model="uploadFile">
-                                                        <label class="custom-file-label">@if(isset($image)) {{$image}} @else {{__('Choose file')}} @endif</label>
+                                                        <label class="custom-file-label"  style="height:35px;paddin;white-space: nowrap;">@if(isset($image)) {{$image}} @else {{__('Choose file')}} @endif</label>
                                                     </div>
                                                 </div>
                                             </section>
-                                            <section class="col-6">
+                                            <section class="col-12 col-lg-6">
                                                 @if ($uploadFile)
-                                                    <img src="{{ $uploadFile->temporaryUrl() }}" style="max-width:300px;">
+                                                    <img src="{{ $uploadFile->temporaryUrl() }}" style="max-width:300px;padding-right: 1px; padding-left: 2px;">
                                                 @elseif (isset($logotipo) && $logotipo)
                                                     <img src="{{ global_tenancy_asset('/app/public/images/logo/' . $logotipo) }}" style="max-width:300px;">
                                                 @endif
@@ -95,53 +95,53 @@
                                 <div class="row">
                                     <div class="col">
                                         <div class="row form-group">
-                                            <section class="col-6">
+                                            <section class="col-12 col-sm-6">
                                                 <label for="senderEmail">{{ __('Sender e-mail') }}</label>
                                                 <input type="text" name="senderEmail" id="senderEmail" class="form-control"
                                                 value="@if(isset($config->sender_email)) $config->sender_email @endif" wire:model.lazy="sender_email">
                                             </section>
-                                            <section class="col-6">
+                                            <section class="col-12 col-sm-6">
                                                 <label for="senderName">{{ __('Sender name') }}</label>
                                                 <input type="text" name="senderName" id="sender_name" class="form-control"
                                                 value="@if(isset($config->sender_name)) $config->sender_name @endif" wire:model.lazy="sender_name">
                                             </section>
                                         </div>
                                         <div class="row form-group">
-                                            <section class="col-6">
+                                            <section class="col-12 col-sm-6">
                                                 <label for="sender_cc_email">{{ __('CC e-mail') }}</label>
                                                 <input type="text" name="sender_cc_email" id="sender_cc_email" class="form-control"
                                                 value="@if(isset($config->sender_cc_email)) $config->sender_cc_email @endif" wire:model.lazy="sender_cc_email">
                                             </section>
-                                            <section class="col-6">
+                                            <section class="col-12 col-sm-6">
                                                 <label for="sender_cc_name">{{ __('CC name') }}</label>
                                                 <input type="text" name="sender_cc_name" id="sender_cc_name" class="form-control"
                                                 value="@if(isset($config->sender_cc_name)) $config->sender_cc_name @endif" wire:model.lazy="sender_cc_name">
                                             </section>
                                         </div>
                                         <div class="row form-group">
-                                            <section class="col-6">
+                                            <section class="col-12 col-sm-6">
                                                 <label for="sender_bcc_email">{{ __('BCC e-mail') }}</label>
                                                 <input type="text" name="sender_bcc_email" id="sender_bcc_email" class="form-control"
                                                 value="@if(isset($config->sender_bcc_email)) $config->sender_bcc_email @endif" wire:model.lazy="sender_bcc_email">
                                             </section>
-                                            <section class="col-6">
+                                            <section class="col-12 col-sm-6">
                                                 <label for="sender_bcc_name">{{ __('BCC name') }}</label>
                                                 <input type="text" name="sender_bcc_name" id="sender_bcc_name" class="form-control"
                                                 value="@if(isset($config->sender_bcc_name)) $config->sender_bcc_name @endif" wire:model.lazy="sender_bcc_name">
                                             </section>
                                         </div>
                                         <div class="row form-group">
-                                            <section class="col-6" wire:ignore>
+                                            <section class="col-12 col-lg-6" wire:ignore>
                                                 <label for="signature">{{ __('Signature') }}</label>
                                                 <div class="summernote"></div>
                                             </section>
-                                            <section class="col-6">
+                                            <section class="col-12 col-lg-6">
                                                 <label for="alert_email">{{ __("Email Alert")}}</label>
                                                 <input type="text" name="alert_email" id="alert_email" class="form-control" wire:model.defer="alert_email">
                                                
-                                                <button type="button" class="btn-xs btn-primary mt-2 mb-2" wire:click="addEmail">{{__("Add Email")}}</button>
+                                                <button type="button" class="btn btn-primary mt-2 mb-2" wire:click="addEmail">{{__("Add Email")}}</button>
                                                 
-                                                <table id="dataTables-data" class="table table-responsive-lg mb-0 table-striped" style="display:block;">
+                                                <table id="dataTables-data" class="table table-responsive mb-0 table-striped" style="display:block;">
                                                     <thead>
                                                         <tr>
                                                             <th>{{ __('Email Alert')}}</th>
@@ -196,8 +196,8 @@
     <div class="card">
         <div class="card-footer justify-content-between">
             <div class="row">
-                <div class="col text-right">
-                    <a wire:click="saveTask" class="btn btn-primary">
+                <div class="col text-right"  style="padding:0;">
+                    <a wire:click="saveTask" class="btn btn-primary" style="padding-left: 11px;padding-right: 7px;max-width: 250px;">
                         {{ $actionButton }}
                         <span class="btn-icon-right"><i class="las la-check mr-2"></i></span>
                     </a>
