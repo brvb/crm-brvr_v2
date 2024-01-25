@@ -1,0 +1,31 @@
+<?php
+
+namespace App\View\Components;
+
+use Illuminate\View\Component;
+use Symfony\Component\HttpFoundation\Request;
+
+class SideBar extends Component
+{
+    private $cmsSettings;
+
+    /**
+     * Create a new component instance.
+     *
+     * @return void
+     */
+    public function __construct(Request $request)
+    {
+        $this->cmsSettings = $request->get('company_name');
+    }
+
+    /**
+     * Get the view / contents that represent the component.
+     *
+     * @return \Illuminate\Contracts\View\View|\Closure|string
+     */
+    public function render()
+    {
+       return view('components.elements.side-bar', ['cmsSettings' => $this->cmsSettings]);
+    }
+}

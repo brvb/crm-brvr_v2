@@ -1,0 +1,21 @@
+
+<x-tenant.customers.form
+    :action="route('tenant.customers.update',$customer->slug)"
+    :districts="$districts"
+    :counties="$counties"
+    :idCustomer="$customer->id"
+    :name="$customer->name"
+    :slug="$customer->slug"
+    :shortName="$customer->short_name"
+    :username="$customer->username"
+    :vat="$customer->vat"
+    :email="$customer->email"
+    :contact="$customer->contact"
+    :address="$customer->address"
+    :zipcode="$customer->zipcode"
+    :district="$customer->district"
+    :county="$customer->county"
+    :accountmanager="$account_manager"
+    :allAccountManagers="$allAccountManagers"
+    :update="true" buttonAction="Atualizar Cliente"
+    formTitle="Atualizar Cliente"/>
