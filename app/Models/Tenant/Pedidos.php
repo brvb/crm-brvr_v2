@@ -40,6 +40,11 @@ class Pedidos extends Model
         return $this->belongsTo(CustomerLocations::class, 'location_id', 'id')->with('locationCounty')->with('locationDistrict');
     }
 
+    public function prioridadeStat()
+    {
+        return $this->belongsTo(Prioridades::class, 'prioridade', 'id');
+    }
+
     protected static function booted()
     {
         self::addGlobalScope('ordered', function (Builder $queryBuilder) {

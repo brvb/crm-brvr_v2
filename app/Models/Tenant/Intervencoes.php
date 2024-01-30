@@ -11,12 +11,18 @@ class Intervencoes extends Model
     use HasFactory;
 
     protected $table = 'intervencoes';
-    protected $fillable = ['id_pedido', 'material_ref_intervencao','material_descricao_intervencao','material_quantidade_intervencao','estado_pedido','descricao_realizado','anexos','assinatura_tecnico','assinatura_cliente','created_at','updated_at'];
+    protected $fillable = ['id_pedido', 'material_ref_intervencao','material_descricao_intervencao','material_quantidade_intervencao','estado_pedido','descricao_realizado','anexos','assinatura_tecnico','assinatura_cliente','horas_alterado','user_id','data_inicio','created_at','updated_at'];
+
+
+    public function pedido()
+    {
+        return $this->belongsTo(Pedidos::class, 'id_pedido', 'id')->with('tipoEstado');
+    }
 
     protected static function booted()
     {
         self::addGlobalScope('ordered', function (Builder $queryBuilder) {
-            $queryBuilder->orderBy('nome_estado');
+            $queryBuilder->orderBy('id_pedido');
         });
     }
 

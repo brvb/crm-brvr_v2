@@ -15,6 +15,7 @@
 <script>
 
 
+var arraySignatures = [];
 
 function initializeDrawing(canvasId, signatureType) {
         const canvas = document.getElementById(canvasId);
@@ -31,6 +32,7 @@ function initializeDrawing(canvasId, signatureType) {
         canvas.addEventListener('touchend', stopDrawing);
 
         function startDrawing(e) {
+            arraySignatures[e.target.id] = [];
             isDrawing = true;
             draw(e);
         }
@@ -71,13 +73,14 @@ function initializeDrawing(canvasId, signatureType) {
             ctx.moveTo((x * canvas.width) / canvas.clientWidth, (y * canvas.height) / canvas.clientHeight);
         }
 
+        
+
         function stopDrawing() {
             isDrawing = false;
             ctx.beginPath();
             saveSignature(signatureType);
         }
-
-        
+     
 
 
         function saveSignature(type) {
@@ -86,10 +89,15 @@ function initializeDrawing(canvasId, signatureType) {
 
             var imageURL = image.src;
 
-            Livewire.emit("signaturePads",imageURL,canvas.id);
-            console.log(`Link da imagem da assinatura ${type}:`, imageURL);
+            arraySignatures[canvas.id] = [imageURL];
+
+        //    Livewire.emit("signaturePads",imageURL,canvas.id);
         }
     }
+
+    
+
+
     function clearSignature(canvasId, signatureType) {
             const canvas = document.getElementById(canvasId);
             const ctx = canvas.getContext('2d');
@@ -101,10 +109,17 @@ function initializeDrawing(canvasId, signatureType) {
             image.src = canvas.toDataURL('image/png');
             var imageURL = image.src;
             
+            arraySignatures[canvas.id] = []
             Livewire.emit("signaturePadsClear",imageURL,canvas.id);
     }
+
+
+
     initializeDrawing('signature-pad', 'Técnico');
     initializeDrawing('signature-pad-cliente', 'Cliente');
+
+    
+                  
 
 
 </script>

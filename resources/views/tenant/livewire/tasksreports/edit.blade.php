@@ -33,7 +33,9 @@
                                         <div class="row form-group" style="display:flex;justify-content:end;">
                                             <section class="col-xl-2 col-xs-2 form-group text-right">
                                                 <h4 style="color:#326c91;">Tempo Gasto</h4>
-                                                <h4>350 horas</h4>
+                                                <h4>
+                                                    @if($horasAtuais == "[]") 0 @else {{$horasAtuais}} @endif horas
+                                                </h4>
                                                 <input type="text" class="form-control" id="horasAlterado" wire:model.defer="horasAlterado">
                                             </section>
                                         </div>
@@ -80,7 +82,7 @@
                                                 </div>
 
                                                 <section class="col-xl-12 col-xs-12 form-group">
-                                                    <label>Descrição do realizado</label>
+                                                    <label>Descrição</label>
                                                     <textarea class="form-control" rows="4" cols="50" name="descricaoRealizado" id="descricaoRealizado" wire:model.defer="descricaoRealizado"></textarea>
                                                 </section>
 
@@ -106,7 +108,7 @@
                                                         <label>Técnico</label>
                                                         <div class="row">
                                                             <div id="signature-container" class="col-12 col-lg-6 offset-lg-3 align-self-center signature-container">
-                                                                <canvas id="signature-pad" class="w-100 border border-dark rounded signature-pad"></canvas>
+                                                                <canvas id="signature-pad" class="w-100 border border-dark rounded signature-pad" wire:ignore></canvas>
                                                             </div>
                                                         </div>
                                                         <div class="row mt-3">
@@ -121,8 +123,8 @@
                                                     <div class="container text-center" style="margin-top: 0">
                                                         <label>Cliente</label>
                                                         <div class="row">
-                                                            <div id="signature-container-cliente" class="col-12 col-lg-6 offset-lg-3 align-self-center signature-container">
-                                                                <canvas id="signature-pad-cliente" class="w-100 border border-dark rounded signature-pad"></canvas>
+                                                            <div id="signature-container-cliente" class="col-12 col-lg-6 offset-lg-3 align-self-center signature-container" >
+                                                                <canvas id="signature-pad-cliente" class="w-100 border border-dark rounded signature-pad" wire:ignore></canvas>
                                                             </div>
                                                         </div>
                                                         <div class="row mt-3">
@@ -134,7 +136,7 @@
                                                 </section>
 
                                                 
-                                                <section class="col-xl-12 col-xs-12 form-group">
+                                                <section class="col-xl-12 col-xs-12 form-group" style="display:{{$signaturePad}}">
                                                     <div class="container text-center" style="margin-top: 0">
                                                         <div class="form-check custom-checkbox checkbox-success">
                                                             <input type="checkbox" name="email_pdf" class="form-check-input" id="customCheckBox3" wire:model.defer="email_pdf">
@@ -180,12 +182,12 @@
                     <a wire:click="cancel" class="btn btn-secondary mr-2">
                         Atrás
                     </a>
-                    @if(Auth::user()->type_user == 0 || Auth::user()->id == $user->user_id)
-                        <a wire:click="addIntervention" class="btn btn-primary">
-                            {{ __("Update Task Report") }}
+                   
+                        <a class="btn btn-primary" id="addInter">
+                            Adicionar intervenção
                             <span class="btn-icon-right"><i class="las la-check mr-2"></i></span>
                         </a>
-                    @endif
+                  
                 </div>
             </div>
         </div>
@@ -212,6 +214,34 @@
         window.addEventListener('loading', function(e) {
             @this.loading();
            
+        });
+
+
+        jQuery('body').on('click', '#addInter', function() {
+            
+            var cliente = "";
+            var tecnico = "";
+         
+            if (Array.isArray(arraySignatures['signature-pad-cliente'])) {
+                cliente = arraySignatures['signature-pad-cliente'][0];
+            } else {
+                
+                cliente = "";
+            }
+
+
+            if (Array.isArray(arraySignatures['signature-pad'])) {
+                tecnico = arraySignatures['signature-pad'][0];
+            } else {
+                
+                tecnico = "";
+            }
+            
+                    
+
+
+
+            Livewire.emit("teste",cliente,tecnico);
         });
 
         window.addEventListener('swal', function(e) {
@@ -243,6 +273,10 @@
                     @this.set('signaturePad','block'); 
                     @this.set('descricaoPanel','block');
                 } 
+                else if(jQuery('#selectedEstado').find(':selected').val() == "1"){
+                    @this.set('descricaoPanel','none');
+                    @this.set('signaturePad','none'); 
+                }
                 else {
                     @this.set('descricaoPanel','block');
                     @this.set('signaturePad','none'); 

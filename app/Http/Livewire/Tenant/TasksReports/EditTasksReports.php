@@ -2,17 +2,26 @@
 
 namespace App\Http\Livewire\Tenant\TasksReports;
 
+use Carbon\Carbon;
+use Dompdf\Dompdf;
+use Dompdf\Options;
 use App\Models\User;
 use Livewire\Component;
 use Livewire\Redirector;
 use App\Events\ChatMessage;
+use App\Events\Tasks\SendPDF;
+use App\Models\Tenant\Config;
 use Livewire\WithFileUploads;
+use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\Tenant\EstadoPedido;
+use App\Models\Tenant\Intervencoes;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use App\Interfaces\Tenant\Tasks\TasksInterface;
 use App\Interfaces\Tenant\TasksTimes\TasksTimesInterface;
 use App\Interfaces\Tenant\TasksReports\TasksReportsInterface;
+use App\Models\Tenant\Pedidos;
 
 class EditTasksReports extends Component
 {
@@ -28,14 +37,14 @@ class EditTasksReports extends Component
 
     public ?object $task = NULL;
     public ?object $statesPedido = NULL;
-
+    public string $horasAtuais = "";
     public string $descricaoPanel = 'none';
     public string $signaturePad = 'none';
     public string $selectedEstado = '';
-    public int $horasAlterado;
+    public int $horasAlterado = 0;
     public string $referencia_intervencao = '';
     public string $descricao_intervencao = '';
-    public string $quantidade_intervencao ='';
+    public int $quantidade_intervencao = 0;
     public string $descricaoRealizado = '';
     public $uploadFile;
     public int $countFirstUpload = 0;
@@ -43,6 +52,8 @@ class EditTasksReports extends Component
     public $signatureClient;
     public $signatureTecnico;
     public $email_pdf;
+
+    public $loading;
     
     public ?object $taskTimes =  NULL;
 
@@ -52,7 +63,7 @@ class EditTasksReports extends Component
     public array $arrayReport = [];
     public bool $changed = false;
 
-    protected $listeners = ['resetChanges' => 'resetChanges', 'signaturePads' => 'signaturePads','signaturePadsClear' => 'signaturePadsClear'];
+    protected $listeners = ['resetChanges' => 'resetChanges', 'signaturePads' => 'signaturePads','signaturePadsClear' => 'signaturePadsClear','teste' => 'teste'];
 
      /**
      * Livewire construct function
@@ -75,12 +86,43 @@ class EditTasksReports extends Component
         $this->task == $task;
 
         $this->statesPedido = EstadoPedido::all();
+
+        //CONTAR O TEMPO PARA COLOCAR NO CABEÇALHO
+        $horas = Intervencoes::where('id_pedido',$this->task->id)->where('estado_pedido','!=',1)->get();
+
+        $somaDiferencasSegundos = 0;
+
+
+        foreach($horas as $hora)
+        {
+            $data1 = Carbon::parse($hora->data_inicio);
+            $data2 = Carbon::parse($hora->created_at);
+            $result = $data1->diff($data2);
+          
+            $data = Carbon::createFromTime($result->h, $result->i, $result->s);
+
+            $somaDiferencasSegundos += $data->diffInSeconds(Carbon::createFromTime(0, 0, 0));
+        }
+
+
+        //Converter segundos e horas e minutos
+        $horas = floor($somaDiferencasSegundos / 3600);
+        $minutos = floor(($somaDiferencasSegundos % 3600) / 60);
+        $horaFormatada = Carbon::createFromTime($horas, $minutos, 0)->format('H:i');
+
+        $this->horasAtuais = $horaFormatada;
+
+        $this->horasAlterado = 0;
      
     }
 
     public function updatedSelectedEstado()
     {
-        $this->descricaoPanel="block";
+        if($this->selectedEstado != "1")
+        {
+            $this->descricaoPanel="block";
+        }
+        
     }
 
     public function updatedUploadFile()
@@ -90,7 +132,8 @@ class EditTasksReports extends Component
     }
    
    public function signaturePads($images,$pessoa)
-   {
+   {  
+        
         if($pessoa == "signature-pad-cliente"){
             $this->signatureClient = $images;
         }
@@ -110,6 +153,15 @@ class EditTasksReports extends Component
     }
    }
 
+   public function teste($cliente,$tecnico)
+   {
+
+      $this->signatureClient = $cliente;
+      $this->signatureTecnico = $tecnico;
+
+      $this->addIntervention();
+   }
+
     /**
      * Saves the task report
      *
@@ -117,18 +169,81 @@ class EditTasksReports extends Component
      */
     public function addIntervention()
     {
+        $config = Config::first();
+
+        if($this->selectedEstado == "1")
+        {
+            $intervencao = Intervencoes::with('pedido')->where('id_pedido',$this->task->id)->where('user_id',Auth::user()->id)->latest()->first();
+            if(isset($intervencao->estado_pedido))
+            {
+                if($intervencao->estado_pedido == "1" && isset($intervencao->estado_pedido))
+                {
+                    $this->dispatchBrowserEvent('swal', ['title' => "Intervenção", 'message' => "O seu utilizador já tem uma intervençao em aberto para este pedido!", 'status'=>'error']);
+                    return false;
+                }
+            }
+            
+        }
+
+        if($this->selectedEstado == "2")
+        {
+            $intervencaoCheckFinalizado = Intervencoes::with('pedido')->where('id_pedido',$this->task->id)->where('user_id',Auth::user()->id)->latest()->first();
+
+            if(isset($intervencaoCheckFinalizado))
+            {
+                if($intervencaoCheckFinalizado->estado_pedido == "2")
+                {
+                    $this->dispatchBrowserEvent('swal', ['title' => "Intervenção", 'message' => "Este pedido já se encontra concluído", 'status'=>'error']);
+                    return false;
+                }  
+                
+                    
+                //Checka se o campo de descrição final esta preenchido
+    
+                if($this->descricaoRealizado == "")
+                {
+                    $this->dispatchBrowserEvent('swal', ['title' => "Intervenção", 'message' => "Tem de selecionar uma descrição do realizado", 'status'=>'error']);
+                    return false;
+                }
+            }
+            else {
+                $this->dispatchBrowserEvent('swal', ['title' => "Intervenção", 'message' => "Tem de abrir intervenção antes poder fechar", 'status'=>'error']);
+                return false;
+            }
+           
+        }
+
+
+        if($this->selectedEstado == "4")
+        {
+            $intervencaoCheckSuspenso = Intervencoes::with('pedido')->where('id_pedido',$this->task->id)->where('user_id',Auth::user()->id)->latest()->first();
+
+            if(!isset($intervencaoCheckSuspenso))
+            {
+                $this->dispatchBrowserEvent('swal', ['title' => "Intervenção", 'message' => "Tem de abrir uma intervenção para colocar em suspenso", 'status'=>'error']);
+                return false;
+    
+            }
+            else 
+            {
+                if($intervencaoCheckSuspenso->estado_pedido == "4")
+                {
+                    $this->dispatchBrowserEvent('swal', ['title' => "Intervenção", 'message' => "Este pedido já se encontra suspenso", 'status'=>'error']);
+                    return false;
+                }
+            }
+        }
+
+
         $validatedData = Validator::make(
             [
                 'selectedEstado'  => $this->selectedEstado,
-                'descricaoRealizado' => $this->descricaoRealizado,
             ],
             [
                 'selectedEstado'  => 'required',
-                'descricaoRealizado'  => 'required',
             ],
             [
                 'selectedEstado'  => "Tem de selecionar um estado!",
-                'descricaoRealizado' => "Tem de selecionar uma descrição da intervenção!",
             ]
         );
 
@@ -145,15 +260,13 @@ class EditTasksReports extends Component
         if(!empty($this->arrayFirstUploaded)){
             foreach($this->arrayFirstUploaded as $img)
             {
-                $img[0]->storeAs(tenant('id') . '/app/public/pedidos/intervencoes_anexos', $img[0]->getClientOriginalName());
+                $img[0]->storeAs(tenant('id') . '/app/public/pedidos/intervencoes_anexos/'.$this->task->id.'/', $img[0]->getClientOriginalName());
             }
         }
 
 
         //PODER VERIFICAR AQUI AS SIGNATUREPADS
-        //chekar se esta vazio ou nao
-
-        //DD($this->signatureClient,$this->signatureTecnico);
+     
         if($this->signatureClient != "")
         {
             $pos = strpos($this->signatureClient, ',') + 1;
@@ -207,15 +320,56 @@ class EditTasksReports extends Component
         }
         
         
-         $this->tasksInterface->addIntervencao($this);
+       
+        $this->tasksInterface->addIntervencao($this);
+
+        $horas = Intervencoes::where('id_pedido',$this->task->id)->where('estado_pedido','!=',1)->get();
+
+        $somaDiferencasSegundos = 0;
 
 
-         //fazer PDF
-         if($this->email_pdf == true)
-         {
-            //Cria PDF e envia
-         }
-              
+        foreach($horas as $hora)
+        {
+            $data1 = Carbon::parse($hora->data_inicio);
+            $data2 = Carbon::parse($hora->created_at);
+            $result = $data1->diff($data2);
+          
+            $data = Carbon::createFromTime($result->h, $result->i, $result->s);
+
+            $somaDiferencasSegundos += $data->diffInSeconds(Carbon::createFromTime(0, 0, 0));
+        }
+
+
+        //Converter segundos e horas e minutos
+        $horas = floor($somaDiferencasSegundos / 3600);
+        $minutos = floor(($somaDiferencasSegundos % 3600) / 60);
+        $horaFormatada = Carbon::createFromTime($horas, $minutos, 0)->format('H:i');
+
+        $this->horasAtuais = $horaFormatada;
+
+
+         
+        $pdf = PDF::loadView('tenant.tasks.invoicepdf',["impressao" => $this,'config' => $config])
+        ->setPaper('a4')
+        ->setOptions(['isHtml5ParserEnabled' => true, 'isPhpEnabled' => true]);
+
+        $content = $pdf->download()->getOriginalContent();
+
+        Storage::put(tenant('id') . '/app/public/pedidos/pdfs_conclusao/'.$this->task->reference.'/'.$this->task->reference.'.pdf',$content);
+
+        if($this->selectedEstado == "2")
+        {
+
+            if($this->email_pdf == true)
+            {
+                //ENVIA EMAIL
+                $pedido = Pedidos::where('id',$this->task->id)->first();
+                event(new SendPDF($pedido));
+                
+            } 
+        }
+
+
             
         return redirect()->route('tenant.tasks-reports.index')
             ->with('message', "Intervenção adicionada com sucesso!")
@@ -276,6 +430,30 @@ class EditTasksReports extends Component
 
     public function render()
     {
+
+        $horas = Intervencoes::where('id_pedido',$this->task->id)->where('estado_pedido','!=',1)->get();
+
+        $somaDiferencasSegundos = 0;
+
+
+        foreach($horas as $hora)
+        {
+            $data1 = Carbon::parse($hora->data_inicio);
+            $data2 = Carbon::parse($hora->created_at);
+            $result = $data1->diff($data2);
+          
+            $data = Carbon::createFromTime($result->h, $result->i, $result->s);
+
+            $somaDiferencasSegundos += $data->diffInSeconds(Carbon::createFromTime(0, 0, 0));
+        }
+
+
+        //Converter segundos e horas e minutos
+        $horas = floor($somaDiferencasSegundos / 3600);
+        $minutos = floor(($somaDiferencasSegundos % 3600) / 60);
+        $horaFormatada = Carbon::createFromTime($horas, $minutos, 0)->format('H:i');
+
+        $this->horasAtuais = $horaFormatada;
 
         return view('tenant.livewire.tasksreports.edit');
 

@@ -14,6 +14,7 @@ use App\Events\Alerts\EmailNotifyEvent;
 use App\Events\ChatEmail\ChatEmailEvent;
 use App\Events\Tasks\DispatchTaskReport;
 use App\Events\Tasks\DispatchTasksToUser;
+use App\Events\Tasks\SendPDF;
 use App\Listeners\Tasks\TaskNotification;
 use App\Events\TeamMember\TeamMemberEvent;
 use App\Listeners\AlertEmail\EmailConclusionNotification;
@@ -23,6 +24,7 @@ use App\Listeners\Tasks\SendTaskReportNotification;
 use App\Listeners\AlertEmail\EmailNotifyNotification;
 use App\Listeners\Tasks\SendDispatchTasksNotification;
 use App\Listeners\AlertEmail\SendAlertEmailNotification;
+use App\Listeners\Tasks\SendPDFNotification;
 use App\Listeners\TeamMember\SendTeamMemberNotification;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -67,6 +69,9 @@ class EventServiceProvider extends ServiceProvider
         ],
         EmailConclusionEvent::class => [
             EmailConclusionNotification::class
+        ],
+        SendPDF::class => [
+            SendPDFNotification::class
         ]
     ];
 

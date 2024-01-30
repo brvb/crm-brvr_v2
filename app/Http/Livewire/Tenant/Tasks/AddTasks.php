@@ -443,7 +443,7 @@ class AddTasks extends Component
             $this->imagem = 'impressao'.$this->taskReference.'.pdf';
 
     
-            Storage::put(tenant('id') . '/app/public/pedidos/etiquetas/etiqueta'.$this->taskReference.'.pdf',$content);
+            Storage::put(tenant('id') . '/app/public/pedidos/etiquetas/'.$this->taskReference.'/etiqueta'.$this->taskReference.'.pdf',$content);
         }
 
 
@@ -457,14 +457,14 @@ class AddTasks extends Component
         if(!empty($this->arrayFirstUploaded)){
             foreach($this->arrayFirstUploaded as $img)
             {
-                $img[0]->storeAs(tenant('id') . '/app/public/pedidos/imagens_pedidos', $img[0]->getClientOriginalName());
+                $img[0]->storeAs(tenant('id') . '/app/public/pedidos/imagens_pedidos/'.$this->taskReference.'/', $img[0]->getClientOriginalName());
             }
         }
 
         if(!empty($this->arrayEquipamentoUploaded)){
             foreach($this->arrayEquipamentoUploaded as $img)
             {
-                $img[0]->storeAs(tenant('id') . '/app/public/pedidos/equipamentos_pedidos', $img[0]->getClientOriginalName());
+                $img[0]->storeAs(tenant('id') . '/app/public/pedidos/equipamentos_pedidos/'.$this->taskReference.'/', $img[0]->getClientOriginalName());
             }
         }
 

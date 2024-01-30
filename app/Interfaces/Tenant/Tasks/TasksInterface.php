@@ -30,6 +30,8 @@ interface TasksInterface
 
     public function createPedido(object $values): Pedidos;
 
+    public function updatePedido(object $values): int;
+
     /**FILTRO */
 
     public function getTasksFilter(string $searchString,int $tech,int $client,int $typeReport,int $work,string $ordenation,string $dateBegin,string $dateEnd,$perPage): LengthAwarePaginator;

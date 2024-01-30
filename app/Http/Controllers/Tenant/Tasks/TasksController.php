@@ -4,15 +4,17 @@ namespace App\Http\Controllers\Tenant\Tasks;
 
 use Illuminate\View\View;
 use App\Models\Tenant\Tasks;
-use App\Models\Tenant\Customers;
+use App\Models\Tenant\Pedidos;
 
+use App\Models\Tenant\Customers;
+use App\Models\Tenant\TasksTimes;
 use App\Models\Tenant\TeamMember;
+use App\Models\Tenant\TasksReports;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Redirect;
 use App\Interfaces\Tenant\Tasks\TasksInterface;
 use App\Interfaces\Tenant\TasksReports\TasksReportsInterface;
-use App\Models\Tenant\TasksReports;
-use App\Models\Tenant\TasksTimes;
-use Illuminate\Support\Facades\Redirect;
+use App\Models\Tenant\Intervencoes;
 
 class TasksController extends Controller
 {
@@ -104,17 +106,13 @@ class TasksController extends Controller
      * @param Tasks $task
      * @return void
      */
-    public function destroy(Tasks $task)
+    public function destroy(Pedidos $task)
     {
-        $taskReport = $this->tasksReportsInterface->getReportByTaskId($task->id);
-    
-        if(isset($taskReport) && $taskReport->count() > 0 && $taskReport->reportStatus != 0) {
-            return redirect()->route('tenant.tasks.index')
-                ->with('message', __('You cannot delete a task with an ongoing report!'))
-                ->with('status', 'error');
-        }
+      
+        Pedidos::where('id',$task->id)->delete();
 
-        $this->tasksInterface->deleteTask($task);
+        Intervencoes::where('id_pedido',$task->id)->delete();
+    
         return to_route('tenant.tasks.index')
             ->with('message', __('Task deleted with success!'))
             ->with('status', 'sucess');

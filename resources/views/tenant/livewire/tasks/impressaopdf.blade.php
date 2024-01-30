@@ -1,4 +1,5 @@
 <div>
+  
     <div style="clear:both; position:relative;">
         <div style="position:absolute; left:0pt; width:192pt;">
             <table style="width: 100%;font-size:50px;">
@@ -26,7 +27,7 @@
                         @if(isset($impressao->customer->short_name))
                             <td style="font-size:30px;">{{ $impressao->customer->short_name }}</td>
                          @else
-                            <td style="font-size:30px;">{{$impressao->taskToUpdate->taskCustomer->short_name}}</td>
+                            <td style="font-size:30px;">{{$impressao->taskToUpdate->customer->short_name}}</td>
                          @endif
                        
                     </tr>

@@ -1,188 +1,34 @@
-
-<div class="container-fluid">
-<div class="row">
-    <div class="col-xl-3">
-      <div class="card">
-        <div class="card-body">
-          <h4 class="card-intro-title">{{__("Calendar")}}</h4>
-          
-          <div class="">
-            <div>
-              <p>{{ __("Team Members") }}</p>
-              @foreach ( $teamMembers as $member )
-                  <div class="col-xs-12 mb-2" style="padding-left:10px;">
-                      <div class="row">
-                      <div class="col-xs-3">
-                          <span class="badge badge-primary rounded-circle" style="background:{{$member->color}}; padding:10px 10px!important;">
-                              <label style="display:none;"></label>
-                          </span>
-                      </div>
-                      <div class="col-xs-9">
-                          <label>&nbsp;{{$member->name}}</label>
-                      </div>
-                  </div>
-                  </div>
-              @endforeach
-            </div>
-      
-          </div>
-        </div>
+<div class="modal fade" id="modalInfo" data-id="" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Informação Pedido</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+       
+      </div>
+      <div class="modal-footer">
+        <!-- Fazer aqui   -->
+        <button type="button" id="abrirIntervencaoButton" class="btn btn-success" style="font-size: 12px;">Abrir Intervenção</button>
+        <button type="button" id="consultarPedidoButton" class="btn btn-danger" style="font-size: 12px;">Consultar Pedido</button> 
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" style="font-size: 12px;">Fechar</button>
       </div>
     </div>
-    <div class="col-xl-9">
+  </div>
+</div>
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-xl-12">
       <div class="row">
-        <div class="col-xl-12">
-          <div class="card">
-            <div class="card-body">
-
-              {{-- @php
-                $teamMemberCheck = \App\Models\Tenant\TeamMember::where('user_id',Auth::user()->id)->first();
-              @endphp
-
-              @if($teamMemberCheck->id_hierarquia != "3")
-                <div id="accordion-one" class="accordion accordion-primary" wire:ignore>
-                  <div class="accordion__item">
-                      <div class="accordion__header rounded-lg collapsed" data-toggle="collapse" data-target="#default_collapseOne" aria-expanded="false">
-                          <span class="accordion__header--text">{{__("Filters")}}</span>
-                          <span class="accordion__header--indicator"></span>
-                      </div>
-                      <div id="default_collapseOne" class="accordion__body collapse" data-parent="#accordion-one">
-                          <div class="accordion__body--text">
-                              <div class="col-12" style="margin-bottom:25px;padding-left:0px;">
-                                
-                                  <div class="row">
-                                      
-                                      <div class="col-12">
-
-      
-                                          <div class="form-group">
-                                            @foreach ($infoTeamMember as $dept => $info)
-                                            @if($info != null)
-                                              <div class="row" style="border:1px solid;justify-content:center;">
-                                                
-                                                <label>{{ $dept }}</label>
-                                                                                
-                                                <div class="col-12" style="padding-left:25px;border-top: 1px solid;">
-                                                @foreach($info as $inf)
-                                              
-                                                 
-                                                    <div class="input-group">
-                                                     
-                                                        <label>{{ $inf->name }}</label>
-                                                        <input type="checkBox" id="check{{$inf->id}}" wire:model.defer="checkboxUser.{{$inf->id}}" class="form-check-input"  value="{{ $inf->id }}">
-                                                     
-                                                    </div>
-                                                  
-                                           
-                                                 
-                                          
-                                                @endforeach
-                                              </div>
-                                              </div>
-                                              @endif
-                                            @endforeach
-                                             
-                                          </div>
-                                      </div>
-                                    
-                                  </div> 
-                      
-                                  <div class="row">
-                    
-                                      <div class="col-md-12 text-right">
-                                          <button type="button" id="search" wire:click="searchPeople" class="btn-sm btn btn-primary">Pesquise</button>
-                    
-                                      </div>
-                                  </div>
-                              </div>
-                          </div>
-                      </div>
-                  </div>
-                </div>   
-              @endif --}}
-
-              <div id="calendarr" class="app-fullcalendarr fc fc-unthemed fc-ltr" wire:ignore></div>
-
-            </div>
-          </div>
-        </div>
-
-        @if(Auth::user()->type_user != 2)
-
-        <div class="col-xl-12" style="margin-top:20px;">
-          
-        @php
-          $teamMemberCheck = \App\Models\Tenant\TeamMember::where('user_id',Auth::user()->id)->first();
-        @endphp
-
-            @if($teamMemberCheck->id_hierarquia != "3")
-              <div id="accordion-one" class="accordion accordion-primary" wire:ignore>
-                <div class="accordion__item">
-                    <div class="accordion__header rounded-lg collapsed" data-toggle="collapse" data-target="#default_collapseOne" aria-expanded="false">
-                        <span class="accordion__header--text">{{__("Filters")}}</span>
-                        <span class="accordion__header--indicator"></span>
-                    </div>
-                    <div id="default_collapseOne" class="accordion__body collapse" data-parent="#accordion-one">
-                        <div class="accordion__body--text">
-                            <div class="col-12" style="margin-bottom:25px;padding-left:0px;">
-                              
-                                <div class="row">
-                                    
-                                    <div class="col-12">
-
-
-                                        <div class="form-group">
-                                          @foreach ($infoTeamMember as $dept => $info)
-                                          @if($info != null)
-                                            <div class="row" style="border:1px solid;justify-content:center;">
-                                              
-                                              <label>{{ $dept }}</label>
-                                                                              
-                                              <div class="col-12" style="padding-left:25px;border-top: 1px solid;">
-                                              @foreach($info as $inf)
-                                            
-                                              
-                                                  <div class="input-group">
-                                                  
-                                                      <label>{{ $inf->name }}</label>
-                                                      <input type="checkBox" id="check{{$inf->id}}" wire:model.defer="checkboxUser.{{$inf->id}}" class="form-check-input"  value="{{ $inf->id }}">
-                                                  
-                                                  </div>
-                                                
-                                        
-                                              
-                                        
-                                              @endforeach
-                                            </div>
-                                            </div>
-                                            @endif
-                                          @endforeach
-                                          
-                                        </div>
-                                    </div>
-                                  
-                                </div> 
-                    
-                                <div class="row">
-                  
-                                    <div class="col-md-12 text-right">
-                                        <button type="button" id="search" wire:click="searchPeople" class="btn-sm btn btn-primary">Pesquise</button>
-                  
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-              </div>   
-            @endif
-        </div>
-
+       
         <div class="col-xl-12" style="height:50%;">
           {{-- <div class="row"> --}}
             <div class="card">
               <div class="card-header">
-                <h4 class="card-title">{{ __("Tarefas abertas")}}</h4>
+                <h4 class="card-title">Pedidos Abertos</h4>
               </div>
               <div class="card-body" style="display:flex;overflow:auto;">
 
@@ -191,55 +37,38 @@
               <table id="dataTables-data" class="table table-responsive-lg mb-0 table-striped">
                   <thead>
                       <tr>
-                          <th>Nome Cliente</th>
-                          <th>Serviço</th>
-                          <th>Resumo</th>
-                          <th>Técnico</th>
-                          <th>Data</th>
+                        <th>{{ __('Reference') }}</th>
+                        <th>{{ __('Customer') }}</th>
+                        <th>{{ __('Descrição') }}</th>
+                        <th>{{ __('Technical') }}</th>
+                        <th>{{ __('Date') }}</th>
+                        <th>{{ __('County') }}</th>
+                        <th>{{ __('Estado do Pedido') }}</th>
                       </tr>
                   </thead>
                   <tbody>
-                      @foreach ($secondTable as $ct => $item)
-                        @if(isset($item->taskReports))
-                          @if($item->taskReports->reportStatus != 2)
+                    @foreach ($pedidos as $item)
+                      <tr id="pedidoLinha" data-id="{{$item->id}}" data-cliente="{{str_replace(' ', '£', $item->customer->short_name)}}" data-referencia="{{$item->reference}}" style="background:{{ $item->prioridadeStat->cor }};">
+              
+                        <td>{{ $item->reference }}</td>
+                        <td>{{ $item->customer->short_name }}</td>
+                        <td>{{ $item->servicesToDo->name}}</td>
+                        <td>{{ $item->tech->name }}</td>
+                        <td>
+                            @if($item->data_agendamento != "")
+            
+                            <i class="fa fa-calendar" aria-hidden="true"></i> {{ $item->data_agendamento }}<br>
+                            <i class="fa fa-clock-o" aria-hidden="true"></i> {{ $item->hora_agendamento }}
+                            @else
+                            <i class="fa fa-calendar" aria-hidden="true"></i> {{ date('Y-m-d',strtotime($item->created_at)) }}<br>
+                            <i class="fa fa-clock-o" aria-hidden="true"></i> {{ date('H:i',strtotime($item->created_at)) }}
+                            @endif
+                        </td>
+                        <td>{{ $item->location->locationCounty->name }}</td>
 
-                            <tr style="background:{{$item->prioridades->cor}};">
-                              <td>{{ $item->taskCustomer->name }}</td>
-                              <td>
-                                  @foreach($item->servicesToDo as $ser)
-                                      {{$ser->service->name}}<br>
-                                  @endforeach
-                              </td>
-                              @if($item->resume == null || !isset($item->resume) || $item->resume == "")
-                                <td>Sem resumo</td>
-                              @else
-                                <td>{{ $item->resume }}</td>
-                              @endif
-                              <td>{{ $item->tech->name }}</td>                                
-                              <td>{{ $item->preview_date}}</td>
-                          </tr>
-                          
-                          @endif
-                        @else
-                          
-                            <tr style="background:{{$item->prioridades->cor}};">
-                                <td>{{ $item->taskCustomer->name }}</td>
-                                <td>
-                                    @foreach($item->servicesToDo as $ser)
-                                        {{$ser->service->name}}<br>
-                                    @endforeach
-                                </td>
-                                @if($item->resume == null || !isset($item->resume) || $item->resume == "")
-                                  <td>Sem resumo</td>
-                                @else
-                                  <td>{{ $item->resume }}</td>
-                                @endif
-                                <td>{{ $item->tech->name }}</td>                                
-                                <td>{{ $item->preview_date}}</td>
-                            </tr>
-                        
-                        @endif
-                      @endforeach
+                        <td>{{ $item->tipoEstado->nome_estado }}</td>
+                      </tr> 
+                    @endforeach
                   </tbody>
               </table>
           </div>
@@ -253,7 +82,7 @@
             <div class="col-xl-12" style="margin-top:20px;padding-left:0px;padding-right:0px;">
               <div class="card">
                 <div class="card-header">
-                  <h4 class="card-title">{{ __("Open Times")}}</h4>
+                  <h4 class="card-title">Intervenções em aberto</h4>
                 </div>
                 <div class="card-body" style="display:flex;overflow:auto;">
                   <table class="table mb-4 dataTablesCard no-hover card-table fs-14 dataTable no-footer" id="data5" role="grid" aria-describedby="data5_info">
@@ -268,35 +97,27 @@
                       </thead>
                       <tbody>
                         @foreach($openTimes as $name => $time)
+                          @if(!empty($time))
                           <tr>
                             <td>
                             <h4>
                                 <a href="javascript:void(0)" class="text-black">{{ $name }}</a>
                             </h4>
                             </td>
-                            <td>{{$time["customer"]}}</td>
+                            <td>{{ $time["cliente"] }}</td>
                             <td>
                               <i class="fa fa-tasks" aria-hidden="true"></i>
-                              {{$time["reference"]}} <br>
-                              <i class="fa fa-wrench" aria-hidden="true"></i>
-                              {{$time["service"]}}
+                              {{ $time["reference"] }} <br>
                             </td>
                             <td>
                               <i class="fa fa-calendar" aria-hidden="true"></i>
-                              {{ $time["date_begin"] }} <br>
+                              {{ date('Y-m-d',strtotime($time["data"])) }} <br>
                               <i class="fa fa-clock-o" aria-hidden="true"></i>
-                              {{ $time["hour_begin"] }}
+                              {{ date('H:i:s',strtotime($time["data"])) }}
                             </td>
-                            <td>
-                              <div class="d-flex">
-                               @if (Auth::user()->type_user == 0 || (Auth::user()->id == $time["tech"]))
-                                 <a href="{{ route('tenant.tasks-reports.edit', $time["task_id"])}}" class="btn btn-primary shadow  sharp mr-1">
-                                   <i class="fa fa-pencil"></i>
-                                 </a>
-                               @endif
-                              </div>
-                           </td>
+                         
                           </tr>
+                          @endif
                         @endforeach
                       </tbody>
                   </table>
@@ -316,7 +137,6 @@
                 <thead>
                   <tr>
                     <th>{{ __('Service') }}</th>
-                    {{-- <th>{{ __('Date Final of service') }}</th> --}}
                     <th>{{ __('Technical') }}</th>
                     <th>{{ __('Customer') }}</th>
                     <th>{{ __('Customer Location') }}</th>                   
@@ -328,7 +148,6 @@
                     @foreach ($servicesNotifications as $notification)
                       <tr>
                         <td>{{$notification["service"]}}</td>
-                        {{-- <td>{{$notification["date_final_service"]}}</td> --}}
                         <td>{{$notification["team_member"]}}</td>
                         <td>{{$notification["customer"]}}</td>
                         <td>{{$notification["customer_county"]}}</td>
@@ -346,11 +165,55 @@
             </div>
           </div>
         </div>
-
-        @endif
       
     </div>
     </div>
   </div>
 </div>
 
+@push('custom-scripts')
+<script>
+  jQuery( document ).ready(function() {
+
+    window.addEventListener('interventionCheck',function(e){
+
+        var nome_text = e.detail.parameter;
+        var referencia = e.detail.reference;
+        var idPedido = e.detail.idPedido;
+        var cliente = e.detail.cliente;
+
+        if(nome_text == "fechar"){
+          jQuery("#abrirIntervencaoButton").text("Fechar Intervenção");
+        } else {
+          jQuery("#abrirIntervencaoButton").text("Abrir Intervenção");
+        }
+
+          timer = setTimeout(function() {
+              if (!prevent) {
+                jQuery(".modal-body").empty();
+
+                jQuery('#modalInfo').modal('show');
+                jQuery(".modal-body").append("Referência: "+referencia+ "<br>Cliente: "+cliente); 
+
+                
+                jQuery("body").on("click","#abrirIntervencaoButton",function(){
+
+                  window.location.href="tasks-reports/"+idPedido+"/edit";
+                });
+
+                jQuery("body").on("click","#consultarPedidoButton",function(){
+
+                  window.location.href="tasks/"+idPedido+"/edit";
+                });
+              }
+              prevent = false;
+          }, delay);
+        
+
+    });
+
+
+
+  });
+</script>
+@endpush

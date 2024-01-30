@@ -6,14 +6,20 @@ use App\Models\User;
 use Livewire\Component;
 use Livewire\Redirector;
 use App\Events\ChatMessage;
+use Livewire\WithFileUploads;
+use App\Models\Tenant\Services;
 use Barryvdh\DomPDF\Facade\Pdf;
+use App\Models\Tenant\Customers;
 use App\Models\Tenant\TeamMember;
 use App\Models\Tenant\Prioridades;
+use App\Models\Tenant\SerieNumbers;
+use App\Models\Tenant\TiposPedidos;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Storage;
+use App\Models\Tenant\CustomerLocations;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Validator;
@@ -24,36 +30,36 @@ use App\Interfaces\Tenant\CustomerServices\CustomerServicesInterface;
 
 class EditTasks extends Component
 {
+    use WithFileUploads;
+    
     public string $homePanel = 'show active';
-    public string $servicesPanel = '';
-    public string $equipmentPanel = '';
     public string $techPanel = '';
     public string $cancelButton = '';
     public string $actionButton = '';
+    public string $stateEquipment = 'none';
+    public string $stateAgenda = 'none';
+    public string $tenant = "";
 
-    public ?object $customerList = NULL;
+
     public ?object $taskToUpdate = NULL;
-    public ?object $customerServicesList = NULL;
-    public ?object $teamMembers = NULL;
-    public ?object $tempSelectedServices = NULL;
-    public ?object $servicesToDo = NULL;
-    public string $selectedTechnician = '';
-
+    public ?string $taskReference = "";
+    public int $selectedId;
+    public string $selectedCustomer = '';
+    public ?object $customerList = NULL;
+    public string $contactoAdicional = '';
+    public string $selectedPedido = '';
+    public ?object $pedidosList = NULL;
+    public string $selectedServico = '';
+    public ?object $servicosList = NULL;
+    public string $serviceDescription = '';
+    public ?object $membersList = NULL;
+    public ?object $customerLocations = NULL;
     public string $selectedLocation = '';
-    public int $numberOfSelectedServices = 0;
-    public array $selectedServiceId = [];
-    public array $serviceDescription = [];
+    
+    public string $dateCreate = '';
+    public string $timeCreate = '';
 
-
-    public ?string $resume = '';
-    public ?string $taskAdditionalDescription = '';
-    public bool $changed = false;
-
-    public ?string $previewDate = NULL;
-    public ?string $previewHour = NULL;
-    public ?string $scheduledHour = NULL;
-    public ?string $scheduledDate = NULL;
-
+    public string $selectedTechnician = '';
     public ?string $origem_pedido = NULL;
     public ?string $quem_pediu = NULL;
     public ?string $tipo_pedido = NULL;
@@ -82,7 +88,18 @@ class EditTasks extends Component
     public ?string $descriptionExtra = '';
     public ?string $imagem = '';
 
+    public ?string $previewDate = NULL;
+    public ?string $previewHour = NULL;
+    public ?string $observacoesAgendar = NULL;
+
     //PARTE DE IR BUSCAR AS CORES
+
+     public $uploadFile;
+     public int $countFirstUpload = 0;
+     public array $arrayFirstUploaded = [];
+     public $uploadFileEquipamento;
+     public int $countEquipamentoUploaded = 0;
+     public array $arrayEquipamentoUploaded = [];
 
     public ?object $coresObject = NULL;
 
@@ -108,24 +125,7 @@ class EditTasks extends Component
         $this->tasksReportsInterface = $tasksReportsInterface;
     }
 
-    private function restartCustomerServiceList($tcl = NULL)
-    {
-        $this->numberOfSelectedServices = $this->taskToUpdate->servicesToDo->count();
-        $this->customerServicesList = $this->taskToUpdate->customerServiceList;
-        $this->servicesToDo = $this->taskToUpdate->servicesTodo;
-
-        if($tcl != NULL && $tcl->count() == 0) {
-            $this->selectedServiceId = [];
-            $this->serviceDescription = [];
-            $this->servicesToDo = NULL;
-            $this->numberOfSelectedServices = 0;
-        } else {
-            foreach($this->servicesToDo as $item) {
-                $this->selectedServiceId[$item->task_service_id] = $item->service->id;
-                $this->serviceDescription[] = $item->additional_description;
-            }
-        }
-    }
+   
     /**
      * Initialize livewire component
      *
@@ -134,22 +134,37 @@ class EditTasks extends Component
      */
     public function mount($taskToUpdate): void
     {
+        $this->tenant = tenant("id");
+    
         $this->taskToUpdate = $taskToUpdate;
+        $this->taskReference = $taskToUpdate->reference;
+        $this->selectedId = $taskToUpdate->id;
+       
+        $this->selectedCustomer = $taskToUpdate->customer_id;
+        $this->customerList = Customers::all();
 
-        $this->restartCustomerServiceList();
-        $this->selectedTechnician = $taskToUpdate->tech_id;
-        $this->taskAdditionalDescription = $taskToUpdate->additional_description;
-        $this->resume = $taskToUpdate->resume;
+        $this->selectedPedido = $taskToUpdate->tipo_pedido;
+        $this->pedidosList = TiposPedidos::all();
+
+        $this->selectedServico = $taskToUpdate->tipo_servico;
+        $this->servicosList = Services::all();
+        
+        $this->membersList = TeamMember::all();
+
+        $this->serviceDescription = $taskToUpdate->descricao;
+
+        $this->customerLocations = CustomerLocations::where('customer_id',$taskToUpdate->customer_id)->get();
         $this->selectedLocation = $taskToUpdate->location_id;
 
-        $this->previewDate = $taskToUpdate->preview_date;
-        $this->previewHour = $taskToUpdate->preview_hour;
-        $this->scheduledDate = $taskToUpdate->scheduled_date;
-        $this->scheduledHour = $taskToUpdate->scheduled_hour;
 
+        $this->selectedTechnician = $taskToUpdate->tech_id;
         $this->origem_pedido = $taskToUpdate->origem_pedido;
         $this->quem_pediu = $taskToUpdate->quem_pediu;
-        $this->tipo_pedido = $taskToUpdate->tipo_pedido;
+        $this->tipo_pedido = $taskToUpdate->tipo_agendamento;
+        $this->selectPrioridade = $taskToUpdate->prioridade;
+
+        $this->dateCreate = $taskToUpdate->created_at;
+        $this->timeCreate = $taskToUpdate->created_at;
 
         if($taskToUpdate->alert_email != null)
         {
@@ -168,6 +183,11 @@ class EditTasks extends Component
         $this->bomestado = $taskToUpdate->bom_estado;
         $this->normalestado = $taskToUpdate->estado_normal;
 
+        if($this->riscado != 0 || $this->partido != 0 || $this->bomestado != 0 || $this->normalestado != 0)
+        {
+            $this->stateEquipment = "block"; 
+        }
+
         $this->transformador = $taskToUpdate->transformador;
         $this->mala = $taskToUpdate->mala;
         $this->tinteiro = $taskToUpdate->tinteiro;
@@ -177,14 +197,29 @@ class EditTasks extends Component
 
         $this->imagem = $taskToUpdate->imagem;
 
+        $this->previewDate = $taskToUpdate->data_agendamento;
+        $this->previewHour = $taskToUpdate->hora_agendamento;
+        $this->observacoesAgendar = $taskToUpdate->observacoes_agendamento;
+
 
         $this->selectPrioridade = $taskToUpdate->prioridade;
         $this->coresObject = Prioridades::all();
 
-        $this->teamMembers = TeamMember::where('checkstatus',1)->get();
+        $getNumberImages = $taskToUpdate->anexos;
+        foreach(json_decode($getNumberImages) as $img)
+        {
+            $this->countFirstUpload++;
+            $this->arrayFirstUploaded[$this->countFirstUpload] = [$img];
+        }
 
+        $anexosEquipamentos = $taskToUpdate->anexos_equipamentos;
+        foreach(json_decode($anexosEquipamentos) as $img)
+        {
+            $this->countEquipamentoUploaded++;
+            $this->arrayEquipamentoUploaded[$this->countEquipamentoUploaded] = [$img];
+        }
         
-        $this->cancelButton = __('Back') . '<span class="btn-icon-right"><i class="las la-angle-double-left"></i></span>';;
+        $this->cancelButton = __('Back') . '<span class="btn-icon-right"><i class="las la-angle-double-left"></i></span>';
         $this->actionButton = __('Yes, update task');
     }
 
@@ -195,270 +230,151 @@ class EditTasks extends Component
         return response()->download('cl/'.tenant('id') . '/app/impressoes/impressao'.$this->taskToUpdate->reference.'.pdf');
     }
 
-    /**
-     * When the service is select is checks if it is not duplicated and stores the property
-     * Else it cleans the property and assigns a new created array without duplicate services
-     *
-     * @return Void
-     */
-    public function updatedSelectedServiceId(): Void
+    public function updatedUploadFile()
     {
-        $this->homePanel = '';
-        $this->servicesPanel = 'show active';
-        $this->techPanel = '';
-        $this->changed = true;
 
-        $tempArray = [];
-        foreach($this->selectedServiceId as $key => $item) {
-            if(!in_array($item, $tempArray)) {
-                $tempArray[$key] = $item;
-            } elseif (in_array($item, $tempArray) && $item == '') {
+        $this->countFirstUpload++;
+        $this->arrayFirstUploaded[$this->countFirstUpload] = [$this->uploadFile];
+    }
 
-            }else {
-                $tempArray[$key] = '';
-                $this->dispatchBrowserEvent('swal', ['title' => __('Task Services'), 'message' => __('Cannot add the same service!'), 'status'=>'error']);
+    public function updatedUploadFileEquipamento()
+    {
+        $this->countEquipamentoUploaded++;
+        $this->arrayEquipamentoUploaded[$this->countEquipamentoUploaded] = [$this->uploadFileEquipamento];
+    }
+
+    
+
+    
+
+    public function refreshPedido()
+    {
+
+        //RECEBER OS VALORES TODOS
+        $validatedData = Validator::make(
+         [
+            'selectedCustomer' => $this->selectedCustomer,
+            'selectedPedido' => $this->selectedPedido,
+            'selectedServico' => $this->selectedServico,
+            'serviceDescription' => $this->serviceDescription,
+            'selectedLocation' => $this->selectedLocation,
+            'selectPrioridade' => $this->selectPrioridade,
+            'selectedTechinician' => $this->selectedTechnician,
+            'origem_pedido' => $this->origem_pedido,
+            'tipo_pedido' => $this->tipo_pedido,
+            'quem_pediu' => $this->quem_pediu,
+         ],
+         [
+            'selectedCustomer' => 'required|int',
+            'selectedPedido' => 'required|int',
+            'selectedServico' => 'required|int',
+            'serviceDescription' => 'required|string',
+            'selectedLocation' => 'required|int',
+            'selectPrioridade' => 'required|int',
+            'selectedTechinician' => 'required|int',
+            'origem_pedido' => 'required|string',
+            'tipo_pedido' => 'required|string',
+            'quem_pediu' => 'required|string',
+        ],
+        [
+            'selectedCustomer'  => __('Tem de selecionar um cliente!'),
+            'selectedPedido' => __("Tem de selecionar um tipo de pedido!"),
+            'selectedServico' => __('Tem de selecionar um tipo de serviço!'),
+            'serviceDescription' => __('Tem de selecionar uma descrição!'),
+            'selectedLocation' => __('Tem de selecionar uma localização de cliente!'),
+            'selectPrioridade' => __('Tem de selecionar uma prioridade!'),
+            'selectedTechnician' => __('Tem de selecionar um técnico!'),
+            'origem_pedido' => __('Tem de selecionar uma origem de pedido!'),
+            'tipo_pedido' => __('Tem de selecionar o tipo de agendamento!'),
+            'quem_pediu' => __('Tem de selecionar quem pediu!'),
+        ]);
+
+        //MANDA OS ERROS
+        if ($validatedData->fails()) {
+            $errorMessage = '';
+            foreach($validatedData->errors()->all() as $message) {
+                $errorMessage .= '<p>' . $message . '</p>';
             }
-        }
-        $this->selectedServiceId = $tempArray;
-        $this->dispatchBrowserEvent('contentChanged');
-    }
-
-    /**
-     * Changes the changed var to keep track to updated values
-     *
-     * @return void
-     */
-    public function updatedServiceDescription()
-    {
-        $this->changed = true;
-    }
-
-    /**
-     * Changes the changed var to keep track to updated values
-     *
-     * @return void
-     */
-    public function updatedSelectedTechnician(): Void
-    {
-        $this->homePanel = '';
-        $this->servicesPanel = '';
-        $this->techPanel = 'show active';
-        $this->changed = true;
-    }
-
-    /**
-     * Changes the changed var to keep track to updated values
-     *
-     * @return void
-     */
-    public function updatedPreviewDate()
-    {
-        $this->homePanel = '';
-        $this->servicesPanel = '';
-        $this->techPanel = 'show active';
-        $this->changed = true;
-    }
-
-    /**
-     * Changes the changed var to keep track to updated values
-     *
-     * @return void
-     */
-    public function updatedPreviewHour()
-    {
-        $this->homePanel = '';
-        $this->servicesPanel = '';
-        $this->techPanel = 'show active';
-        $this->changed = true;
-    }
-
-    /**
-     * Changes the changed var to keep track to updated values
-     *
-     * @return void
-     */
-    public function updatedScheduledDate()
-    {
-        $this->homePanel = '';
-        $this->servicesPanel = '';
-        $this->techPanel = 'show active';
-        $this->changed = true;
-    }
-
-    /**
-     * Changes the changed var to keep track to updated values
-     *
-     * @return void
-     */    public function updatedScheduledHour()
-    {
-        $this->homePanel = '';
-        $this->servicesPanel = '';
-        $this->techPanel = 'show active';
-        $this->changed = true;
-    }
-
-    /**
-     * Changes the changed var to keep track to updated values
-     *
-     * @return void
-     */
-    public function updatedTaskAdditionalDescription()
-    {
-        $this->homePanel = '';
-        $this->servicesPanel = '';
-        $this->techPanel = 'show active';
-        $this->changed = true;
-    }
-
-    /**
-     * Removes a service, removes fields from the task
-     *
-     * @return Void
-     */
-    public function removeServiceForm($id)
-    {
-        unset($this->selectedServiceId[$id]);
-        unset($this->serviceDescription[$id]);
-        $this->numberOfSelectedServices--;
-        $this->changed = true;
-        $this->dispatchBrowserEvent('contentChanged');
-    }
-
-    /**
-     * Add a new service, adding news fields to the task
-     *
-     * @return Void
-     */
-    public function addServiceForm(): Void
-    {
-        if(!$this->customerServicesList) {
-            $this->homePanel = '';
-            $this->servicesPanel = 'show active';
-            $this->techPanel = '';
-            $this->dispatchBrowserEvent('swal', ['title' => __('Task Services'), 'message' => __('You must select the location!'), 'status'=>'error']);
+            $this->dispatchBrowserEvent('swal', ['title' => "Identificação", 'message' => $errorMessage, 'status'=>'error', 'whatfunction'=>"add"]);
             return;
         }
 
-        if($this->customerServicesList->count() > $this->numberOfSelectedServices) {
-            $this->numberOfSelectedServices++;
-            $this->homePanel = '';
-            $this->servicesPanel = 'show active';
-            $this->techPanel = '';
-            $this->dispatchBrowserEvent('newService');
-        } else {
-             $this->dispatchBrowserEvent('swal', ['title' => __('Task Services'), 'message' => __('You cannot add more services to this location!'), 'status'=>'error']);
+      
+        //VERIFICA SE JA EXISTE ESSE NUMERO DE SERIE
+        $serieNumberSearch = SerieNumbers::where('nr_serie',$this->serieNumber)->first();
+
+        if($serieNumberSearch == null)
+        {
+            SerieNumbers::Create([
+                "nr_serie" => $this->serieNumber,
+                "marca" => $this->marcaEquipment,
+                "modelo" => $this->modelEquipment
+            ]);
         }
-    }
+      
+      
+        //fazer a criacao do PDF da etiqueta
+        if($this->riscado != 0 || $this->partido != 0 || $this->bomestado != 0 || $this->normalestado != 0 || $this->transformador != 0 || $this->mala != 0 || $this->tinteiro != 0 || $this->ac != 0)
+        {
+            $qrcode = base64_encode(QrCode::size(150)->generate('https://hihello.me/pt/p/adc8b89e-a3de-4033-beeb-43384aafa1c3?f=email'));
+       
+            $customPaper = array(0, 0, 400.00, 216.00);
+            $pdf = PDF::loadView('tenant.livewire.tasks.impressaopdf',["impressao" => $this, "qrcode" => $qrcode])->setPaper($customPaper);
+        
+            $content = $pdf->download()->getOriginalContent();
 
-    /**
-     * Saves the task
-     *
-     * @return Void
-     */
-    public function saveTask()
-    {
+            $this->imagem = 'impressao'.$this->taskReference.'.pdf';
 
-        $validator = Validator::make(
-            [
-                'selectedLocation'  => $this->selectedLocation,
-                'selectedServiceId' => $this->selectedServiceId,
-                'selectedTechnician' => $this->selectedTechnician,
-                'previewDate' => $this->previewDate,
-                'origem_pedido' => $this->origem_pedido,
-                'quem_pediu' => $this->quem_pediu,
-                'tipo_pedido' => $this->tipo_pedido
-            ],
-            [
-                'selectedLocation'  => 'required|numeric|min:0|not_in:0',
-                'selectedServiceId' => function ($attribute, $value, $fail)
-                {
-                    $found = false;
-                    foreach($value as $item) {
-                        if($item != '') {
-                            $found = true;
-                        }
-                    }
-                   if ($found == false) {
-                       $fail('The :attribute must be uppercase.');
-                   }
-                },
-                'selectedTechnician'  => 'required|numeric|min:0|not_in:0',
-                'previewDate'  => 'required|string',
+    
+            Storage::put(tenant('id') . '/app/public/pedidos/etiquetas/'.$this->taskReference.'/etiqueta'.$this->taskReference.'.pdf',$content);
+        }
 
-                'origem_pedido'  => 'required|string',
-                'quem_pediu'  => 'required|string',
-                'tipo_pedido'  => 'required|string',
 
-            ],
-            [
-                'selectedCustomer'  => __('You must select the customer location!'),
-                'numberOfSelectedServices' => __('You must select at least a service!'),
-                'selectedServiceId' => __('You must select at least a service!'),
-                'selectedTechnician' => __('You must select someone to perform this task!'),
-                'previewDate' => __('You must select, at least, the preview date!'),
 
-                'origem_pedido' => __('You must select, a request origin!'),
-                'quem_pediu' => __('You must select, who asked!'),
-                'tipo_pedido' => __('You must select, a type of request!'),
-            ]
-        );
+       
+        //FAZ ADICIONAR Á BASE DE DADOS
+        $pedido = $this->tasksInterface->updatePedido($this);
 
-        if ($validator->fails()) {
-            $errorMessage = '';
-            foreach($validator->errors()->all() as $message) {
-                $errorMessage .= '<p>' . $message . '</p>';
+        //GRAVA AS IMAGENS
+        
+       
+        if(!empty($this->arrayFirstUploaded)){
+            foreach($this->arrayFirstUploaded as $img)
+            {
+                if (!is_string($img[0])) {
+    
+                    $img[0]->storeAs(tenant('id') . '/app/public/pedidos/imagens_pedidos/'.$this->taskReference.'/', $img[0]->getClientOriginalName());
+                }
+               
             }
-            $this->dispatchBrowserEvent('swal', ['title' => __('Services'), 'message' => $errorMessage, 'status'=>'error']);
-            return NULL;
         }
 
-        $taskReport = $this->tasksReportsInterface->getReportByTaskId($this->taskToUpdate->id);
-        if($taskReport != null && $taskReport->count() > 0 ) {
-            // if(!$this->tasksReportsInterface->destroyReportByTaskId($this->taskToUpdate->id)) {
-            //     return redirect()->route('tenant.tasks.index')
-            //         ->with('message', __('There was an error while trying to update the task!'))
-            //         ->with('status', 'error');
-            // }
+        if(!empty($this->arrayEquipamentoUploaded)){
+            foreach($this->arrayEquipamentoUploaded as $img)
+            {
+                if (!is_string($img[0])) {
+                
+                    $img[0]->storeAs(tenant('id') . '/app/public/pedidos/equipamentos_pedidos/'.$this->taskReference.'/', $img[0]->getClientOriginalName());
+                }
+            }
         }
 
-          //fazer a criacao do PDF
-          if($this->riscado != 0 || $this->partido != 0 || $this->bomestado != 0 || $this->normalestado != 0 || $this->transformador != 0 || $this->mala != 0 || $this->tinteiro != 0 || $this->ac != 0)
-          {
-              $qrcode = base64_encode(QrCode::size(150)->generate('https://hihello.me/pt/p/adc8b89e-a3de-4033-beeb-43384aafa1c3?f=email'));
-         
-              $customPaper = array(0, 0, 400.00, 216.00);
-              $pdf = PDF::loadView('tenant.livewire.tasks.impressaopdf',["impressao" => $this, "qrcode" => $qrcode])->setPaper($customPaper);
-      
-              if(!Storage::exists(tenant('id') . '/app/impressoes'))
-              {
-                  File::makeDirectory(storage_path('app/impressoes'), 0755, true, true);
-              }
-      
-              $content = $pdf->download()->getOriginalContent();
-  
-              $this->imagem = 'impressao'.$this->taskToUpdate->reference.'.pdf';
-  
-      
-              Storage::put(tenant('id') . '/app/impressoes/impressao'.$this->taskToUpdate->reference.'.pdf',$content);
-          }
-     
-        if($this->tasksInterface->updateTask($this->taskToUpdate, $this) === false) {
-            $this->dispatchBrowserEvent('swal', ['title' => __('Services'), 'message' => 'There was an error updating the task!', 'status'=>'error']);
-            return NULL;
-        }
-        #$this->taskToUpdate = $this->tasksInterface->updateTask($this->taskToUpdate, $this);
-        #$this->taskToUpdate = $this->taskToUpdate;
-        $this->changed = false;
-        //$this->dispatchBrowserEvent('loading');
 
-        $message = "atualizou uma tarefa";
-        $usr = User::where('id',Auth::user()->id)->first();
+       
+        
+        //Checka o Nao enviar email de alerta se devo enviar email ou nao
+        // if($this->alert_email == 0)
+        // {
+        //     event(new TaskCustomer($this->pedido_id));
+        // }
 
-        event(new ChatMessage($usr->name, $message));
+       
 
         return redirect()->route('tenant.tasks.index')
-            ->with('message', __('Task updated with success!'))
+            ->with('message', "Pedido criado com sucesso!")
             ->with('status', 'info');
+     
+
     }
 
     /**

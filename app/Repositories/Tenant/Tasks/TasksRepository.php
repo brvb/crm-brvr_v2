@@ -109,6 +109,90 @@ class TasksRepository implements TasksInterface
         });
     }
 
+    public function updatePedido(object $values): int
+    {
+        
+        return DB::transaction(function () use ($values) {
+
+            if(!empty($values->arrayFirstUploaded)){
+                $imagesPedido = [];
+                foreach($values->arrayFirstUploaded as $img)
+                {
+                    if (!is_string($img[0])) {
+            
+                        array_push($imagesPedido,$img[0]->getClientOriginalName());
+                    }
+                    else {
+                        array_push($imagesPedido,$img[0]);
+                    }
+                    
+                }
+            }
+            else {
+                $imagesPedido = [];
+            }
+
+            
+
+            if(!empty($values->arrayEquipamentoUploaded)){
+                $imagesEquipamento = [];
+                foreach($values->arrayEquipamentoUploaded as $img)
+                {
+                    if (!is_string($img[0])) {
+                    
+                        array_push($imagesEquipamento,$img[0]->getClientOriginalName());
+                    }
+                    else {
+                        array_push($imagesEquipamento,$img[0]);
+                    }
+                }
+            }
+            else {
+                $imagesEquipamento = [];
+            }
+
+            
+            $update = Pedidos::where('id',$values->selectedId)->update([
+                'reference' => $values->taskReference,
+                'number' => $values->taskToUpdate->number,
+                'customer_id' => $values->selectedCustomer,
+                'contacto_adicional' => $values->contactoAdicional,
+                'tipo_pedido' => $values->selectedPedido,
+                'tipo_servico' => $values->selectedServico,
+                'descricao' => $values->serviceDescription,
+                'anexos' => json_encode($imagesPedido),
+                'location_id' => $values->selectedLocation,
+                'nr_serie' => $values->serieNumber,
+                'marca' => $values->marcaEquipment,
+                'modelo' => $values->modelEquipment,
+                'nome_equipamento' => $values->nameEquipment,
+                'descricao_equipamento' => $values->descriptionEquipment,
+                'riscado' => $values->riscado,
+                'partido' => $values->partido,
+                'bom_estado' => $values->bomestado,
+                'estado_normal' => $values->normalestado,
+                'transformador' => $values->transformador,
+                'mala' => $values->mala,
+                'tinteiro' => $values->tinteiro,
+                'ac' => $values->ac,
+                'descricao_extra' => $values->descriptionExtra,
+                'anexos_equipamentos' => json_encode($imagesEquipamento),
+                'prioridade' => $values->selectPrioridade,
+                'tech_id' => $values->selectedTechnician,
+                'origem_pedido' => $values->origem_pedido,
+                'tipo_agendamento' => $values->tipo_pedido,
+                'quem_pediu' => $values->quem_pediu,
+                'data_agendamento' => $values->previewDate,
+                'hora_agendamento' => $values->previewHour,
+                'observacoes_agendamento' => $values->observacoesAgendar,
+                'estado' => $values->taskToUpdate->estado
+            ]);
+
+
+            return $update;
+        });
+    }
+
     public function updateTask(Tasks $task, object $values): bool
     {
         DB::beginTransaction();
@@ -853,8 +937,19 @@ class TasksRepository implements TasksInterface
                 $imagesPedido = [];
             }
 
+            if($object->selectedEstado != "2")
+            {
+                $object->horasAlterado = 0;
+            }
 
-            Intervencoes::create([
+            if($object->selectedEstado == "1"){
+                $data_inicio = null;
+            } else {
+                $check = Intervencoes::where('user_id',Auth::user()->id)->where('id_pedido',$object->task->id)->where('estado_pedido',1)->latest()->first();
+                $data_inicio = date('Y-m-d H:i:s',strtotime($check->created_at));
+            }
+
+            $intervencao = Intervencoes::create([
                 "id_pedido" => $object->task->id,
                 "material_ref_intervencao" => $object->referencia_intervencao,
                 "material_descricao_intervencao" => $object->descricao_intervencao,
@@ -863,17 +958,21 @@ class TasksRepository implements TasksInterface
                 "descricao_realizado" => $object->descricaoRealizado,
                 "anexos" => json_encode($imagesPedido),
                 "assinatura_tecnico" => $object->signatureTecnico,
-                "assinatura_cliente" => $object->signatureCliente
+                "assinatura_cliente" => $object->signatureClient,
+                "horas_alterado" => $object->horasAlterado,
+                "user_id" => Auth::user()->id,
+                "data_inicio" => $data_inicio
             ]);
 
 
             //ALTERAR PARA CONCLUÍDO CASO ESTEJA CONCLUÍDA
-            if($object->selectedEstado == "2")
-            {
-                Pedidos::where('id',$object->task->id)->update([
-                    "estado" => "2"
-                ]);
-            }
+           
+            Pedidos::where('id',$object->task->id)->update([
+                "estado" => $object->selectedEstado
+            ]);
+            
+
+            return $intervencao;
 
         });
     }

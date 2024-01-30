@@ -229,7 +229,7 @@
                                                     data-text="Quer eliminar este pedido?"
                                                     data-title="{{ __('Are you sure?') }}"
                                                     data-btn-cancel="{{ __('No, do not delete!!') }}"
-                                                    data-btn-ok="{{ __('Yes, delete task!!') }}" data-method="DELETE">
+                                                    data-btn-ok="Sim, apagar pedido" data-method="DELETE">
                                                     Apagar Pedido
                                                 </button>
                                                 
