@@ -61,4 +61,10 @@ interface TasksInterface
 
     /*****/
 
+    public function getTasksCompleted($all,$perPage);
+
+    public function getTaskCompletedSearch($all,$searchString,$perPage): LengthAwarePaginator;
+
+    public function getTasksFilterCompleted($all,string $searchString,int $tech,int $client,int $typeReport,int $work,string $ordenation,string $dateBegin,string $dateEnd,$perPage): LengthAwarePaginator;
+
 }

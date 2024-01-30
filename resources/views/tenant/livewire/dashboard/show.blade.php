@@ -1,3 +1,12 @@
+<div>
+<div id="ajaxLoading" wire:loading.flex class="w-100 h-100 flex "
+style="background:rgba(255, 255, 255, 0.8);z-index:999;position:fixed;top:0;left:0;align-items: center;justify-content: center;">
+  <div class="sk-three-bounce" style="background:none;">
+      <div class="sk-child sk-bounce1"></div>
+      <div class="sk-child sk-bounce2"></div>
+      <div class="sk-child sk-bounce3"></div>
+  </div>
+</div>
 <div class="modal fade" id="modalInfo" data-id="" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
@@ -154,7 +163,7 @@
                         <td>{{$notification["notification"]}}</td>
                         <td>
                           <div class="d-flex">
-                            <a href="javascript:void(0)" wire:click="treated({{$notification["customerServicesId"]}})" class="btn btn-primary btn-sm light px-4">{{__("Treated")}}</a>
+                            <button href="javascript:void(0)" wire:click="treated({{$notification["customerServicesId"]}})" class="btn btn-primary btn-sm light px-4">{{__("Treated")}}</button>
                           </div>
                         </td>
                       </tr>
@@ -217,3 +226,5 @@
   });
 </script>
 @endpush
+
+</div>

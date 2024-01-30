@@ -17,9 +17,11 @@ interface CompletedAnalysisInterface
     
 
 
-    public function getAllAnalysisToExcel(): Collection;
+    public function getAllAnalysisToExcel($all): Collection;
 
-    public function getAnalysisFilterToExcel(int $tech,int $client,int $work,string $dateBegin,string $dateEnd): Collection;
+    public function getAllAnalysisToExcelSearchString($all,$searchString): Collection;
+
+    public function getAnalysisFilterToExcel($all,string $searchString,int $tech,int $client,int $typeReport,int $work,$ordenation,string $dateBegin,string $dateEnd): Collection;
 
 
 }

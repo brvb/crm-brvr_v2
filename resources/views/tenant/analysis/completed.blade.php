@@ -1,11 +1,11 @@
-<x-tenant-layout title="{{ __('Tasks Completed') }}" :themeAction="$themeAction" :status="$status" :message="$message">
+<x-tenant-layout title="{{ __('Pedidos Completos') }}" :themeAction="$themeAction" :status="$status" :message="$message">
     {{-- Content --}}
     <div class="container-fluid">
         <div class="row">
             <div class="col-9">
                 <div class="page-titles">
                     <ol class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="javascript:void(0)">{{ __('Tasks Completed') }}</a></li>
+                        <li class="breadcrumb-item"><a href="javascript:void(0)">{{ __('Pedidos Completos') }}</a></li>
                         <li class="breadcrumb-item active"><a href="javascript:void(0)">{{ __('List') }}</a></li>
                     </ol>
                 </div>
@@ -17,9 +17,7 @@
         <div class="row">
             <div class="col-12">
                 <div class="card" >
-                    <div class="card-header">
-                        <h4 class="card-title">{{ __('Tasks Completed') }}</h4>
-                    </div>
+                  
                     <div class="card-body">
                         @livewire('tenant.analysis.completed-tasks-reports')
                     </div>

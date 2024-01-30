@@ -34,6 +34,7 @@ class EditTasks extends Component
     
     public string $homePanel = 'show active';
     public string $techPanel = '';
+    public string $intervencoesPanel = '';
     public string $cancelButton = '';
     public string $actionButton = '';
     public string $stateEquipment = 'none';
@@ -384,10 +385,10 @@ class EditTasks extends Component
      */
     public function cancel(): NULL|Redirector
     {
-        if($this->changed == true )
-        {
-            return $this->askUserLooseChanges();
-        }
+        // if($this->changed == true )
+        // {
+        //     return $this->askUserLooseChanges();
+        // }
         //$this->dispatchBrowserEvent('loading');
         return redirect()->route('tenant.tasks.index');
     }

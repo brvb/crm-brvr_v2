@@ -944,8 +944,33 @@ class TasksRepository implements TasksInterface
 
             if($object->selectedEstado == "1"){
                 $data_inicio = null;
-            } else {
-                $check = Intervencoes::where('user_id',Auth::user()->id)->where('id_pedido',$object->task->id)->where('estado_pedido',1)->latest()->first();
+
+                $pedido = Pedidos::where('id',$object->task->id)->first();
+
+                $data_agendamento = $object->task->data_agendamento;
+                $hora_agendamento = $object->task->hora_agendamento;
+
+                if($pedido->data_agendamento == null)
+                {
+                    $data_agendamento = date('Y-m-d');
+                }
+
+                if($pedido->hora_agendamento == null)
+                {
+                   $hora_agendamento = date('H:i:s');
+                }
+
+                Pedidos::where('id',$object->task->id)->update([
+                    "data_agendamento" => $data_agendamento,
+                    "hora_agendamento" => $hora_agendamento
+                ]);
+
+            } 
+            else if($object->selectedEstado == "2"){
+                $data_inicio = null;
+            }
+            else {
+                $check = Intervencoes::where('user_id',Auth::user()->id)->where('id_pedido',$object->task->id)->latest()->first();
                 $data_inicio = date('Y-m-d H:i:s',strtotime($check->created_at));
             }
 
@@ -977,5 +1002,294 @@ class TasksRepository implements TasksInterface
         });
     }
 
+    public function getTasksCompleted($all,$perPage)
+    {
+        if(Auth::user()->type_user == 2)
+        {
+            $customer = Customers::where('user_id',Auth::user()->id)->first();
+
+            if($all == "")
+            {
+                return Pedidos::where('estado',2)->where('customer_id',$customer->id)
+                ->with('customer')
+                ->with('tipoEstado')
+                ->with('tech')
+                ->with('servicesToDo')
+                ->with('location')
+                ->orderBy('created_at','desc')
+                ->paginate($perPage);
+            }
+            else
+            {
+                return Pedidos::where('customer_id',$customer->id)
+                ->with('customer')
+                ->with('tipoEstado')
+                ->with('tech')
+                ->with('servicesToDo')
+                ->with('location')
+                ->orderBy('created_at','desc')
+                ->paginate($perPage);
+            }
+
+           
+        }
+        else 
+        {
+            $teammember = TeamMember::where('user_id',Auth::user()->id)->first();
+
+            if($all == "")
+            {
+                return Pedidos::where('estado',2)
+                ->with('customer')
+                ->with('tipoEstado')
+                ->with('tech')
+                ->with('servicesToDo')
+                ->with('location')
+                ->orderBy('created_at','desc')
+                ->paginate($perPage);
+            }
+            else
+            {
+                return Pedidos::with('customer')
+                ->with('tipoEstado')
+                ->with('tech')
+                ->with('servicesToDo')
+                ->with('location')
+                ->orderBy('created_at','desc')
+                ->paginate($perPage);
+            }
+        }
+    }
+
+
+    public function getTaskCompletedSearch($all,$searchString,$perPage): LengthAwarePaginator
+    {
+        if(Auth::user()->type_user == 2)
+        {
+            if($all == "")
+            {
+                $customer = Customers::where('user_id',Auth::user()->id)->first();
+                return Pedidos::where('estado',2)->where('customer_id',$customer->id)          
+                ->with('customer')
+                ->with('tipoEstado')
+                ->with('tech')
+                ->with('servicesToDo')
+                ->with('location')
+                  ->orderBy('created_at','desc')
+                  ->paginate($perPage);
+            }
+            else 
+            {
+                $customer = Customers::where('user_id',Auth::user()->id)->first();
+                return Pedidos::where('customer_id',$customer->id)          
+                ->with('customer')
+                ->with('tipoEstado')
+                ->with('tech')
+                ->with('servicesToDo')
+                ->with('location')
+                  ->orderBy('created_at','desc')
+                  ->paginate($perPage);
+            }
+         
+        }
+       
+        else {
+            $teammember = TeamMember::where('user_id',Auth::user()->id)->first();
+
+            if($all == "")
+            {
+                return Pedidos::where('estado',2)
+                ->with('customer')
+                ->with('tipoEstado')
+                ->with('tech')
+                ->with('servicesToDo')
+                ->with('location')
+              ->paginate($perPage);
+            }
+            else
+            {
+                return Pedidos::
+                with('customer')
+                ->with('tipoEstado')
+                ->with('tech')
+                ->with('servicesToDo')
+                ->with('location')
+              ->paginate($perPage);
+            }
+           
+        }
+    }
+
+    public function getTasksFilterCompleted($all,$searchString,$tech,$client,$typeReport,$work,$ordenation,$dateBegin,$dateEnd,$perPage): LengthAwarePaginator
+    {          
+        if($client != 0)
+        {
+            
+           $tasks = Pedidos::whereHas('tech', function ($query) use ($tech)
+            {
+               if($tech != 0)
+               {
+                   $query->where('id',$tech);
+               }
+            })
+            ->whereHas('servicesToDo', function ($query) use ($work, $searchString)
+            {
+               
+                    if($work != 0)
+                    {
+                         $query->where('id',$work);
+                    }
+
+                    if($searchString != "")
+                    {
+                        $query->where('name', 'like', '%' . $searchString . '%');
+                    }
+
+              
+              
+            })
+            ->whereHas('customer', function ($query) use ($searchString)
+            {
+                if($searchString != "")
+                {
+                    $query->where('short_name', 'like', '%' . $searchString . '%');
+                }
+            });
+            
+         
+                $tasks = $tasks
+                ->when($dateBegin != "" && $dateEnd != "", function($query) use($dateBegin,$dateEnd) {
+                    $query->where('created_at','>=',$dateBegin)->where('created_at','<=',$dateEnd);
+                })
+                ->when($dateBegin != "" && $dateEnd == "", function($query) use($dateBegin) {
+                    $query->where('created_at','>=',$dateBegin);
+                })
+                ->when($dateBegin == "" && $dateEnd != "", function($query) use ($dateEnd) {
+                    $query->where('created_at','<=',$dateEnd);
+                });
+    
+                if(Auth::user()->type_user == 2)
+                {
+                   $customer = Customers::where('user_id',Auth::user()->id)->first();
+                   $tasks = $tasks->where('customer_id',$customer->id);
+                }
+
+
+                $tasks = $tasks->where('customer_id',$client);
+
+                $tasks = $tasks->whereHas('tipoEstado', function ($query) use ($typeReport)
+                {
+                
+                        if($typeReport != 0)
+                        {
+                            $query->where('id',$typeReport);
+                        }
+                
+                
+                });
+
+                if($all == "")
+                {
+                    $tasks = $tasks->where('estado',2);
+                }
+                else
+                {
+                    $tasks = $tasks;
+                }
+    
+                if($ordenation == "asc"){
+                    $tasks = $tasks->with('tech')->with('servicesToDo')->with('tipoEstado')->with('customer')->with('location')->orderBy('created_at', 'asc')->paginate($perPage);
+                 }
+                 else {
+                    $tasks = $tasks->with('tech')->with('servicesToDo')->with('tipoEstado')->with('customer')->with('location')->orderBy('created_at', 'desc')->paginate($perPage);
+                 }
+
+        
+                     
+        }
+        else 
+        {
+            $tasks = Pedidos::whereHas('tech', function ($query) use ($tech)
+            {
+               if($tech != 0)
+               {
+                   $query->where('id',$tech);
+               }
+            })
+            ->whereHas('customer', function ($query) use ($searchString)
+            {
+                if($searchString != "")
+                {
+                    $query->where('short_name', 'like', '%' . $searchString . '%');
+                }
+            })
+            ->whereHas('servicesToDo', function ($query) use ($work, $searchString)
+            {
+               
+                    if($work != 0)
+                    {
+                         $query->where('id',$work);
+                    }
+                    if($searchString != "")
+                    {
+                        $query->orwhere('name', 'like', '%' . $searchString . '%');
+                    }
+
+              
+            });
+
+          
+                $tasks = $tasks
+                ->when($dateBegin != "" && $dateEnd != "", function($query) use($dateBegin,$dateEnd) {
+                    $query->where('created_at','>=',$dateBegin)->where('created_at','<=',$dateEnd);
+                })
+                ->when($dateBegin != "" && $dateEnd == "", function($query) use($dateBegin) {
+                    $query->where('created_at','>=',$dateBegin);
+                })
+                ->when($dateBegin == "" && $dateEnd != "", function($query) use ($dateEnd) {
+                    $query->where('created_at','<=',$dateEnd);
+                });
+    
+                if(Auth::user()->type_user == 2)
+                {
+                   $customer = Customers::where('user_id',Auth::user()->id)->first();
+                   $tasks = $tasks->where('customer_id',$customer->id);
+                }
+
+                $tasks = $tasks->whereHas('tipoEstado', function ($query) use ($typeReport)
+                {
+                
+                        if($typeReport != 0)
+                        {
+                            $query->where('id',$typeReport);
+                        }
+                
+                
+                });
+
+                if($all == "")
+                {
+                    $tasks = $tasks->where('estado',2);
+                }
+                else
+                {
+                    $tasks = $tasks;
+                }
+    
+                if($ordenation == "asc"){
+                    $tasks = $tasks->with('tech')->with('servicesToDo')->with('tipoEstado')->with('customer')->with('location')->orderBy('created_at', 'asc')->paginate($perPage);
+                 }
+                 else {
+                    $tasks = $tasks->with('tech')->with('servicesToDo')->with('tipoEstado')->with('customer')->with('location')->orderBy('created_at', 'desc')->paginate($perPage);
+                 }
+
+         
+        
+        }
+       
+        
+        
+        return $tasks;
+    }
 
 }

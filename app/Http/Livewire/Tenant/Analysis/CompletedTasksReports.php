@@ -3,16 +3,20 @@
 namespace App\Http\Livewire\Tenant\Analysis;
 
 use Livewire\Component;
+use App\Models\Tenant\Tasks;
 use Livewire\WithPagination;
 use App\Exports\ExportTasksExcel;
+use App\Models\Tenant\EstadoPedido;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\File;
 use Maatwebsite\Excel\Facades\Excel;
-use App\Interfaces\Tenant\Analysis\AnalysisInterface;
+use App\Events\Tasks\DispatchTasksToUser;
+use App\Interfaces\Tenant\Tasks\TasksInterface;
 use App\Interfaces\Tenant\Customers\CustomersInterface;
 use App\Interfaces\Tenant\TeamMember\TeamMemberInterface;
 use App\Interfaces\Tenant\Setup\Services\ServicesInterface;
+use App\Interfaces\Tenant\TasksReports\TasksReportsInterface;
 use App\Interfaces\Tenant\Analysis\CompletedAnalysisInterface;
-
 
 class CompletedTasksReports extends Component
 {
@@ -20,111 +24,129 @@ class CompletedTasksReports extends Component
 
     public int $perPage;
     public string $searchString = '';
+    private ?object $tasksList = NULL;
+    private ?object $counties = NULL;
 
+    private TasksInterface $tasksInterface;
+    private TasksReportsInterface $tasksReportsInterface;
+    private ?object $task = NULL;
+    public int $taskId = 0;
+
+    /** Inicio do Filtro */
     protected object $analysisRepository;
     protected object $teamMembersRepository;
     protected object $customersRepository;
     protected object $serviceRepository;
 
-    private ?object $analysis =  NULL;
+
+    private ?object $analysis = NULL;
     private ?object $members = NULL;
     private ?object $customers = NULL;
     private ?object $service = NULL;
-    /** Filtro */
     private ?object $analysisToExcel = NULL;
-    /***Fim Filtro */
+    private ?object $estadosPedido =  NULL;
 
     public int $technical = 0;
     public int $client = 0;
     public int $work = 0;
-
-    //Filtro
-    public int $typeTask = 4;
-    //Fim do Filtro
+    public int $typeTask = 0;
+    public string $ordenation = '';
 
     public string $dateBegin = '';
     public string $dateEnd = '';
 
-    //Filtro
     public int $flagRender = 0;
+    /** Fim do Filtro  */
 
-
-    public function boot(CompletedAnalysisInterface $interfaceAnalysis, TeamMemberInterface $interfaceTeamMember, CustomersInterface $interfaceCustomers, ServicesInterface $interfaceService)
+    /**
+     * Livewire construct function
+     *
+     * @param TasksInterface $tasksInterface
+     * @return Void
+     */
+    public function boot(CompletedAnalysisInterface $interfaceAnalysis,TasksInterface $tasksInterface, TasksReportsInterface $tasksReportsInterface, TeamMemberInterface $interfaceTeamMember, CustomersInterface $interfaceCustomers, ServicesInterface $interfaceService): Void
     {
-        $this->analysisRepository = $interfaceAnalysis;
+        $this->tasksInterface = $tasksInterface;
+        $this->tasksReportsInterface = $tasksReportsInterface;
+
+        /** Inicio Filtro */
         $this->teamMembersRepository = $interfaceTeamMember;
         $this->customersRepository = $interfaceCustomers;
         $this->serviceRepository = $interfaceService;
+        //** Fim filtro */
+
+        $this->analysisRepository = $interfaceAnalysis;
     }
 
-    public function mount(): void
+    /**
+     * Livewire mount properties
+     *
+     * @return void
+     */
+    public function mount(): Void
     {
-        if (isset($this->perPage)) {
-            session()->put('perPage', $this->perPage);
-        } elseif (session('perPage')) {
-            $this->perPage = session('perPage');
-        } else {
-            $this->perPage = 10;
-        }
+        $this->initProperties();
+        $this->tasksList = $this->tasksInterface->getTasks($this->perPage);
 
+        /**Parte do Filtro */
         $this->members = $this->teamMembersRepository->getTeamMembersAnalysis();
         $this->customers = $this->customersRepository->getCustomersAnalysis();
         $this->service = $this->serviceRepository->getServicesAnalysis();
-        $this->analysis = $this->analysisRepository->getAllAnalysis($this->perPage);
-        $this->analysisToExcel = $this->analysisRepository->getAllAnalysisToExcel();
 
-        $this->flagRender = 0;
+        $this->estadosPedido = EstadoPedido::all();
 
+        /**Parte do Fim do Filtro */
 
+        $this->analysisToExcel = $this->analysisRepository->getAllAnalysisToExcel("");
     }
 
+
+    /**
+     * Change number of records to display
+     *
+     * @return void
+     */
     public function updatedPerPage(): void
     {
         $this->resetPage();
         session()->put('perPage', $this->perPage);
+        $this->tasksList = $this->tasksInterface->getTasks($this->perPage);
     }
 
+    /**
+     * Do a search base on
+     *
+     * @return void
+     */
     public function updatedSearchString(): void
     {
         $this->resetPage();
     }
 
-    public function clearFilter(): void
+    /**
+     * Create custom pagination html string
+     *
+     * @return string
+     */
+    public function paginationView(): String
     {
-        $this->members = $this->teamMembersRepository->getTeamMembersAnalysis();
-        $this->customers = $this->customersRepository->getCustomersAnalysis();
-        $this->service = $this->serviceRepository->getServicesAnalysis();
-        $this->analysis = $this->analysisRepository->getAllAnalysis($this->perPage);
-        //Filtro
-        $this->analysisToExcel = $this->analysisRepository->getAllAnalysisToExcel();
-        //End filtro
-
-        $this->technical = 0;
-        $this->client = 0;
-        $this->work = 0;
-        /***Filtro */
-        $this->typeTask = 4;
-        /***End Filtro */
-        $this->dateBegin = '';
-        $this->dateEnd = '';
-
-        $this->flagRender = 0;
-
+        return 'tenant.livewire.setup.pagination';
     }
+
+    /** Parte fo Filtro **/
 
     public function updatedTechnical(): void
     {
-        //$this->analysis = $this->analysisRepository->getAnalysisFilter($this->technical,$this->client,$this->work,$this->dateBegin,$this->dateEnd,$this->perPage);
-        
-        //Filtro
         $this->flagRender = 1;
     }
 
     public function updatedClient(): void
     {
-        //$this->analysis = $this->analysisRepository->getAnalysisFilter($this->technical,$this->client,$this->work,$this->dateBegin,$this->dateEnd,$this->perPage);
+        $this->flagRender = 1;
+    }
 
-        //Filtro
+    public function updatedWork(): void
+    {
         $this->flagRender = 1;
     }
 
@@ -133,76 +155,117 @@ class CompletedTasksReports extends Component
         $this->flagRender = 1;
     }
 
-    public function updatedWork(): void
+    public function updatedOrdenation(): void
     {
-        //$this->analysis = $this->analysisRepository->getAnalysisFilter($this->technical,$this->client,$this->work,$this->dateBegin,$this->dateEnd,$this->perPage);
-
-        //Filtro
         $this->flagRender = 1;
     }
 
     public function updatedDateBegin(): void
     {
-        //$this->analysis = $this->analysisRepository->getAnalysisFilter($this->technical,$this->client,$this->work,$this->dateBegin,$this->dateEnd,$this->perPage);
         $this->dispatchBrowserEvent("contentChanged");
 
-        //Filtro
         $this->flagRender = 1;
-
     }
 
     public function updatedDateEnd(): void
     {
-        //$this->analysis = $this->analysisRepository->getAnalysisFilter($this->technical,$this->client,$this->work,$this->dateBegin,$this->dateEnd,$this->perPage);
         $this->dispatchBrowserEvent("contentChanged");
 
         $this->flagRender = 1;
         $this->resetPage();
     }
 
-
-    public function paginationView()
-    {
-        return 'tenant.livewire.setup.pagination';
-    }
-
-    /**Export to Excel function */
-    public function exportExcel($analysis)
-    {
-        $this->analysis = $this->analysisRepository->getAllAnalysis($this->perPage);
-        return Excel::download(new ExportTasksExcel($analysis), 'export-'.date('Y-m-d').'.xlsx');
-    }
-
-
-    /****** */
-
-    /**
-     * List informations of customer location
-     *
-     * @return View
-     */
-    public function render(): View
+    public function clearFilter(): void
     {
         $this->members = $this->teamMembersRepository->getTeamMembersAnalysis();
         $this->customers = $this->customersRepository->getCustomersAnalysis();
         $this->service = $this->serviceRepository->getServicesAnalysis();
 
-        if($this->flagRender == 0)
+
+        $this->technical = 0;
+        $this->client = 0;
+        $this->work = 0;
+        $this->typeTask = 0;
+        $this->dateBegin = '';
+        $this->dateEnd = '';
+        $this->ordenation = 'desc';
+
+        $this->flagRender = 0;
+    }
+
+    /****FIM DO FILTRO ****/
+
+    public function exportExcel($analysis)
+    {
+        //$this->analysis = $this->analysisRepository->getAllAnalysis($this->perPage);
+        return Excel::download(new ExportTasksExcel($analysis), 'export-'.date('Y-m-d').'.xlsx');
+    }
+
+   
+    /**
+     * Livewire render list tasks view
+     *
+     * @return View
+     */
+    public function render(): View
+    {
+       
+        /** Parte do Filtro */
+        $this->members = $this->teamMembersRepository->getTeamMembersAnalysis();
+        $this->customers = $this->customersRepository->getCustomersAnalysis();
+        $this->service = $this->serviceRepository->getServicesAnalysis();
+        $this->estadosPedido = EstadoPedido::all();
+
+
+        if($this->searchString != null)
         {
-            $this->analysis = $this->analysisRepository->getAllAnalysis($this->perPage);
-            $this->analysisToExcel = $this->analysisRepository->getAllAnalysisToExcel();
+            if($this->flagRender == 0){
+                $this->tasksList = $this->tasksInterface->getTaskCompletedSearch("",$this->searchString,$this->perPage);
+                $this->analysisToExcel = $this->analysisRepository->getAllAnalysisToExcelSearchString("",$this->searchString);
+            }
+            else {
+                $this->tasksList = $this->tasksInterface->getTasksFilterCompleted("",$this->searchString,$this->technical,$this->client,$this->typeTask,$this->work,$this->ordenation,$this->dateBegin,$this->dateEnd,$this->perPage);
+                $this->analysisToExcel = $this->analysisRepository->getAnalysisFilterToExcel("",$this->searchString,$this->technical,$this->client,$this->typeTask,$this->work,$this->ordenation,$this->dateBegin,$this->dateEnd);
+            }
         }
-        else {
-            $this->analysis = $this->analysisRepository->getAnalysisFilter($this->technical,$this->client,$this->work,$this->dateBegin,$this->dateEnd,$this->perPage);
-            $this->analysisToExcel = $this->analysisRepository->getAnalysisFilterToExcel($this->technical,$this->client,$this->work,$this->dateBegin,$this->dateEnd);
+        else 
+        {
+            if($this->flagRender == 0){
+                $this->tasksList = $this->tasksInterface->getTasksCompleted("",$this->perPage);
+                $this->analysisToExcel = $this->analysisRepository->getAllAnalysisToExcel("");
+            }
+            else {
+                $this->tasksList = $this->tasksInterface->getTasksFilterCompleted("",$this->searchString,$this->technical,$this->client,$this->typeTask,$this->work,$this->ordenation,$this->dateBegin,$this->dateEnd,$this->perPage);
+                $this->analysisToExcel = $this->analysisRepository->getAnalysisFilterToExcel("",$this->searchString,$this->technical,$this->client,$this->typeTask,$this->work,$this->ordenation,$this->dateBegin,$this->dateEnd);
+            }
         }
 
         return view('tenant.livewire.analysis.completed-tasks-reports', [
-            'analysis' => $this->analysis,
+            'tasksList' => $this->tasksList,
             'analysisExcel' => $this->analysisToExcel,
             'members' => $this->members,
             'customers' => $this->customers,
-            'services' => $this->service
+            'services' => $this->service,
+            'estadosPedido' => $this->estadosPedido
         ]);
+
+        /** Fim do Filtro */
     }
+
+    /**
+     * Prepare properties
+     *
+     * @return void
+     */
+    private function initProperties(): void
+    {
+        if (isset($this->perPage)) {
+            session()->put('perPage', $this->perPage);
+        } elseif (session('perPage')) {
+            $this->perPage = session('perPage');
+        } else {
+            $this->perPage = 10;
+        }
+    }
+
 }

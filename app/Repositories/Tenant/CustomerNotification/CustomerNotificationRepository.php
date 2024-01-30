@@ -15,15 +15,7 @@ class CustomerNotificationRepository implements CustomerNotificationInterface
     public function getNotificationTimes(): Array
     {
         $notificationInfo = [];
-        // if(Auth::user()->type_user == 2)
-        // {
-        //     $customer = Customers::where('user_id',Auth::user()->id)->first();
-        //     $servicesNotifications = CustomerNotifications::where('treated',1)->where('customer_id',$customer->id)->with('service')->with('customer')->with('customerLocation')->get();
-        // }
-        // else 
-        // {
-        //     $servicesNotifications = CustomerNotifications::where('treated',1)->with('service')->with('customer')->with('customerLocation')->get();   
-        // }
+       
         if(Auth::user()->type_user == 1)
         {
             $teamMember = TeamMember::where('user_id',Auth::user()->id)->first();

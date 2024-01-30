@@ -67,16 +67,6 @@
 
 {{-- @push('custom-scripts') --}}
 <script>
-  var mesAtual = (new Date).getMonth() + 1;
-  var anoAtual = (new Date).getFullYear();
-  var date = (new Date);
-
- 
-  document.addEventListener('livewire:load', function () {
-      restartCalendar();
-          
-  });
-
 
   
   var timer = 0;
@@ -89,34 +79,6 @@
     var idPedido = jQuery(this).attr('data-id');
 
     Livewire.emit("checkStatePedido",idPedido);
-
-    
-    // var referencia = jQuery(this).attr('data-referencia');
-    // var cliente = jQuery(this).attr('data-cliente');
-
-    // var clienteEspaco = cliente.replace('£',' ');
-
-    // timer = setTimeout(function() {
-    //   if (!prevent) {
-    //     jQuery(".modal-body").empty();
-
-    //     jQuery('#modalInfo').modal('show');
-    //     jQuery(".modal-body").append("Referência: "+referencia+ "<br>Cliente: "+clienteEspaco); 
-
-        
-    //     jQuery("body").on("click","#abrirIntervencaoButton",function(){
-
-    //       window.location.href="deleteTask/"+valueData;
-    //     });
-
-    //     jQuery("body").on("click","#consultarPedidoButton",function(){
-
-    //       window.location.href="tasks/"+idPedido+"/edit";
-    //     });
-    //   }
-    //   prevent = false;
-    // }, delay);
-
 
   });
 

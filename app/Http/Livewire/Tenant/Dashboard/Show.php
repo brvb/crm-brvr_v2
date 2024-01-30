@@ -79,7 +79,7 @@ class Show extends Component
                 if($pedidoInfo->estado == "1")
                 {
                     $arrayUser[$us->name] = [];
-                    $arrayUser[$us->name] = ["cliente" =>$pedidoInfo->customer->name,"reference" => $pedidoInfo->reference,"data" => $pedidoInfo->created_at];
+                    $arrayUser[$us->name] = ["cliente" =>$pedidoInfo->customer->name,"reference" => $pedidoInfo->reference,"data" => $intervencao->created_at];
                 }
             }
 
@@ -94,7 +94,20 @@ class Show extends Component
 
         $teammember = TeamMember::where('user_id',Auth::user()->id)->first();
         
-        $this->secondTable = Pedidos::where('tech_id',$teammember->id)
+        if(Auth::user()->type_user == "0")
+        {
+            $this->secondTable = Pedidos::where('estado','!=','2')
+            ->with('prioridadeStat')
+            ->with('customer')
+            ->with('tipoEstado')
+            ->with('tech')
+            ->with('servicesToDo')
+            ->with('location')
+            ->orderBy('prioridade','asc')
+            ->get();
+        }
+        else {
+            $this->secondTable = Pedidos::where('tech_id',$teammember->id)
             ->where('estado','!=','2')
             ->with('prioridadeStat')
             ->with('customer')
@@ -105,6 +118,8 @@ class Show extends Component
             ->orderBy('prioridade','asc')
             ->get();
     
+        }
+      
 
 
     }
@@ -135,7 +150,20 @@ class Show extends Component
       
         $teammember = TeamMember::where('user_id',Auth::user()->id)->first();
         
-        $this->secondTable = Pedidos::where('tech_id',$teammember->id)
+        if(Auth::user()->type_user == "0")
+        {
+            $this->secondTable = Pedidos::where('estado','!=','2')
+            ->with('prioridadeStat')
+            ->with('customer')
+            ->with('tipoEstado')
+            ->with('tech')
+            ->with('servicesToDo')
+            ->with('location')
+            ->orderBy('prioridade','asc')
+            ->get();
+        }
+        else {
+            $this->secondTable = Pedidos::where('tech_id',$teammember->id)
             ->where('estado','!=','2')
             ->with('prioridadeStat')
             ->with('customer')
@@ -145,6 +173,9 @@ class Show extends Component
             ->with('location')
             ->orderBy('prioridade','asc')
             ->get();
+    
+        }
+      
 
         
         $users = User::where('type_user','!=','2')->get();
@@ -161,7 +192,7 @@ class Show extends Component
                 if($pedidoInfo->estado == "1")
                 {
                     $arrayUser[$us->name] = [];
-                    $arrayUser[$us->name] = ["cliente" =>$pedidoInfo->customer->name,"reference" => $pedidoInfo->reference,"data" => $pedidoInfo->created_at];
+                    $arrayUser[$us->name] = ["cliente" =>$pedidoInfo->customer->name,"reference" => $pedidoInfo->reference,"data" => $intervencao->created_at];
                 }
             }
 
@@ -204,7 +235,7 @@ class Show extends Component
                 if($pedidoInfo->estado == "1")
                 {
                     $arrayUser[$us->name] = [];
-                    $arrayUser[$us->name] = ["cliente" =>$pedidoInfo->customer->name,"reference" => $pedidoInfo->reference,"data" => $pedidoInfo->created_at];
+                    $arrayUser[$us->name] = ["cliente" =>$pedidoInfo->customer->name,"reference" => $pedidoInfo->reference,"data" => $intervencao->created_at];
                 }
             }
 
@@ -219,7 +250,20 @@ class Show extends Component
 
         $teammember = TeamMember::where('user_id',Auth::user()->id)->first();
         
-        $this->secondTable = Pedidos::where('tech_id',$teammember->id)
+        if(Auth::user()->type_user == "0")
+        {
+            $this->secondTable = Pedidos::where('estado','!=','2')
+            ->with('prioridadeStat')
+            ->with('customer')
+            ->with('tipoEstado')
+            ->with('tech')
+            ->with('servicesToDo')
+            ->with('location')
+            ->orderBy('prioridade','asc')
+            ->get();
+        }
+        else {
+            $this->secondTable = Pedidos::where('tech_id',$teammember->id)
             ->where('estado','!=','2')
             ->with('prioridadeStat')
             ->with('customer')
@@ -229,6 +273,9 @@ class Show extends Component
             ->with('location')
             ->orderBy('prioridade','asc')
             ->get();
+    
+        }
+      
        
     }
 
