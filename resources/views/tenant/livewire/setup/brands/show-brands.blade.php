@@ -28,65 +28,68 @@
         </div>
     </div>
     <!-- display dataTable no-footer -->
-    <table id="dataTables-data" class="table table-responsive mb-0 table-striped">
-        <thead>
-            <tr>
-                <th>
-                    <div class="custom-control custom-checkbox">
-                        <input type="checkbox" class="custom-control-input" id="checkAll" required="">
-                        <label class="custom-control-label" for="checkAll"></label>
-                    </div>
-                </th>
-                <th>{{ __('Image') }}</th>
-                <th>{{ __('Name') }}</th>
-                <th>{{ __('Action') }}</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach ($brands as $brand)
+    <div class="table-responsive w-100">
+        <table id="dataTables-data" class="table mb-0 table-striped">
+            <thead>
                 <tr>
-                    <td>
+                    <th>
                         <div class="custom-control custom-checkbox">
-                            <input type="checkbox" class="custom-control-input" id="customCheckBox{{ $brand->id }}"
-                                required="">
-                            <label class="custom-control-label" for="customCheckBox{{ $brand->id }}"></label>
+                            <input type="checkbox" class="custom-control-input" id="checkAll" required="">
+                            <label class="custom-control-label" for="checkAll"></label>
                         </div>
-                    </td>
-                        {{-- <img src="{{asset('/cl/'.$brand->image)}}" width="100px"> --}}
-                    <td><img src="{{ global_tenancy_asset('/app/public/brands/'.$brand->image) }}" width="100px"></td>
-                    <td>{{ $brand->name }}</td>
-                    <td>
-                        <div class="dropdown ml-auto text-right">
-                           <button class="btn btn-primary tp-btn-light sharp" type="button" data-toggle="dropdown">
-                            <span class="fs--1">
-                                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="18px" height="18px" viewBox="0 0 24 24" version="1.1">
-                                    <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                                        <rect x="0" y="0" width="24" height="24"></rect>
-                                        <circle fill="#000000" cx="5" cy="12" r="2"></circle>
-                                        <circle fill="#000000" cx="12" cy="12" r="2"></circle>
-                                        <circle fill="#000000" cx="19" cy="12" r="2"></circle>
-                                    </g>
-                                </svg>
-                            </span>
-                           </button>
-                            <div class="dropdown-menu dropdown-menu-right">
-                                <a class="dropdown-item"
-                                    href="{{ route('tenant.setup.brands.edit', $brand->id) }}">{{ __('Edit Brand') }}</a>
-                                    <button class="dropdown-item btn-sweet-alert" data-type="form"
-                                        data-route="{{ route('tenant.setup.brands.destroy', $brand->id) }}"
-                                        data-style="warning" data-csrf="csrf"
-                                        data-text="{{ __('Do you want to delete this brand?') }}"
-                                        data-title="{{ __('Are you sure?') }}"
-                                        data-btn-cancel="{{ __('No, cancel it!!') }}"
-                                        data-btn-ok="{{ __('Yes, delete it!!') }}" data-method="DELETE">
-                                        {{ __('Delete Brand') }}
-                                    </button>
-                            </div>
-                        </div>
-                    </td>
+                    </th>
+                    <th>{{ __('Image') }}</th>
+                    <th>{{ __('Name') }}</th>
+                    <th>{{ __('Action') }}</th>
                 </tr>
-            @endforeach
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @foreach ($brands as $brand)
+                    <tr>
+                        <td>
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input" id="customCheckBox{{ $brand->id }}"
+                                    required="">
+                                <label class="custom-control-label" for="customCheckBox{{ $brand->id }}"></label>
+                            </div>
+                        </td>
+                            {{-- <img src="{{asset('/cl/'.$brand->image)}}" width="100px"> --}}
+                        <td><img src="{{ global_tenancy_asset('/app/public/brands/'.$brand->image) }}" width="100px"></td>
+                        <td>{{ $brand->name }}</td>
+                        <td>
+                            <div class="dropdown ml-auto text-right">
+                            <button class="btn btn-primary tp-btn-light sharp" type="button" data-toggle="dropdown">
+                                <span class="fs--1">
+                                    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="18px" height="18px" viewBox="0 0 24 24" version="1.1">
+                                        <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                                            <rect x="0" y="0" width="24" height="24"></rect>
+                                            <circle fill="#000000" cx="5" cy="12" r="2"></circle>
+                                            <circle fill="#000000" cx="12" cy="12" r="2"></circle>
+                                            <circle fill="#000000" cx="19" cy="12" r="2"></circle>
+                                        </g>
+                                    </svg>
+                                </span>
+                            </button>
+                                <div class="dropdown-menu dropdown-menu-right">
+                                    <a class="dropdown-item"
+                                        href="{{ route('tenant.setup.brands.edit', $brand->id) }}">{{ __('Edit Brand') }}</a>
+                                        <button class="dropdown-item btn-sweet-alert" data-type="form"
+                                            data-route="{{ route('tenant.setup.brands.destroy', $brand->id) }}"
+                                            data-style="warning" data-csrf="csrf"
+                                            data-text="{{ __('Do you want to delete this brand?') }}"
+                                            data-title="{{ __('Are you sure?') }}"
+                                            data-btn-cancel="{{ __('No, cancel it!!') }}"
+                                            data-btn-ok="{{ __('Yes, delete it!!') }}" data-method="DELETE">
+                                            {{ __('Delete Brand') }}
+                                        </button>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+
     {{ $brands->links() }}
 </div>

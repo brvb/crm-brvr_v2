@@ -1,5 +1,3 @@
-
-
 <div>
     <div id="ajaxLoading" wire:loading.flex class="w-100 h-100 flex "
         style="background:rgba(255, 255, 255, 0.8);z-index:999;position:fixed;top:0;left:0;align-items: center;justify-content: center;">
@@ -24,7 +22,7 @@
        <div id="accordion-one" class="accordion accordion-primary" wire:ignore>
         <div class="accordion__item">
             <div class="accordion__header rounded-lg collapsed" data-toggle="collapse" data-target="#default_collapseOne" aria-expanded="false">
-                <span class="accordion__header--text">{{__("Filters")}}</span>
+                <span class="accordion_header--text">{{_("Filters")}}</span>
                 <span class="accordion__header--indicator"></span>
             </div>
             <div id="default_collapseOne" class="accordion__body collapse" data-parent="#accordion-one">
@@ -101,7 +99,7 @@
                                 <div class="form-group">
                                     <label>{{__("Final Date")}}</label>
                                     <div class="input-group" wire:ignore>
-                                        <input id="dateEnd" class="form-control picker__input" type="text" wire:model="dateEnd" placeholder="{{ __("Date End") }}">
+                                        <input id="dateEnd" class="form-control picker_input" type="text" wire:model="dateEnd" placeholder="{{ _("Date End") }}">
                                         <span class="input-group-append"><span class="input-group-text"><i class="fa fa-calendar-o"></i></span></span>
                                     </div>
                                 </div>
@@ -146,7 +144,8 @@
                 </div>
             </div>
             <!-- display dataTable no-footer -->
-            <table id="dataTables-data" class="table table-responsive-lg mb-0 table-striped">
+            <div class="table-responsive w-100">
+            <table id="dataTables-data" class="table mb-0 table-striped">
                 <thead>
                     <tr>
                         <th>
@@ -263,6 +262,7 @@
                     @endforeach
                 </tbody>
             </table>
+            </div>
             {{ $tasksList->links() }}
         </div>
       </div>
@@ -333,8 +333,8 @@
     {
         
         jQuery('.input-group #dateBegin').pickadate({
-            monthsFull: ["{!!__('January') !!}", "{!!__('February') !!}","{!!__('March') !!}","{!!__('April') !!}","{!!__('May') !!}","{!!__('June') !!}","{!!__('July') !!}","{!!__('August') !!}","{!!__('September') !!}","{!!__('October') !!}","{!!__('November') !!}","{!!__('December') !!}"],
-            weekdaysShort: ["{!!__('Sun') !!}","{!! __('Mon') !!}","{!! __('Tue') !!}", "{!! __('Wed') !!}","{!! __('Thu') !!}", "{!! __('Fri') !!}", "{!! __('Sat') !!}"],
+            monthsFull: ["{!!_('January') !!}", "{!!('February') !!}","{!!('March') !!}","{!!('April') !!}","{!!('May') !!}","{!!('June') !!}","{!!('July') !!}","{!!('August') !!}","{!!('September') !!}","{!!('October') !!}","{!!('November') !!}","{!!_('December') !!}"],
+            weekdaysShort: ["{!!_('Sun') !!}","{!! _('Mon') !!}","{!! _('Tue') !!}", "{!! _('Wed') !!}","{!! _('Thu') !!}", "{!! _('Fri') !!}", "{!! __('Sat') !!}"],
             today: "{!! __('today') !!}",
             clear: "{!! __('clear') !!}",
             close: "{!! __('close') !!}",
@@ -345,8 +345,8 @@
             });
 
         jQuery('.input-group #dateEnd').pickadate({
-            monthsFull: ["{!! __('January') !!}","{!! __('February') !!}","{!! __('March') !!}","{!! __('April') !!}","{!! __('May') !!}","{!! __('June') !!}","{!! __('July') !!}","{!! __('August') !!}","{!! __('September') !!}","{!! __('October') !!}","{!! __('November') !!}","{!! __('December') !!}"],
-            weekdaysShort: ["{!!__('Sun') !!}","{!!__('Mon') !!}","{!!__('Tue') !!}","{!!__('Wed') !!}","{!!__('Thu') !!}","{!!__('Fri') !!}","{!!__('Sat') !!}"],
+            monthsFull: ["{!! _('January') !!}","{!! _('February') !!}","{!! _('March') !!}","{!! _('April') !!}","{!! _('May') !!}","{!! _('June') !!}","{!! _('July') !!}","{!! _('August') !!}","{!! _('September') !!}","{!! _('October') !!}","{!! _('November') !!}","{!! _('December') !!}"],
+            weekdaysShort: ["{!!_('Sun') !!}","{!!('Mon') !!}","{!!('Tue') !!}","{!!('Wed') !!}","{!!('Thu') !!}","{!!('Fri') !!}","{!!_('Sat') !!}"],
             today: "{!! __('today') !!}",
             clear: "{!! __('clear') !!}",
             close: "{!! __('close') !!}",

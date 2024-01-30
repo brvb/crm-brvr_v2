@@ -60,15 +60,26 @@
                                         </div>
                                         <div class="row ">
                                             <section class="col-12 col-lg-6">
-                                                <div class="input-group">
-                                                    <div class="input-group-prepend">
-                                                        <button class="btn btn-primary btn-sm" type="button">{{__("Image")}}</button>
-                                                    </div>
-                                                    <div class="custom-file">
-                                                        <input type="file" name="uploadFile" id="uploadFile" class="custom-file-input" wire:model="uploadFile">
-                                                        <label class="custom-file-label"  style="height:35px;paddin;white-space: nowrap;">@if(isset($image)) {{$image}} @else {{__('Choose file')}} @endif</label>
-                                                    </div>
+                                            <div class="input-group" style="height: 40px;">
+                                                <div class="input-group-prepend" style="height: 100%;">
+                                                    <button class="btn btn-primary btn-sm" style="height: 100%;" type="button">{{ __("Image") }}</button>
                                                 </div>
+                                                <div class="custom-file" style="height: 100%;">
+                                                    <input type="file" name="uploadFile" id="uploadFile" class="custom-file-input" style="height: 100%;" wire:model="uploadFile">
+                                                    <label class="custom-file-label" style="height: 100%; white-space: nowrap;">
+                                                        @if(isset($image)) 
+                                                            {{ $image }} 
+                                                        @else 
+                                                            {{ __('Choose file') }} 
+                                                        @endif
+                                                        <style>
+                                                            .custom-file-label::after {
+                                                                height:100%;
+                                                            }
+                                                        </style>
+                                                    </label>
+                                                </div>
+                                            </div>
                                             </section>
                                             <section class="col-12 col-lg-6">
                                                 @if ($uploadFile)
@@ -197,7 +208,7 @@
         <div class="card-footer justify-content-between">
             <div class="row">
                 <div class="col text-right"  style="padding:0;">
-                    <a wire:click="saveTask" class="btn btn-primary" style="padding-left: 11px;padding-right: 7px;max-width: 250px;">
+                    <a wire:click="saveTask" class="btn btn-primary" style="padding-left: 13px;padding-right: 7px;">
                         {{ $actionButton }}
                         <span class="btn-icon-right"><i class="las la-check mr-2"></i></span>
                     </a>
