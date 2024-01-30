@@ -8,7 +8,7 @@
         </div>
     </div>
     <div class="card-header" wire:key="tenanttasksshow">
-        <h4 class="card-title">{{ __('Pedidos Completos') }}</h4>
+        <h4 class="card-title"></h4>
         @if(Auth::user()->type_user !="2")
             <div class="col-xl-3 col-xs-6 text-right pr-0">
                 <a wire:click="exportExcel({{$analysisExcel}})" class="btn btn-primary"><i class="fa fa-file-text scale5 mr-3" aria-hidden='true'></i>{{ __('Export to Excel')}}</a>
@@ -22,7 +22,7 @@
        <div id="accordion-one" class="accordion accordion-primary" wire:ignore>
         <div class="accordion__item">
             <div class="accordion__header rounded-lg collapsed" data-toggle="collapse" data-target="#default_collapseOne" aria-expanded="false">
-                <span class="accordion_header--text">{{_("Filters")}}</span>
+                <span class="accordion_header--text">{{ __('Filters') }}</span>
                 <span class="accordion__header--indicator"></span>
             </div>
             <div id="default_collapseOne" class="accordion__body collapse" data-parent="#accordion-one">
@@ -99,7 +99,7 @@
                                 <div class="form-group">
                                     <label>{{__("Final Date")}}</label>
                                     <div class="input-group" wire:ignore>
-                                        <input id="dateEnd" class="form-control picker_input" type="text" wire:model="dateEnd" placeholder="{{ _("Date End") }}">
+                                        <input id="dateEnd" class="form-control picker_input" type="text" wire:model="dateEnd" placeholder="{{ __("Date End") }}">
                                         <span class="input-group-append"><span class="input-group-text"><i class="fa fa-calendar-o"></i></span></span>
                                     </div>
                                 </div>
@@ -333,8 +333,8 @@
     {
         
         jQuery('.input-group #dateBegin').pickadate({
-            monthsFull: ["{!!_('January') !!}", "{!!('February') !!}","{!!('March') !!}","{!!('April') !!}","{!!('May') !!}","{!!('June') !!}","{!!('July') !!}","{!!('August') !!}","{!!('September') !!}","{!!('October') !!}","{!!('November') !!}","{!!_('December') !!}"],
-            weekdaysShort: ["{!!_('Sun') !!}","{!! _('Mon') !!}","{!! _('Tue') !!}", "{!! _('Wed') !!}","{!! _('Thu') !!}", "{!! _('Fri') !!}", "{!! __('Sat') !!}"],
+            monthsFull: ["{!!__('January') !!}", "{!!__('February') !!}","{!!__('March') !!}","{!!__('April') !!}","{!!__('May') !!}","{!!__('June') !!}","{!!__('July') !!}","{!!__('August') !!}","{!!__('September') !!}","{!!__('October') !!}","{!!__('November') !!}","{!!__('December') !!}"],
+            weekdaysShort: ["{!!__('Sun') !!}","{!! __('Mon') !!}","{!! __('Tue') !!}", "{!! __('Wed') !!}","{!! __('Thu') !!}", "{!! __('Fri') !!}", "{!! __('Sat') !!}"],
             today: "{!! __('today') !!}",
             clear: "{!! __('clear') !!}",
             close: "{!! __('close') !!}",
@@ -345,8 +345,8 @@
             });
 
         jQuery('.input-group #dateEnd').pickadate({
-            monthsFull: ["{!! _('January') !!}","{!! _('February') !!}","{!! _('March') !!}","{!! _('April') !!}","{!! _('May') !!}","{!! _('June') !!}","{!! _('July') !!}","{!! _('August') !!}","{!! _('September') !!}","{!! _('October') !!}","{!! _('November') !!}","{!! _('December') !!}"],
-            weekdaysShort: ["{!!_('Sun') !!}","{!!('Mon') !!}","{!!('Tue') !!}","{!!('Wed') !!}","{!!('Thu') !!}","{!!('Fri') !!}","{!!_('Sat') !!}"],
+            monthsFull: ["{!!__('January') !!}", "{!!__('February') !!}","{!!__('March') !!}","{!!__('April') !!}","{!!__('May') !!}","{!!__('June') !!}","{!!__('July') !!}","{!!__('August') !!}","{!!__('September') !!}","{!!__('October') !!}","{!!__('November') !!}","{!!__('December') !!}"],
+            weekdaysShort: ["{!!__('Sun') !!}","{!! __('Mon') !!}","{!! __('Tue') !!}", "{!! __('Wed') !!}","{!! __('Thu') !!}", "{!! __('Fri') !!}", "{!! __('Sat') !!}"],
             today: "{!! __('today') !!}",
             clear: "{!! __('clear') !!}",
             close: "{!! __('close') !!}",
