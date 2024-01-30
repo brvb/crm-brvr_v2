@@ -15,6 +15,12 @@
             <a class="nav-link {{ $techPanel }}" data-toggle="tab" href="#techPanel"><i
                     class="flaticon-381-calendar mr-2"></i> Agendamento</a>
         </li>
+        @if($taskToUpdate->estado == "2")
+            <li class="nav-item">
+                <a class="nav-link {{ $intervencoesPanel }}" data-toggle="tab" href="#intervencoesPanel"><i
+                        class="la la-file mr-2"></i> Intervenções</a>
+            </li>
+        @endif
     </ul>
     <div class="tab-content">
         <div class="tab-pane fade {{ $homePanel }}" id="homePanel" role="tabpanel">
@@ -581,7 +587,22 @@
             </div>
         </div>
     </div>
+
+    @if($taskToUpdate->estado == "2")
+    <div class="tab-pane fade {{ $intervencoesPanel }}" id="intervencoesPanel" role="tabpanel">
+        <div class="row">
+            <div class="col-12">
+                <div class="card mb-0" style="border-top-left-radius: 0px; border-top-right-radius: 0px;">
+                    <div class="card-body">
+                        @livewire('tenant.tasks-times.show-times',['task' => $taskToUpdate])
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+    @endif
+    </div>
+   
     <div class="card" style="display: table-cell;width:100vw;">
         <div class="card-footer justify-content-between">
             <div class="row">
@@ -589,14 +610,16 @@
                     <a wire:click="cancel" class="btn btn-secondary mr-2">
                         Atrás
                     </a>
-                    <a wire:click="refreshPedido" class="btn btn-primary">
-                        <i class="las la-check mr-2"></i>Atualizar Pedido
-                    </a>
+                    @if($taskToUpdate->estado != 2)
+                        <a wire:click="refreshPedido" class="btn btn-primary">
+                            <i class="las la-check mr-2"></i>Atualizar Pedido
+                        </a>
+                    @endif
                 </div>
             </div>
         </div>
     </div>
-    
+
     
         
    

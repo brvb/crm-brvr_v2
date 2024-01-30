@@ -2,7 +2,10 @@
 
 namespace App\Exports;
 
+use Carbon\Carbon;
 use App\Models\User;
+use App\Models\Tenant\Intervencoes;
+use App\Models\Tenant\TeamMember;
 use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\Style;
@@ -29,32 +32,38 @@ class ExportTasksExcel implements FromCollection, WithHeadings, WithEvents,Shoul
 
         $sum_minutes = 0;
 
-        foreach($this->analysis as $hour)
+        $resultado_soma = "";
+        $somaDiferencasSegundos = 0;
+
+        foreach($this->analysis as $ana)
         {
-            $explodedTime = array_map('intval',explode(':',$hour["total_hours"]));
-            $sum_minutes += $explodedTime[0]*60+$explodedTime[1];
+            $intervencoes = Intervencoes::where('id_pedido',$ana["id"])->where('data_inicio','!=',null)->get();
+                                    
+            
+            foreach($intervencoes as $hora)
+            {
+                $data1 = Carbon::parse($hora->data_inicio);
+                $data2 = Carbon::parse($hora->created_at);
+                $result = $data1->diff($data2);
+            
+                $data = Carbon::createFromTime($result->h, $result->i, $result->s);
+
+                $somaDiferencasSegundos += $data->diffInSeconds(Carbon::createFromTime(0, 0, 0));
+            }
+
+
         }
 
-        if(strlen(floor($sum_minutes/60)) == 1){
-            $hoursCheck = '0'.floor($sum_minutes/60);
-        }
-        else {
-            $hoursCheck = floor($sum_minutes/60);
-        }
+         //Converter segundos e horas e minutos
+         $horas = floor($somaDiferencasSegundos / 3600);
+         $minutos = floor(($somaDiferencasSegundos % 3600) / 60);
+         $horaFormatada = Carbon::createFromTime($horas, $minutos, 0)->format('H:i');
 
-        if(strlen(floor($sum_minutes % 60)) == 1){
-            $minutesCheck = '0'.floor($sum_minutes % 60);
-        }
-        else {
-            $minutesCheck = floor($sum_minutes % 60);
-        }
-
-        $sumTime = $hoursCheck. ':' .$minutesCheck;
-
-        $resultado_soma = global_hours_format($sumTime);
+         $resultado_soma = $horaFormatada;
+       
 
         $sheet->setCellValue("I{$totalRow}","SOMA DAS HORAS");
-        $sheet->setCellValue("J{$totalRow}", "$resultado_soma min");
+        $sheet->setCellValue("J{$totalRow}", "$resultado_soma");
 
         $sheet->getStyle("I{$totalRow}:J{$totalRow}")->applyFromArray(
             array(
@@ -96,31 +105,46 @@ class ExportTasksExcel implements FromCollection, WithHeadings, WithEvents,Shoul
     {
         $newCollection = collect($this->analysis);
 
+
         $collectionMapped = $newCollection->map(function($analysis){
 
-            if($analysis["tasks_reports"]["reportStatus"] == 0){
-                $type = "Agendada";
-            }
-            else if($analysis["tasks_reports"]["reportStatus"] == 1){
-                $type = "Em Curso";
-            }
-            else{
-                $type="Finalizada";
+            $intervencoes = Intervencoes::where('id_pedido',$analysis["id"])->where('data_inicio','!=',null)->get();
+                                    
+            $somaDiferencasSegundos = 0;
+
+
+            foreach($intervencoes as $hora)
+            {
+                $data1 = Carbon::parse($hora->data_inicio);
+                $data2 = Carbon::parse($hora->created_at);
+                $result = $data1->diff($data2);
+            
+                $data = Carbon::createFromTime($result->h, $result->i, $result->s);
+
+                $somaDiferencasSegundos += $data->diffInSeconds(Carbon::createFromTime(0, 0, 0));
             }
 
-            $teamMember = User::where('id',$analysis["tech_id"])->first();
+
+            //Converter segundos e horas e minutos
+            $horas = floor($somaDiferencasSegundos / 3600);
+            $minutos = floor(($somaDiferencasSegundos % 3600) / 60);
+            $horaFormatada = Carbon::createFromTime($horas, $minutos, 0)->format('H:i');
+
+            $horasAtuais = $horaFormatada;
+
+            $teamMember = TeamMember::where('id',$analysis["tech_id"])->first();
+
            
             return [
-                'reference' => $analysis["tasks_reports"]["reference"],
-                'stateOfTask' => $type,
+                'reference' => $analysis["reference"],
+                'stateOfTask' => $analysis["tipo_estado"]["nome_estado"],
                 'tech' => $teamMember->name,
-                'dateBegin' => $analysis["date_begin"],
-                'hourBegin' => $analysis["hour_begin"],
-                'hourEnd' => $analysis["hour_end"],
-                'shortName' => $analysis["tasks_reports"]["task_customer"]["short_name"],
-                'serviceName' => $analysis["service"]["name"],
+                'dateBegin' => $analysis["data_agendamento"],
+                'hourBegin' => $analysis["hora_agendamento"],
+                'shortName' => $analysis["customer"]["short_name"],
+                'serviceName' => $analysis["services_to_do"]["name"],
                 'descricao' => $analysis["descricao"],
-                'totalHours' => $analysis["total_hours"]
+                'totalHours' => $horasAtuais
             ];
         });
 
@@ -129,7 +153,7 @@ class ExportTasksExcel implements FromCollection, WithHeadings, WithEvents,Shoul
 
     public function headings(): array
     {
-        return ["Referência", "Estado da Tarefa","Técnico", "Data", "Hora inicial", "Hora final", "Cliente", "Serviço", "Descrição", "Tempo Gasto"];
+        return ["Referência", "Estado do Pedido","Técnico", "Data de Agendamento", "Hora de Agendamento", "Cliente", "Serviço", "Descrição", "Tempo Gasto"];
     }
 
     public function registerEvents(): array
