@@ -70,7 +70,7 @@
                                                                     {{-- @empty
                                                                     @endforelse --}}
                                                                 
-                                                            {{ global_hours_sum($task->getHoursTask); }}<br>
+                                                            {{ global_hours_sum($task->getHoursTask)}}<br>
                                                             @endif
                                                         @endforeach
                                                     </p>

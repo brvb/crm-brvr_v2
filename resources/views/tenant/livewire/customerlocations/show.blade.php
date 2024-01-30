@@ -28,7 +28,7 @@
         </div>
     </div>
     <!-- display dataTable no-footer -->
-    <table id="dataTables-data" class="table table-responsive-lg mb-0 table-striped">
+    <table id="dataTables-data" class="table table-responsive mb-0 table-striped">
         <thead>
             <tr>
                 <th>

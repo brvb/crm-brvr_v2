@@ -21,7 +21,7 @@
                                         @if($not->senderUser->photo == null)
                                             <img alt="image" width="50" src="{!! "https://".$_SERVER['SERVER_NAME']."/assets/resources/images/avatar/1.png" !!}">
                                         @else
-                                        {{$userCustomer = null;}}
+                                        {{$userCustomer = null}}
                                             @php
                                             if($not->group_chat != null && $not->group_chat != "")
                                             {

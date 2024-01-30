@@ -18,7 +18,7 @@
                     <div class="accordion__body--text">
                         <div class="col-12" style="margin-bottom:25px;padding-left:0px;">
                             <div class="row">
-                                <div class="col-6">
+                                <div class="col-12 col-sm-6">
                                     <div class="form-group">
                                         <label>{{__("Select Technical")}}</label>
                                         <select name="selectTechnical" id="selectTechnical" class="form-control" wire:model="technical">
@@ -29,7 +29,7 @@
                                         </select>
                                     </div>
                                 </div>
-                                <div class="col-6">
+                                <div class="col-12 col-sm-6">
                                     <div class="form-group">
                                         <label>{{__("Select Customer")}}</label>
                                         <select class="form-control" name="selectCustomer" id="selectCustomer" wire:model="client">
@@ -43,7 +43,7 @@
                             </div>
                             
                             <div class="row">
-                                <div class="col-6">
+                                <div class="col-12 col-md-6">
                                     <div class="form-group">
                                         <label>{{__("Select Service")}}</label>
                 
@@ -55,7 +55,7 @@
                                         </select>
                                     </div>
                                 </div>
-                                <div class="col-3">
+                                <div class="col-12 col-md-6">
                                     <div class="form-group">
                                         <label>{{__("Initial Date")}}</label>
                                         <div class="input-group" wire:ignore>
@@ -64,7 +64,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-3">
+                                <div class="col-12 col-md-6">
                                     <div class="form-group">
                                         <label>{{__("Final Date")}}</label>
                                         <div class="input-group" wire:ignore>
@@ -76,7 +76,7 @@
                             </div> 
                 
                             <div class="row">
-                                <div class="col-md-12 text-right">
+                                <div class="col-md-12 text-center">
                                     <button type="button" id="clearFilter" wire:click="clearFilter" class="btn-sm btn btn-primary">{{__("Clear Filter")}}</button>
                                 </div>
                             </div>
@@ -112,7 +112,7 @@
                 </div>
             </div>
             {{-- class="display dataTable no-footer" --}}
-            <table id="dataTables-data" class="table table-responsive-lg mb-0 table-striped">
+            <table id="dataTables-data" class="table table-responsive mb-0 table-striped">
                 <thead>
                     <tr>
                         <th>
