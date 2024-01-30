@@ -123,79 +123,81 @@
                 </div>
             </div>
             {{-- class="display dataTable no-footer" --}}
-            <table id="dataTables-data" class="table table-responsive mb-0 table-striped">
-                <thead>
-                    <tr>
-                        <th>
-                            <div class="custom-control custom-checkbox">
-                                <input type="checkbox" class="custom-control-input" id="checkAll" required="">
-                                <label class="custom-control-label" for="checkAll"></label>
-                            </div>
-                        </th>
-                        <th>{{ __('Reference') }}</th>
-                        <th>{{ __('State of Task') }}</th>
-                        <th>{{ __('Technical') }}</th>
-                        <th>{{ __('Date') }}</th>
-                        <th>{{ __('Hour') }}</th>
-                        <th>{{ __('Customer') }}</th>
-                        <th>{{ __('Service') }}</th>
-                        <th>{{ __('Hours')}}</th>
-                        <th>{{ __('Actions') }}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($analysis as $item)
+            <div class="table-responsive w-100">
+                <table id="dataTables-data" class="table mb-0 table-striped">
+                    <thead>
                         <tr>
-                            <td>
+                            <th>
                                 <div class="custom-control custom-checkbox">
-                                    <input type="checkbox" class="custom-control-input" id="customCheckBox{{ $item->id }}"
-                                        required="">
-                                    <label class="custom-control-label" for="customCheckBox{{ $item->id }}"></label>
+                                    <input type="checkbox" class="custom-control-input" id="checkAll" required="">
+                                    <label class="custom-control-label" for="checkAll"></label>
                                 </div>
-                            </td>
-                            <td>{{ $item->tasksReports->reference }}</td>
-                            <td>
-                                @if($item->tasksReports->reportStatus == 0)
-                                   {{__("Agendada")}}
-                                @elseif($item->tasksReports->reportStatus == 1)
-                                   {{__("Em Curso")}}
-                                @else
-                                    {{__("Finalizada")}}
-                                @endif
-                            </td>
-                            {{-- <td>{{ $item->tasksReports->tech->name }}</td> --}}
-                            @php
-                                $user = \App\Models\User::where('id',$item->tech_id)->first();
-                            @endphp
-                            <td>{{ $user->name}}</td>
-                            <td>{{ $item->date_begin }}</td>
-                            <td>{{ $item->hour_begin }} / {{ $item->hour_end }}</td>
-                            <td>{{ $item->tasksReports->taskCustomer->short_name }}</td>
-                            <td>{{ $item->service->name }}</td>
-                            <td>{{ global_hours_format($item->total_hours) }}</td>
-                            <td>
-                                <div class="dropdown">
-                                    <button class="btn btn-primary tp-btn-light sharp" type="button" data-toggle="dropdown">
-                                        <span class="fs--1">
-                                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="18px" height="18px" viewBox="0 0 24 24" version="1.1">
-                                                <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                                                    <rect x="0" y="0" width="24" height="24"></rect>
-                                                    <circle fill="#000000" cx="5" cy="12" r="2"></circle>
-                                                    <circle fill="#000000" cx="12" cy="12" r="2"></circle>
-                                                    <circle fill="#000000" cx="19" cy="12" r="2"></circle>
-                                                </g>
-                                            </svg>
-                                        </span>
-                                    </button>
-                                    <div class="dropdown-menu dropdown-menu-right">
-                                        <a class="dropdown-item" href="{{ route('tenant.tasks-reports.edit', $item->tasksReports->id)}}">{{__('Visualize Report')}}</a>
-                                    </div>
-                                </div>
-                            </td>
+                            </th>
+                            <th>{{ __('Reference') }}</th>
+                            <th>{{ __('State of Task') }}</th>
+                            <th>{{ __('Technical') }}</th>
+                            <th>{{ __('Date') }}</th>
+                            <th>{{ __('Hour') }}</th>
+                            <th>{{ __('Customer') }}</th>
+                            <th>{{ __('Service') }}</th>
+                            <th>{{ __('Hours')}}</th>
+                            <th>{{ __('Actions') }}</th>
                         </tr>
-                    @endforeach
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        @foreach ($analysis as $item)
+                            <tr>
+                                <td>
+                                    <div class="custom-control custom-checkbox">
+                                        <input type="checkbox" class="custom-control-input" id="customCheckBox{{ $item->id }}"
+                                            required="">
+                                        <label class="custom-control-label" for="customCheckBox{{ $item->id }}"></label>
+                                    </div>
+                                </td>
+                                <td>{{ $item->tasksReports->reference }}</td>
+                                <td>
+                                    @if($item->tasksReports->reportStatus == 0)
+                                    {{__("Agendada")}}
+                                    @elseif($item->tasksReports->reportStatus == 1)
+                                    {{__("Em Curso")}}
+                                    @else
+                                        {{__("Finalizada")}}
+                                    @endif
+                                </td>
+                                {{-- <td>{{ $item->tasksReports->tech->name }}</td> --}}
+                                @php
+                                    $user = \App\Models\User::where('id',$item->tech_id)->first();
+                                @endphp
+                                <td>{{ $user->name}}</td>
+                                <td>{{ $item->date_begin }}</td>
+                                <td>{{ $item->hour_begin }} / {{ $item->hour_end }}</td>
+                                <td>{{ $item->tasksReports->taskCustomer->short_name }}</td>
+                                <td>{{ $item->service->name }}</td>
+                                <td>{{ global_hours_format($item->total_hours) }}</td>
+                                <td>
+                                    <div class="dropdown">
+                                        <button class="btn btn-primary tp-btn-light sharp" type="button" data-toggle="dropdown">
+                                            <span class="fs--1">
+                                                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="18px" height="18px" viewBox="0 0 24 24" version="1.1">
+                                                    <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                                                        <rect x="0" y="0" width="24" height="24"></rect>
+                                                        <circle fill="#000000" cx="5" cy="12" r="2"></circle>
+                                                        <circle fill="#000000" cx="12" cy="12" r="2"></circle>
+                                                        <circle fill="#000000" cx="19" cy="12" r="2"></circle>
+                                                    </g>
+                                                </svg>
+                                            </span>
+                                        </button>
+                                        <div class="dropdown-menu dropdown-menu-right">
+                                            <a class="dropdown-item" href="{{ route('tenant.tasks-reports.edit', $item->tasksReports->id)}}">{{__('Visualize Report')}}</a>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
             {{ $analysis->links() }}
         </div>
       </div>
