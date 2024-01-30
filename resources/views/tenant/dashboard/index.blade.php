@@ -1,6 +1,6 @@
 <x-tenant-layout title="{{ __('Dashboard') }}" :themeAction="$themeAction">
     <div class="container-fluid">
-        <div class="row">
+        <div class="row" style="display:block;">
             {{-- <div class="container-fluid"> --}}
                 <!-- Add Order -->
                 <div class="modal fade" id="addOrderModalside">
