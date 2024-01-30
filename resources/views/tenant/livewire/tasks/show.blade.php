@@ -29,7 +29,7 @@
                 <div class="accordion__body--text">
                     <div class="col-12" style="margin-bottom:25px;padding-left:0px;">
                         <div class="row">
-                            <div class="col-3">
+                            <div class="col-12 col-sm-6 col-md-3">
                                 <div class="form-group">
                                     <label>{{__("Select Technical")}}</label>
                                     <select name="selectTechnical" id="selectTechnical" class="form-control" wire:model="technical">
@@ -40,7 +40,7 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-3">
+                            <div class="col-12 col-sm-6 col-md-3">
                                 <div class="form-group">
                                     <label>{{__("Select Customer")}}</label>
                                     <select class="form-control" name="selectCustomer" id="selectCustomer" wire:model="client">
@@ -51,7 +51,7 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-3">
+                            <div class="col-12 col-sm-6 col-md-3">
                                 <div class="form-group">
                                     <label>Selecionar estado do pedido</label>
                                     <select class="form-control" name="selectType" id="selectType" wire:model="typeTask">
@@ -62,7 +62,7 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-3">
+                            <div class="col-12 col-sm-6 col-md-3">
                                 <div class="form-group">
                                     <label>{{__("Select Ordenation")}}</label>
                                     <select class="form-control" name="ordenation" id="ordenation" wire:model="ordenation">
@@ -74,7 +74,7 @@
                         </div>
                         
                         <div class="row">
-                            <div class="col-6">
+                            <div class="col-12 col-md-6">
                                 <div class="form-group">
                                     <label>{{__("Select Service")}}</label>
             
@@ -86,7 +86,7 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-3">
+                            <div class="col-12 col-sm-6 col-md-3">
                                 <div class="form-group">
                                     <label>{{__("Initial Date")}}</label>
                                     <div class="input-group" wire:ignore>
@@ -95,7 +95,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-3">
+                            <div class="col-12 col-sm-6 col-md-3">
                                 <div class="form-group">
                                     <label>{{__("Final Date")}}</label>
                                     <div class="input-group" wire:ignore>
@@ -122,8 +122,8 @@
     <!-- Fim do Filtro -->  
 
       <div class="row">
-        <div class="table-responsive">
-            <div id="dataTables_wrapper" class="dataTables_wrapper">
+        <div class="table">
+            <div id="dataTables_wrapper" class="dataTables_wrapper container" style="margin-top:0">
                 <div class="dataTables_length" id="dataTables_length">
                     <label>{{ __('Show') }}
                         <select name="perPage" wire:model="perPage">
@@ -144,106 +144,108 @@
                 </div>
             </div>
             <!-- display dataTable no-footer -->
-            <table id="dataTables-data" class="table table-responsive-lg mb-0 table-striped">
-                <thead>
-                    <tr>
-                        <th>
-                            <div class="custom-control custom-checkbox">
-                                <input type="checkbox" class="custom-control-input" id="checkAll" required="">
-                                <label class="custom-control-label" for="checkAll"></label>
-                            </div>
-                        </th>
-                        <th>{{ __('Reference') }}</th>
-                        <th>{{ __('Customer') }}</th>
-                        <th>{{ __('Descrição') }}</th>
-                        <th>{{ __('Technical') }}</th>
-                        <th>{{ __('Date') }}</th>
-                        <th>{{ __('County') }}</th>
-                        <th>{{ __('Estado do Pedido') }}</th>
-                        @if(Auth::user()->type_user !="2")
-                            <th>{{ __('Action') }}</th>
-                        @endif
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($tasksList as $item)
+            <div class="table-responsive w-100">
+                <table id="dataTables-data" class="table mb-0 table-striped">
+                    <thead>
                         <tr>
-                            <td>
+                            <th>
                                 <div class="custom-control custom-checkbox">
-                                    <input type="checkbox" class="custom-control-input" id="customCheckBox{{ $item->id }}"
-                                        required="">
-                                    <label class="custom-control-label" for="customCheckBox{{ $item->id }}"></label>
+                                    <input type="checkbox" class="custom-control-input" id="checkAll" required="">
+                                    <label class="custom-control-label" for="checkAll"></label>
                                 </div>
-                            </td>
-                            <td>{{ $item->reference }}</td>
-                            <td>{{ $item->customer->short_name }}</td>
-                            <td>{{ $item->servicesToDo->name}}</td>
-                            <td>{{ $item->tech->name }}</td>
-                            <td>
-                                @if($item->data_agendamento != "")
-                
-                                <i class="fa fa-calendar" aria-hidden="true"></i> {{ $item->data_agendamento }}<br>
-                                <i class="fa fa-clock-o" aria-hidden="true"></i> {{ $item->hora_agendamento }}
-                                @else
-                                <i class="fa fa-calendar" aria-hidden="true"></i> {{ date('Y-m-d',strtotime($item->created_at)) }}<br>
-                                <i class="fa fa-clock-o" aria-hidden="true"></i> {{ date('H:i',strtotime($item->created_at)) }}
-                                @endif
-                            </td>
-                            <td>{{ $item->location->locationCounty->name }}</td>
-
-                            <td>{{ $item->tipoEstado->nome_estado }}</td>
-
-                           
-                                <td>
-                                        <!-- dropdown-menu dropdown-menu-right -->
-
-                                    @if(Auth::user()->type_user != 2)
-
-                                        <div class="dropdown">
-                                            <button class="btn btn-primary tp-btn-light sharp" type="button" data-toggle="dropdown">
-                                                <span class="fs--1">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="18px" height="18px" viewBox="0 0 24 24" version="1.1">
-                                                        <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                                                            <rect x="0" y="0" width="24" height="24"></rect>
-                                                            <circle fill="#000000" cx="5" cy="12" r="2"></circle>
-                                                            <circle fill="#000000" cx="12" cy="12" r="2"></circle>
-                                                            <circle fill="#000000" cx="19" cy="12" r="2"></circle>
-                                                        </g>
-                                                    </svg>
-                                                </span>
-                                            </button>
-                                            <div class="dropdown-menu dropdown-menu-right">
-
-                                                @php
-                                                    $user = \App\Models\Tenant\TeamMember::where('id',$item->tech_id)->first();
-                                                @endphp
-                                                
-                                                
-                                                <a class="dropdown-item" href="{{ route('tenant.tasks.edit', $item->id) }}">Atualizar Pedido</a>
-                                                 
-
-                                               
-                                                <button class="dropdown-item btn-sweet-alert" data-type="form"
-                                                    data-route="{{ route('tenant.tasks.destroy', $item->id) }}"
-                                                    data-style="warning" data-csrf="csrf"
-                                                    data-text="Quer eliminar este pedido?"
-                                                    data-title="{{ __('Are you sure?') }}"
-                                                    data-btn-cancel="{{ __('No, do not delete!!') }}"
-                                                    data-btn-ok="Sim, apagar pedido" data-method="DELETE">
-                                                    Apagar Pedido
-                                                </button>
-                                                
-
-                                            </div>
-                                        </div>
-                                   
-                                    @endif
-                                 
-                                </td>
+                            </th>
+                            <th>{{ __('Reference') }}</th>
+                            <th>{{ __('Customer') }}</th>
+                            <th>{{ __('Descrição') }}</th>
+                            <th>{{ __('Technical') }}</th>
+                            <th>{{ __('Date') }}</th>
+                            <th>{{ __('County') }}</th>
+                            <th>{{ __('Estado do Pedido') }}</th>
+                            @if(Auth::user()->type_user !="2")
+                                <th>{{ __('Action') }}</th>
+                            @endif
                         </tr>
-                    @endforeach
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        @foreach ($tasksList as $item)
+                            <tr>
+                                <td>
+                                    <div class="custom-control custom-checkbox">
+                                        <input type="checkbox" class="custom-control-input" id="customCheckBox{{ $item->id }}"
+                                            required="">
+                                        <label class="custom-control-label" for="customCheckBox{{ $item->id }}"></label>
+                                    </div>
+                                </td>
+                                <td>{{ $item->reference }}</td>
+                                <td>{{ $item->customer->short_name }}</td>
+                                <td>{{ $item->servicesToDo->name}}</td>
+                                <td>{{ $item->tech->name }}</td>
+                                <td>
+                                    @if($item->data_agendamento != "")
+                    
+                                    <i class="fa fa-calendar" aria-hidden="true"></i> {{ $item->data_agendamento }}<br>
+                                    <i class="fa fa-clock-o" aria-hidden="true"></i> {{ $item->hora_agendamento }}
+                                    @else
+                                    <i class="fa fa-calendar" aria-hidden="true"></i> {{ date('Y-m-d',strtotime($item->created_at)) }}<br>
+                                    <i class="fa fa-clock-o" aria-hidden="true"></i> {{ date('H:i',strtotime($item->created_at)) }}
+                                    @endif
+                                </td>
+                                <td>{{ $item->location->locationCounty->name }}</td>
+
+                                <td>{{ $item->tipoEstado->nome_estado }}</td>
+
+                            
+                                    <td>
+                                            <!-- dropdown-menu dropdown-menu-right -->
+
+                                        @if(Auth::user()->type_user != 2)
+
+                                            <div class="dropdown">
+                                                <button class="btn btn-primary tp-btn-light sharp" type="button" data-toggle="dropdown">
+                                                    <span class="fs--1">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="18px" height="18px" viewBox="0 0 24 24" version="1.1">
+                                                            <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                                                                <rect x="0" y="0" width="24" height="24"></rect>
+                                                                <circle fill="#000000" cx="5" cy="12" r="2"></circle>
+                                                                <circle fill="#000000" cx="12" cy="12" r="2"></circle>
+                                                                <circle fill="#000000" cx="19" cy="12" r="2"></circle>
+                                                            </g>
+                                                        </svg>
+                                                    </span>
+                                                </button>
+                                                <div class="dropdown-menu dropdown-menu-right">
+
+                                                    @php
+                                                        $user = \App\Models\Tenant\TeamMember::where('id',$item->tech_id)->first();
+                                                    @endphp
+                                                    
+                                                    
+                                                    <a class="dropdown-item" href="{{ route('tenant.tasks.edit', $item->id) }}">Atualizar Pedido</a>
+                                                    
+
+                                                
+                                                    <button class="dropdown-item btn-sweet-alert" data-type="form"
+                                                        data-route="{{ route('tenant.tasks.destroy', $item->id) }}"
+                                                        data-style="warning" data-csrf="csrf"
+                                                        data-text="Quer eliminar este pedido?"
+                                                        data-title="{{ __('Are you sure?') }}"
+                                                        data-btn-cancel="{{ __('No, do not delete!!') }}"
+                                                        data-btn-ok="Sim, apagar pedido" data-method="DELETE">
+                                                        Apagar Pedido
+                                                    </button>
+                                                    
+
+                                                </div>
+                                            </div>
+                                    
+                                        @endif
+                                    
+                                    </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
             {{ $tasksList->links() }}
         </div>
       </div>
