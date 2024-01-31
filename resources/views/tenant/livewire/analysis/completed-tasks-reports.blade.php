@@ -31,7 +31,7 @@
                     <div class="accordion__body--text">
                         <div class="col-12" style="margin-bottom:25px;padding-left:0px;">
                             <div class="row">
-                                <div class="col-3">
+                                <div class="col-12 col-sm-6 col-lg-3">
                                     <div class="form-group">
                                         <label>{{__("Select Technical")}}</label>
                                         <select name="selectTechnical" id="selectTechnical" class="form-control" wire:model="technical">
@@ -42,7 +42,7 @@
                                         </select>
                                     </div>
                                 </div>
-                                <div class="col-3">
+                                <div class="col-12 col-sm-6 col-lg-3">
                                     <div class="form-group">
                                         <label>{{__("Select Customer")}}</label>
                                         <select class="form-control" name="selectCustomer" id="selectCustomer" wire:model="client">
@@ -53,7 +53,7 @@
                                         </select>
                                     </div>
                                 </div>
-                                <div class="col-3">
+                                <div class="col-12 col-sm-6 col-lg-3">
                                     <div class="form-group">
                                         <label>Selecionar estado do pedido</label>
                                         <select class="form-control" name="selectType" id="selectType" wire:model="typeTask">
@@ -64,7 +64,7 @@
                                         </select>
                                     </div>
                                 </div>
-                                <div class="col-3">
+                                <div class="col-12 col-sm-6 col-lg-3">
                                     <div class="form-group">
                                         <label>{{__("Select Ordenation")}}</label>
                                         <select class="form-control" name="ordenation" id="ordenation" wire:model="ordenation">
@@ -76,7 +76,7 @@
                             </div>
                             
                             <div class="row">
-                                <div class="col-6">
+                                <div class="col-12 col-sm-6">
                                     <div class="form-group">
                                         <label>{{__("Select Service")}}</label>
                 
@@ -88,7 +88,7 @@
                                         </select>
                                     </div>
                                 </div>
-                                <div class="col-3">
+                                <div class="col-12 col-sm-6 col-lg-3">
                                     <div class="form-group">
                                         <label>{{__("Initial Date")}}</label>
                                         <div class="input-group" wire:ignore>
@@ -97,7 +97,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-3">
+                                <div class="col-12 col-sm-6 col-lg-3">
                                     <div class="form-group">
                                         <label>{{__("Final Date")}}</label>
                                         <div class="input-group" wire:ignore>
@@ -142,7 +142,7 @@
                 </div>
             </div>
             {{-- class="display dataTable no-footer" --}}
-            
+            <div class="table-responsive w-100">
             <table id="dataTables-data" class="table mb-0 table-striped">
                 <thead>
                 <tr>
@@ -262,6 +262,7 @@
                 </tbody>
             </table>
             {{ $tasksList->links() }}
+        </div>
         </div>
       </div>
     </div>
