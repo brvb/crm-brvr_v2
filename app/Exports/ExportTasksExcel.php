@@ -35,35 +35,36 @@ class ExportTasksExcel implements FromCollection, WithHeadings, WithEvents,Shoul
         $resultado_soma = "";
         $somaDiferencasSegundos = 0;
 
+
         foreach($this->analysis as $ana)
         {
             $intervencoes = Intervencoes::where('id_pedido',$ana["id"])->where('data_inicio','!=',null)->get();
-                                    
-            
+                                
+            $arrHours[$ana["id"]] = [];
+           
             foreach($intervencoes as $hora)
             {
-                $data1 = Carbon::parse($hora->data_inicio);
-                $data2 = Carbon::parse($hora->created_at);
-                $result = $data1->diff($data2);
-            
-                $data = Carbon::createFromTime($result->h, $result->i, $result->s);
+                $data1 = Carbon::parse($hora->hora_inicio);
+                $data2 = Carbon::parse($hora->hora_final);
+                $result = $data1->diff($data2)->format("%h.%i");
+                $hours = date("H:i",strtotime($result));
 
-                $somaDiferencasSegundos += $data->diffInSeconds(Carbon::createFromTime(0, 0, 0));
+                array_push($arrHours[$ana["id"]],$hours);
+                //$somaDiferencasSegundos += $result->diffInSeconds(Carbon::createFromTime(0, 0, 0));
             }
-
+           
 
         }
 
+        //FAZER AQUI A CONTINUAÇÃO DO CODIGO
+
+        
+        $sum = global_hours_sum($arrHours);
+
          //Converter segundos e horas e minutos
-         $horas = floor($somaDiferencasSegundos / 3600);
-         $minutos = floor(($somaDiferencasSegundos % 3600) / 60);
-         $horaFormatada = Carbon::createFromTime($horas, $minutos, 0)->format('H:i');
-
-         $resultado_soma = $horaFormatada;
-       
-
+        
         $sheet->setCellValue("I{$totalRow}","SOMA DAS HORAS");
-        $sheet->setCellValue("J{$totalRow}", "$resultado_soma");
+        $sheet->setCellValue("J{$totalRow}", "$sum min");
 
         $sheet->getStyle("I{$totalRow}:J{$totalRow}")->applyFromArray(
             array(
@@ -109,28 +110,37 @@ class ExportTasksExcel implements FromCollection, WithHeadings, WithEvents,Shoul
         $collectionMapped = $newCollection->map(function($analysis){
 
             $intervencoes = Intervencoes::where('id_pedido',$analysis["id"])->where('data_inicio','!=',null)->get();
+
+            $arrHours[$analysis["id"]] = [];
                                     
             $somaDiferencasSegundos = 0;
 
 
             foreach($intervencoes as $hora)
             {
-                $data1 = Carbon::parse($hora->data_inicio);
-                $data2 = Carbon::parse($hora->created_at);
-                $result = $data1->diff($data2);
+                // $data1 = Carbon::parse($hora->hora_inicio);
+                // $data2 = Carbon::parse($hora->hora_final);
+                // $result = $data1->diff($data2);
             
-                $data = Carbon::createFromTime($result->h, $result->i, $result->s);
+                // $data = Carbon::createFromTime($result->h, $result->i, $result->s);
 
-                $somaDiferencasSegundos += $data->diffInSeconds(Carbon::createFromTime(0, 0, 0));
+                // $somaDiferencasSegundos += $data->diffInSeconds(Carbon::createFromTime(0, 0, 0));
+
+                $data1 = Carbon::parse($hora->hora_inicio);
+                $data2 = Carbon::parse($hora->hora_final);
+                $result = $data1->diff($data2)->format("%h.%i");
+                $hours = date("H:i",strtotime($result));
+
+                array_push($arrHours[$analysis["id"]],$hours);
             }
 
 
             //Converter segundos e horas e minutos
-            $horas = floor($somaDiferencasSegundos / 3600);
-            $minutos = floor(($somaDiferencasSegundos % 3600) / 60);
-            $horaFormatada = Carbon::createFromTime($horas, $minutos, 0)->format('H:i');
+            // $horas = floor($somaDiferencasSegundos / 3600);
+            // $minutos = floor(($somaDiferencasSegundos % 3600) / 60);
+            // $horaFormatada = Carbon::createFromTime($horas, $minutos, 0)->format('H:i');
 
-            $horasAtuais = $horaFormatada;
+            $horasAtuais = global_hours_sum($arrHours);
 
             $teamMember = TeamMember::where('id',$analysis["tech_id"])->first();
 

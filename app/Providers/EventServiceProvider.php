@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Listeners\EmailEvent;
 use App\Events\Alerts\AlertEvent;
+use App\Events\Alerts\CheckFinalizadosEvent;
 use App\Events\Alerts\EmailConclusionEvent;
 use App\Events\Tasks\TaskCreated;
 
@@ -11,19 +12,24 @@ use App\Events\Tasks\TaskCustomer;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Auth\Events\Registered;
 use App\Events\Alerts\EmailNotifyEvent;
+use App\Events\Alerts\ReaberturaPedidoEvent;
+use App\Events\Alerts\SendStatusEvent;
 use App\Events\ChatEmail\ChatEmailEvent;
 use App\Events\Tasks\DispatchTaskReport;
 use App\Events\Tasks\DispatchTasksToUser;
 use App\Events\Tasks\SendPDF;
 use App\Listeners\Tasks\TaskNotification;
 use App\Events\TeamMember\TeamMemberEvent;
+use App\Listeners\AlertEmail\CheckFinalizadosNotification;
 use App\Listeners\AlertEmail\EmailConclusionNotification;
 use App\Listeners\Tasks\TaskCustomerNotification;
 use App\Listeners\ChatEmail\ChatEmailNotification;
 use App\Listeners\Tasks\SendTaskReportNotification;
 use App\Listeners\AlertEmail\EmailNotifyNotification;
+use App\Listeners\AlertEmail\ReaberturaPedidoNotification;
 use App\Listeners\Tasks\SendDispatchTasksNotification;
 use App\Listeners\AlertEmail\SendAlertEmailNotification;
+use App\Listeners\AlertEmail\SendStatusNotification;
 use App\Listeners\Tasks\SendPDFNotification;
 use App\Listeners\TeamMember\SendTeamMemberNotification;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
@@ -72,6 +78,15 @@ class EventServiceProvider extends ServiceProvider
         ],
         SendPDF::class => [
             SendPDFNotification::class
+        ],
+        CheckFinalizadosEvent::class => [
+            CheckFinalizadosNotification::class
+        ],
+        SendStatusEvent::class => [
+            SendStatusNotification::class
+        ],
+        ReaberturaPedidoEvent::class => [
+            ReaberturaPedidoNotification::class
         ]
     ];
 

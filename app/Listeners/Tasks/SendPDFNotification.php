@@ -38,10 +38,10 @@ class SendPDFNotification
     public function handle(SendPDF $valuesInfo)
     {   
       
-        Mail::to($valuesInfo->valuesInfo->customer->email)->queue(new PDFEmail($valuesInfo->valuesInfo));
+        Mail::to($valuesInfo->valuesInfo->customer->email)->queue(new PDFEmail($valuesInfo->valuesInfo,$valuesInfo->pdf));
 
         $tm = TeamMember::where('id',$valuesInfo->valuesInfo->tech_id)->first();
-        Mail::to($tm->email)->queue(new PDFEmail($valuesInfo->valuesInfo));
+        Mail::to($tm->email)->queue(new PDFEmail($valuesInfo->valuesInfo,$valuesInfo->pdf));
 
         
     }

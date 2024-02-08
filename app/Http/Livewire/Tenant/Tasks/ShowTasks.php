@@ -2,9 +2,13 @@
 
 namespace App\Http\Livewire\Tenant\Tasks;
 
+use App\Events\Alerts\ReaberturaPedidoEvent;
+use App\Events\Alerts\SendStatusEvent;
 use Livewire\Component;
 use App\Models\Tenant\Tasks;
 use Livewire\WithPagination;
+use App\Models\Tenant\Pedidos;
+use App\Models\Tenant\EstadoPedido;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\File;
 use App\Events\Tasks\DispatchTasksToUser;
@@ -13,7 +17,6 @@ use App\Interfaces\Tenant\Customers\CustomersInterface;
 use App\Interfaces\Tenant\TeamMember\TeamMemberInterface;
 use App\Interfaces\Tenant\Setup\Services\ServicesInterface;
 use App\Interfaces\Tenant\TasksReports\TasksReportsInterface;
-use App\Models\Tenant\EstadoPedido;
 
 class ShowTasks extends Component
 {
@@ -278,6 +281,28 @@ class ShowTasks extends Component
     }
 
     /****FIM DO FILTRO ****/
+
+    public function enviaStatus($id)
+    {
+        $pedido = Pedidos::where('id',$id)->with('tipoEstado')->first();
+
+        event(new SendStatusEvent($pedido));
+
+        $this->dispatchBrowserEvent('fireSwal', ['title' => "Estado", 'message' => "Enviado email para cliente", 'status'=>'success']);
+    }
+
+    public function reabrirPedido($id)
+    {
+        $pedido = Pedidos::where('id',$id)->with('tipoEstado')->first();
+
+        Pedidos::where('id',$id)->update([
+            "estado" => 6
+        ]);
+
+        event(new ReaberturaPedidoEvent($pedido));
+
+        return redirect()->route('tenant.tasks.edit', $pedido->id);
+    }
 
    
     /**

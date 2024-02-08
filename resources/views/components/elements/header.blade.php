@@ -8,6 +8,7 @@
                     </div>
                 </div>
                 <ul class="navbar-nav header-right">
+                    @livewire('tenant.annotation.tenant-annotation')
                     @livewire('tenant.alert-messages.alert-messages')
 
                     @if(Auth::user()->type_user != 2)
@@ -176,7 +177,7 @@
 <script src="https://js.pusher.com/7.2/pusher.min.js"></script>
 <script>
   
-    var pusher = new Pusher('9fc590949fcf83c98e55', {
+    var pusher = new Pusher('10fbe9dc210a0ed69bf8', {
         cluster: 'eu',
     });
     

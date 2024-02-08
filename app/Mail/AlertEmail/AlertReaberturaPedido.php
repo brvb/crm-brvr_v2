@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Mail\Tasks;
+namespace App\Mail\AlertEmail;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
@@ -13,22 +13,20 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
-class PDFEmail extends Mailable
+class AlertReaberturaPedido extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $info;
-    public $pdf;
+    public $pedido;
 
     /**
      * Create a new message instance.
      *
      * @return void
      */
-    public function __construct($info,$pdf)
+    public function __construct($pedido)
     {
-        $this->info = $info;
-        $this->pdf = $pdf;
+        $this->pedido = $pedido;
     }
 
     /**
@@ -38,13 +36,12 @@ class PDFEmail extends Mailable
      */
     public function envelope()
     {
-       
-        //env('MAIL_USERNAME')
-        $subject = 'Pedido #' . $this->info->reference . ' pedido finalizado com sucesso.';
+          //env('MAIL_USERNAME')
 
+        $subject = 'Reabertura do pedido #' . $this->pedido->reference . '';
         return new Envelope(
             subject: $subject,
-            from: new Address("pp@gmail.com", session('sender_name')),
+            from: new Address("fsdfss@gmail.com", session('sender_name')),
         );
     }
 
@@ -74,14 +71,12 @@ class PDFEmail extends Mailable
 
     public function build()
     {
-
-               
-        $subject = 'Pedido #' . $this->info->reference . ' pedido finalizado com sucesso.';
+        $subject = 'Reabertura do pedido #' . $this->pedido->reference . '';
 
         $email = $this
-            ->view('tenant.mail.tasks.pdf-email',[
+            ->view('tenant.mail.alertemail.alertreaberturapedido',[
                 "subject" => $subject,
-                "task" => $this->info,
+                "task" => $this->pedido,
                 "company_name" => session('company_name'),
                 "vat" => session('vat'),
                 "contact" => session('contact'),
@@ -90,15 +85,7 @@ class PDFEmail extends Mailable
                 "logotipo" => session('logotipo'),
             ]);
 
-
-
-         if($this->pdf == "1")
-         {
-            \Log::info("entrou aqui");
-            $email->attach(global_tenancy_asset('/app/public/pedidos/pdfs_conclusao/'.$this->info->reference.'/'.$this->info->reference.'.pdf'));
-         }
-        //Junta o PDF 
-        
+            
 
         return $email;
     }

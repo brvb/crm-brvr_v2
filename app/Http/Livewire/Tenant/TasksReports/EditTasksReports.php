@@ -38,10 +38,11 @@ class EditTasksReports extends Component
     public ?object $task = NULL;
     public ?object $statesPedido = NULL;
     public string $horasAtuais = "";
+    public string $minutosAtuais = "";
     public string $descricaoPanel = 'none';
     public string $signaturePad = 'none';
     public string $selectedEstado = '';
-    public int $horasAlterado = 0;
+    public string $horasAlterado = '';
     public string $referencia_intervencao = '';
     public string $descricao_intervencao = '';
     public int $quantidade_intervencao = 0;
@@ -88,31 +89,48 @@ class EditTasksReports extends Component
         $this->statesPedido = EstadoPedido::all();
 
         //CONTAR O TEMPO PARA COLOCAR NO CABEÇALHO
-        $horas = Intervencoes::where('id_pedido',$this->task->id)->where('estado_pedido','!=',1)->get();
+        $horas = Intervencoes::where('id_pedido',$this->task->id)->where('hora_final','!=',null)->get();
 
         $somaDiferencasSegundos = 0;
 
+        $arrHours[$this->task->id] = [];
 
         foreach($horas as $hora)
         {
-            $data1 = Carbon::parse($hora->data_inicio);
-            $data2 = Carbon::parse($hora->created_at);
-            $result = $data1->diff($data2);
-          
-            $data = Carbon::createFromTime($result->h, $result->i, $result->s);
+            // $data1 = Carbon::parse($hora->hora_inicio);
+            // $data2 = Carbon::parse($hora->hora_final);
+            // $result = $data1->diff($data2);
 
-            $somaDiferencasSegundos += $data->diffInSeconds(Carbon::createFromTime(0, 0, 0));
+            // $data = Carbon::createFromTime($result->h, $result->i, $result->s);
+
+            // $somaDiferencasSegundos += $data->diffInSeconds(Carbon::createFromTime(0, 0, 0));
+
+            $data1 = Carbon::parse($hora->hora_inicio);
+            $data2 = Carbon::parse($hora->hora_final);
+            $result = $data1->diff($data2)->format("%h.%i");
+            $hours = date("H:i",strtotime($result));
+
+            array_push($arrHours[$this->task->id],$hours);
         }
 
 
         //Converter segundos e horas e minutos
-        $horas = floor($somaDiferencasSegundos / 3600);
-        $minutos = floor(($somaDiferencasSegundos % 3600) / 60);
-        $horaFormatada = Carbon::createFromTime($horas, $minutos, 0)->format('H:i');
+        // $horas = floor($somaDiferencasSegundos / 3600);
+        // $minutos = floor(($somaDiferencasSegundos % 3600) / 60);
 
-        $this->horasAtuais = $horaFormatada;
+        // $horaFormatada = Carbon::createFromTime($horas, $minutos, 0)->format('H:i');
 
-        $this->horasAlterado = 0;
+        // $this->horasAtuais = $horaFormatada;
+
+        $this->horasAtuais = global_hours_sum($arrHours);
+
+
+        $horaAlterado = Pedidos::where('id',$this->task->id)->first();
+        if($horaAlterado->horas_alterado != null)
+        {
+            $this->horasAlterado = $horaAlterado->horas_alterado;
+        }
+        
      
     }
 
@@ -171,12 +189,20 @@ class EditTasksReports extends Component
     {
         $config = Config::first();
 
+        if($this->horasAlterado != "")
+        {
+            Pedidos::where('id',$this->task->id)->update([
+                "horas_alterado" => $this->horasAlterado
+            ]);
+        }
+
         if($this->selectedEstado == "1")
         {
             $intervencao = Intervencoes::with('pedido')->where('id_pedido',$this->task->id)->where('user_id',Auth::user()->id)->latest()->first();
+
             if(isset($intervencao->estado_pedido))
             {
-                if($intervencao->estado_pedido == "1" && isset($intervencao->estado_pedido))
+                if($intervencao->estado_pedido == "1" && $intervencao->hora_final == "")
                 {
                     $this->dispatchBrowserEvent('swal', ['title' => "Intervenção", 'message' => "O seu utilizador já tem uma intervençao em aberto para este pedido!", 'status'=>'error']);
                     return false;
@@ -226,6 +252,7 @@ class EditTasksReports extends Component
             }
             else 
             {
+
                 if($intervencaoCheckSuspenso->estado_pedido == "4")
                 {
                     $this->dispatchBrowserEvent('swal', ['title' => "Intervenção", 'message' => "Este pedido já se encontra suspenso", 'status'=>'error']);
@@ -323,30 +350,40 @@ class EditTasksReports extends Component
        
         $this->tasksInterface->addIntervencao($this);
 
-        $horas = Intervencoes::where('id_pedido',$this->task->id)->where('estado_pedido','!=',1)->get();
+        $horas = Intervencoes::where('id_pedido',$this->task->id)->where("data_final","!=",null)->get();
 
         $somaDiferencasSegundos = 0;
+
+        $arrHours[$this->task->id] = [];
 
 
         foreach($horas as $hora)
         {
-            $data1 = Carbon::parse($hora->data_inicio);
-            $data2 = Carbon::parse($hora->created_at);
-            $result = $data1->diff($data2);
-          
-            $data = Carbon::createFromTime($result->h, $result->i, $result->s);
 
-            $somaDiferencasSegundos += $data->diffInSeconds(Carbon::createFromTime(0, 0, 0));
+            $data1 = Carbon::parse($hora->hora_inicio);
+            $data2 = Carbon::parse($hora->hora_final);
+            $result = $data1->diff($data2)->format("%h.%i");
+            $hours = date("H:i",strtotime($result));
+
+            array_push($arrHours[$this->task->id],$hours);
+
+
+            // $data1 = Carbon::parse($hora->hora_inicio);
+            // $data2 = Carbon::parse($hora->hora_final);
+            // $result = $data1->diff($data2);
+
+            // $data = Carbon::createFromTime($result->h, $result->i, $result->s);
+
+            // $somaDiferencasSegundos += $data->diffInSeconds(Carbon::createFromTime(0, 0, 0));
         }
 
 
         //Converter segundos e horas e minutos
-        $horas = floor($somaDiferencasSegundos / 3600);
-        $minutos = floor(($somaDiferencasSegundos % 3600) / 60);
-        $horaFormatada = Carbon::createFromTime($horas, $minutos, 0)->format('H:i');
+        // $horas = floor($somaDiferencasSegundos / 3600);
+        // $minutos = floor(($somaDiferencasSegundos % 3600) / 60);
+        // $horaFormatada = Carbon::createFromTime($horas, $minutos, 0)->format('H:i');
 
-        $this->horasAtuais = $horaFormatada;
-
+        $this->horasAtuais = global_hours_sum($arrHours);
 
          
         $pdf = PDF::loadView('tenant.tasks.invoicepdf',["impressao" => $this,'config' => $config])
@@ -360,14 +397,22 @@ class EditTasksReports extends Component
         if($this->selectedEstado == "2")
         {
 
-            if($this->email_pdf == true)
-            {
-                //ENVIA EMAIL
-                $pedido = Pedidos::where('id',$this->task->id)->first();
-                event(new SendPDF($pedido));
-                
-            } 
+            $pedido = Pedidos::where('id',$this->task->id)->first();
+            event(new SendPDF($pedido, $this->email_pdf));
         }
+
+
+          //TENTAR VER ESTA SITUAÇÃO PARA ENVIAR PARA O DASHBOARD
+          $usr = User::where('id',Auth::user()->id)->first();
+          $pedido = Pedidos::where('id',$this->task->id)->first();
+  
+          $usrRecebido = User::where('id',$pedido->user_id)->first();
+  
+         
+          $message = "adicionou uma intervenção";
+      
+  
+          event(new ChatMessage($usr->name, $message));
 
 
             
@@ -431,29 +476,38 @@ class EditTasksReports extends Component
     public function render()
     {
 
-        $horas = Intervencoes::where('id_pedido',$this->task->id)->where('estado_pedido','!=',1)->get();
+        $horas = Intervencoes::where('id_pedido',$this->task->id)->where('hora_final','!=',null)->get();
 
         $somaDiferencasSegundos = 0;
 
+        $arrHours[$this->task->id] = [];
 
         foreach($horas as $hora)
         {
-            $data1 = Carbon::parse($hora->data_inicio);
-            $data2 = Carbon::parse($hora->created_at);
-            $result = $data1->diff($data2);
-          
-            $data = Carbon::createFromTime($result->h, $result->i, $result->s);
+            // $data1 = Carbon::parse($hora->hora_inicio);
+            // $data2 = Carbon::parse($hora->hora_final);
+            // $result = $data1->diff($data2);
 
-            $somaDiferencasSegundos += $data->diffInSeconds(Carbon::createFromTime(0, 0, 0));
+            // $data = Carbon::createFromTime($result->h, $result->i, $result->s);
+
+            // $somaDiferencasSegundos += $data->diffInSeconds(Carbon::createFromTime(0, 0, 0));
+            $data1 = Carbon::parse($hora->hora_inicio);
+            $data2 = Carbon::parse($hora->hora_final);
+            $result = $data1->diff($data2)->format("%h.%i");
+            $hours = date("H:i",strtotime($result));
+
+            array_push($arrHours[$this->task->id],$hours);
         }
 
 
         //Converter segundos e horas e minutos
-        $horas = floor($somaDiferencasSegundos / 3600);
-        $minutos = floor(($somaDiferencasSegundos % 3600) / 60);
-        $horaFormatada = Carbon::createFromTime($horas, $minutos, 0)->format('H:i');
+        // $horas = floor($somaDiferencasSegundos / 3600);
+        // $minutos = floor(($somaDiferencasSegundos % 3600) / 60);
+        // $horaFormatada = Carbon::createFromTime($horas, $minutos, 0)->format('H:i');
+    
+        // $this->horasAtuais = $horaFormatada;
 
-        $this->horasAtuais = $horaFormatada;
+        $this->horasAtuais = global_hours_sum($arrHours);
 
         return view('tenant.livewire.tasksreports.edit');
 

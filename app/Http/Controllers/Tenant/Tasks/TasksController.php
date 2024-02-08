@@ -60,7 +60,7 @@ class TasksController extends Controller
      * @param Tasks $task
      * @return Redirect|View
      */
-    public function edit(Tasks $task): Redirect|View
+    public function edit(Pedidos $task): Redirect|View
     {
         // $taskReport = $this->tasksReportsInterface->getReportByTaskId($task->id);
         // if(isset($taskReport) && $taskReport->reportStatus > 0 ) {

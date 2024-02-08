@@ -55,7 +55,7 @@
                     <span class="nav-text">{{ __('Analysis') }}</span>
                 </a>
                 <ul aria-expanded="false">
-                    <li><a href="{{ route('tenant.completed.index')}}">Pedidos completos</a></li>
+                    {{-- <li><a href="{{ route('tenant.completed.index')}}">Pedidos completos</a></li> --}}
                     <li><a href="{{ route('tenant.analysis.index') }}">Todos os pedidos</a></li>
                 </ul>
 

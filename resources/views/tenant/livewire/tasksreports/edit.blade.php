@@ -34,7 +34,7 @@
                                             <section class="col-xl-2 col-xs-2 form-group text-right">
                                                 <h4 style="color:#326c91;">Tempo Gasto</h4>
                                                 <h4>
-                                                    @if($horasAtuais == "[]") 0 @else {{$horasAtuais}} @endif horas
+                                                    @if($horasAtuais == "[]") 0 @else {{$horasAtuais}} @endif
                                                 </h4>
                                                 <input type="text" class="form-control" id="horasAlterado" wire:model.defer="horasAlterado">
                                             </section>
@@ -67,9 +67,11 @@
                                                     <option value="">Selecione estado do pedido</option>
                                                     @if(isset($statesPedido))
                                                         @forelse ($statesPedido as $item)
-                                                        <option value="{{ $item->id }}">
-                                                                {{ $item->nome_estado }}
-                                                        </option>
+                                                            @if($item->id != 5 && $item->id != 6)
+                                                            <option value="{{ $item->id }}">
+                                                                    {{ $item->nome_estado }}
+                                                            </option>
+                                                            @endif
                                                         @empty
                                                         @endforelse
                                                     @endif

@@ -15,7 +15,7 @@
             <a class="nav-link {{ $techPanel }}" data-toggle="tab" href="#techPanel"><i
                     class="flaticon-381-calendar mr-2"></i> Agendamento</a>
         </li>
-        @if($taskToUpdate->estado == "2")
+        @if($taskToUpdate->estado == "2" || $taskToUpdate->estado == "5")
             <li class="nav-item">
                 <a class="nav-link {{ $intervencoesPanel }}" data-toggle="tab" href="#intervencoesPanel"><i
                         class="la la-file mr-2"></i> Intervenções</a>
@@ -94,6 +94,46 @@
                                     </div>
                                 </div>
 
+                                @if($this->selectedCustomer != "")
+                                <div class="container-fluid" style="position: relative;border:1px solid #49748fec;padding: 10px; margin-top:20px;border-radius:6px;">
+                                    <div class="inner-text" style="position: absolute;top: 0%;left: 50%;transform: translate(-50%, -50%);background:white;">
+                                        <h4>Local</h4>
+                                    </div>
+                                    <div class="row">
+                                        @php
+                                            if($customerLocations == null)
+                                            {
+                                                $contaCustomers = 0;
+                                            }
+                                            else {
+                                                $contaCustomers = count($customerLocations);
+                                            }
+                                           
+                                        @endphp
+
+                                            <div class="col-xl-12 col-xs-12" wire:key="select-field-model-version-{{ $iteration }}">
+                                                <section class="col-12" style="margin-top:20px;margin-left:0px;padding-left:0;" wire:ignore>
+                                                    <label>{{ __('Location') }}</label>
+                                                    <select name="selectedLocation" id="selectedLocation" >
+                                                        <option value="">{{ __('Please select location') }}</option>
+                                                        @if($customerLocations != null)
+                                                            @forelse ($customerLocations as $item)
+                                                                <option value="{{ $item->id }}" @if($contaCustomers == 1) selected @endif>
+                                                                    {{ $item->description }} | {{ $item->locationCounty->name }}
+                                                                </option>
+                                                            @empty
+                                                            @endforelse
+                                                        @endif
+                                                    </select>
+                                                </section> 
+                                            </div>
+                                     
+                                       
+                                    </div>
+                                    
+                                </div>
+                                @endif
+
 
                                 <div class="container-fluid" style="position: relative;border:1px solid #49748fec;padding: 10px;margin-top:20px;border-radius:6px;">
                                     <div class="inner-text" style="position: absolute;top: 0%;left: 50%;transform: translate(-50%, -50%);background:white;">
@@ -140,6 +180,20 @@
                                             rows="4">@if(isset($serviceDescription)) {{$serviceDescription}} @endif</textarea>
                                         </div>
                                     </div>
+
+            
+
+                                    @if($taskToUpdate->estado == "6" || $taskToUpdate->descricao_reabertura != null)
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <label>Descrição da Reclamação</label>
+                                                <textarea name="descriptionReabertura"
+                                                class="form-control descriptionReabertura" id="descriptionReabertura"
+                                                wire:model.defer="descriptionReabertura"
+                                                rows="4">@if(isset($descriptionReabertura)) {{$descriptionReabertura}} @endif</textarea>
+                                            </div>
+                                        </div>
+                                    @endif
 
                                 </div>
 
@@ -344,7 +398,7 @@
                                   
                                 </div>
 
-                                @if($this->selectedCustomer != "")
+                                {{-- @if($this->selectedCustomer != "")
                                     <div class="container-fluid" style="position: relative;border:1px solid #49748fec;padding: 10px; margin-top:20px;border-radius:6px;">
                                         <div class="inner-text" style="position: absolute;top: 0%;left: 50%;transform: translate(-50%, -50%);background:white;">
                                             <h4>Local</h4>
@@ -362,7 +416,7 @@
                                             </select>
                                         </div>
                                     </div>
-                                @endif
+                                @endif --}}
 
 
 
@@ -588,7 +642,7 @@
         </div>
     </div>
 
-    @if($taskToUpdate->estado == "2")
+    @if($taskToUpdate->estado == "2" || $taskToUpdate->estado == "5")
     <div class="tab-pane fade {{ $intervencoesPanel }}" id="intervencoesPanel" role="tabpanel">
         <div class="row">
             <div class="col-12">

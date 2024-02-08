@@ -27,7 +27,6 @@ class AlertEmailConclusionDay extends Mailable
     public function __construct($infoSendEmail)
     {
         $this->infoSendEmail = $infoSendEmail;
-
     }
 
     /**

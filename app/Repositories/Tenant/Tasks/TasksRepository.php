@@ -160,6 +160,7 @@ class TasksRepository implements TasksInterface
                 'tipo_pedido' => $values->selectedPedido,
                 'tipo_servico' => $values->selectedServico,
                 'descricao' => $values->serviceDescription,
+                'descricao_reabertura' => $values->descriptionReabertura,
                 'anexos' => json_encode($imagesPedido),
                 'location_id' => $values->selectedLocation,
                 'nr_serie' => $values->serieNumber,
@@ -371,6 +372,7 @@ class TasksRepository implements TasksInterface
             $customer = Customers::where('user_id',Auth::user()->id)->first();
 
             return Pedidos::where('customer_id',$customer->id)
+                ->where('estado','!=',5)
                 ->with('customer')
                 ->with('tipoEstado')
                 ->with('tech')
@@ -383,6 +385,7 @@ class TasksRepository implements TasksInterface
         {
             $teammember = TeamMember::where('user_id',Auth::user()->id)->first();
             return Pedidos::where('tech_id',$teammember->id)
+                ->where('estado','!=',5)
                 ->with('customer')
                 ->with('tipoEstado')
                 ->with('tech')
@@ -395,6 +398,7 @@ class TasksRepository implements TasksInterface
         {
             $teammember = TeamMember::where('user_id',Auth::user()->id)->first();
             return Pedidos::where('tech_id',$teammember->id)
+            ->where('estado','!=',5)
             ->with('customer')
             ->with('tipoEstado')
             ->with('tech')
@@ -412,7 +416,8 @@ class TasksRepository implements TasksInterface
         {
 
             $customer = Customers::where('user_id',Auth::user()->id)->first();
-            return Pedidos::where('customer_id',$customer->id)          
+            return Pedidos::where('customer_id',$customer->id)    
+            ->where('estado','!=',5)      
             ->with('customer')
             ->with('tipoEstado')
             ->with('tech')
@@ -425,6 +430,7 @@ class TasksRepository implements TasksInterface
         {
           $teammember = TeamMember::where('user_id',Auth::user()->id)->first();
            return Pedidos::where('tech_id',$teammember->id)
+                ->where('estado','!=',5)
                 ->with('customer')
                 ->with('tipoEstado')
                 ->with('tech')
@@ -435,6 +441,7 @@ class TasksRepository implements TasksInterface
         else {
             $teammember = TeamMember::where('user_id',Auth::user()->id)->first();
             return Pedidos::where('tech_id',$teammember->id)
+                ->where('estado','!=',5)
                 ->with('customer')
                 ->with('tipoEstado')
                 ->with('tech')
@@ -499,7 +506,7 @@ class TasksRepository implements TasksInterface
     {          
         if($client != 0)
         {
-            $tasks = Pedidos::whereHas('tech', function ($query) use ($tech)
+            $tasks = Pedidos::where('estado','!=',5)->whereHas('tech', function ($query) use ($tech)
             {
                if($tech != 0)
                {
@@ -574,7 +581,7 @@ class TasksRepository implements TasksInterface
         }
         else 
         {
-            $tasks = Pedidos::whereHas('tech', function ($query) use ($tech)
+            $tasks = Pedidos::where('estado','!=',5)->whereHas('tech', function ($query) use ($tech)
             {
                if($tech != 0)
                {
@@ -667,7 +674,7 @@ class TasksRepository implements TasksInterface
             $customer = Customers::where('user_id',Auth::user()->id)->first();
 
             return Pedidos::where('customer_id',$customer->id)
-                ->where('estado','!=',2)
+                ->where('estado','!=',5)
                 ->with('customer')
                 ->with('tipoEstado')
                 ->with('tech')
@@ -680,7 +687,7 @@ class TasksRepository implements TasksInterface
         {
             $teammember = TeamMember::where('user_id',Auth::user()->id)->first();
             return Pedidos::where('tech_id',$teammember->id)
-                ->where('estado','!=',2)
+                ->where('estado','!=',5)
                 ->with('customer')
                 ->with('tipoEstado')
                 ->with('tech')
@@ -693,7 +700,7 @@ class TasksRepository implements TasksInterface
         {
             $teammember = TeamMember::where('user_id',Auth::user()->id)->first();
             return Pedidos::where('tech_id',$teammember->id)
-            ->where('estado','!=',2)
+            ->where('estado','!=',5)
             ->with('customer')
             ->with('tipoEstado')
             ->with('tech')
@@ -712,7 +719,7 @@ class TasksRepository implements TasksInterface
 
             $customer = Customers::where('user_id',Auth::user()->id)->first();
             return Pedidos::where('customer_id',$customer->id)
-            ->where('estado','!=',2)          
+            ->where('estado','!=',5)          
             ->with('customer')
             ->with('tipoEstado')
             ->with('tech')
@@ -725,7 +732,7 @@ class TasksRepository implements TasksInterface
         {
           $teammember = TeamMember::where('user_id',Auth::user()->id)->first();
            return Pedidos::where('tech_id',$teammember->id)
-                ->where('estado','!=',2)
+                ->where('estado','!=',5)
                 ->with('customer')
                 ->with('tipoEstado')
                 ->with('tech')
@@ -736,7 +743,7 @@ class TasksRepository implements TasksInterface
         else {
             $teammember = TeamMember::where('user_id',Auth::user()->id)->first();
             return Pedidos::where('tech_id',$teammember->id)
-                ->where('estado','!=',2)
+                ->where('estado','!=',5)
                 ->with('customer')
                 ->with('tipoEstado')
                 ->with('tech')
@@ -749,7 +756,7 @@ class TasksRepository implements TasksInterface
     public function getIntervencao($task): Tasks
     {
         return Pedidos::where('id', $task->id)
-            ->where('estado','!=',2)
+            ->where('estado','!=',5)
             ->with('customer')
             ->with('tipoEstado')
             ->with('tech')
@@ -761,7 +768,7 @@ class TasksRepository implements TasksInterface
     public function getIntervencaoById($taskId): Tasks
     {
         return Pedidos::where('id', $taskId)
-            ->where('estado','!=',2)
+            ->where('estado','!=',5)
             ->with('customer')
             ->with('tipoEstado')
             ->with('tech')
@@ -774,7 +781,7 @@ class TasksRepository implements TasksInterface
     {          
         if($client != 0)
         {
-            $tasks = Pedidos::where('estado','!=',2)->whereHas('tech', function ($query) use ($tech)
+            $tasks = Pedidos::where('estado','!=',5)->whereHas('tech', function ($query) use ($tech)
             {
                if($tech != 0)
                {
@@ -849,7 +856,7 @@ class TasksRepository implements TasksInterface
         }
         else 
         {
-            $tasks = Pedidos::where('estado','!=',2)->whereHas('tech', function ($query) use ($tech)
+            $tasks = Pedidos::where('estado','!=',5)->whereHas('tech', function ($query) use ($tech)
             {
                if($tech != 0)
                {
@@ -937,10 +944,44 @@ class TasksRepository implements TasksInterface
                 $imagesPedido = [];
             }
 
+
+
             if($object->selectedEstado != "2")
             {
                 $object->horasAlterado = 0;
             }
+
+
+            $pedidoAtual = Pedidos::where('id',$object->task->id)->first();
+
+            if($pedidoAtual->estado != "1" && $object->selectedEstado != "1")
+            {
+                $intervencao = Intervencoes::create([
+                    "id_pedido" => $object->task->id,
+                    "material_ref_intervencao" => $object->referencia_intervencao,
+                    "material_descricao_intervencao" => $object->descricao_intervencao,
+                    "material_quantidade_intervencao" => $object->quantidade_intervencao,
+                    "estado_pedido" => $object->selectedEstado,
+                    "descricao_realizado" => $object->descricaoRealizado,
+                    "anexos" => json_encode($imagesPedido),
+                    "assinatura_tecnico" => $object->signatureTecnico,
+                    "assinatura_cliente" => $object->signatureClient,
+                    "horas_alterado" => $object->horasAlterado,
+                    "user_id" => Auth::user()->id,
+                    "data_inicio" => date('Y-m-d'),
+                    "hora_inicio" => date('H:i:s'),
+                    "hora_final" => date('H:i:s'),
+                    "data_final" => date('Y-m-d')
+                ]);
+
+                Pedidos::where('id',$object->task->id)->update([
+                    "estado" => $object->selectedEstado
+                ]);
+
+                return $intervencao;
+            }
+           
+
 
             if($object->selectedEstado == "1"){
                 $data_inicio = null;
@@ -965,36 +1006,99 @@ class TasksRepository implements TasksInterface
                     "hora_agendamento" => $hora_agendamento
                 ]);
 
+
+            }
+            
+            
+    
+
+            //CHECKAR SE JA EXISTE, CASO EXISTA ALTERA
+            $checkIntervencoes = Intervencoes::where('user_id',Auth::user()->id)->where('id_pedido',$object->task->id)->orderBy('id','desc')->first();
+
+
+            if(empty($checkIntervencoes))
+            {
+                $intervencao = Intervencoes::create([
+                    "id_pedido" => $object->task->id,
+                    "material_ref_intervencao" => $object->referencia_intervencao,
+                    "material_descricao_intervencao" => $object->descricao_intervencao,
+                    "material_quantidade_intervencao" => $object->quantidade_intervencao,
+                    "estado_pedido" => $object->selectedEstado,
+                    "descricao_realizado" => $object->descricaoRealizado,
+                    "anexos" => json_encode($imagesPedido),
+                    "assinatura_tecnico" => $object->signatureTecnico,
+                    "assinatura_cliente" => $object->signatureClient,
+                    "horas_alterado" => $object->horasAlterado,
+                    "user_id" => Auth::user()->id,
+                    "data_inicio" => date('Y-m-d'),
+                    "hora_inicio" => date('H:i:s')
+                ]);
             } 
-            else if($object->selectedEstado == "2"){
-                $data_inicio = null;
+            else 
+            {
+                if($checkIntervencoes->hora_final != "")
+                {
+                    $intervencao = Intervencoes::create([
+                        "id_pedido" => $object->task->id,
+                        "material_ref_intervencao" => $object->referencia_intervencao,
+                        "material_descricao_intervencao" => $object->descricao_intervencao,
+                        "material_quantidade_intervencao" => $object->quantidade_intervencao,
+                        "estado_pedido" => $object->selectedEstado,
+                        "descricao_realizado" => $object->descricaoRealizado,
+                        "anexos" => json_encode($imagesPedido),
+                        "assinatura_tecnico" => $object->signatureTecnico,
+                        "assinatura_cliente" => $object->signatureClient,
+                        "horas_alterado" => $object->horasAlterado,
+                        "user_id" => Auth::user()->id,
+                        "data_inicio" => date('Y-m-d'),
+                        "hora_inicio" => date('H:i:s')
+                    ]);
+                }
+                else if($checkIntervencoes->hora_final == null)
+                {
+                    $check = Intervencoes::where('id_pedido',$object->task->id)->where('user_id',Auth::user()->id)->orderBy('id','desc')->first();
+
+
+                    $intervencao = Intervencoes::where('id',$check->id)->update([
+                        "id_pedido" => $object->task->id,
+                        "material_ref_intervencao" => $object->referencia_intervencao,
+                        "material_descricao_intervencao" => $object->descricao_intervencao,
+                        "material_quantidade_intervencao" => $object->quantidade_intervencao,
+                        "estado_pedido" => $object->selectedEstado,
+                        "descricao_realizado" => $object->descricaoRealizado,
+                        "anexos" => json_encode($imagesPedido),
+                        "assinatura_tecnico" => $object->signatureTecnico,
+                        "assinatura_cliente" => $object->signatureClient,
+                        "horas_alterado" => $object->horasAlterado,
+                        "user_id" => Auth::user()->id,
+                        "hora_final" => date('H:i:s'),
+                        "data_final" => date('Y-m-d')
+                    ]);
+
+                    $intervencao = Intervencoes::where('id_pedido',$object->task->id)->first();
+                }
+            
             }
-            else {
-                $check = Intervencoes::where('user_id',Auth::user()->id)->where('id_pedido',$object->task->id)->latest()->first();
-                $data_inicio = date('Y-m-d H:i:s',strtotime($check->created_at));
-            }
 
-            $intervencao = Intervencoes::create([
-                "id_pedido" => $object->task->id,
-                "material_ref_intervencao" => $object->referencia_intervencao,
-                "material_descricao_intervencao" => $object->descricao_intervencao,
-                "material_quantidade_intervencao" => $object->quantidade_intervencao,
-                "estado_pedido" => $object->selectedEstado,
-                "descricao_realizado" => $object->descricaoRealizado,
-                "anexos" => json_encode($imagesPedido),
-                "assinatura_tecnico" => $object->signatureTecnico,
-                "assinatura_cliente" => $object->signatureClient,
-                "horas_alterado" => $object->horasAlterado,
-                "user_id" => Auth::user()->id,
-                "data_inicio" => $data_inicio
-            ]);
-
-
-            //ALTERAR PARA CONCLUÍDO CASO ESTEJA CONCLUÍDA
            
-            Pedidos::where('id',$object->task->id)->update([
-                "estado" => $object->selectedEstado
-            ]);
+
+
+           //SE FOR USER PRINCIPAL DESSE PEDIDO
+            $teammember = TeamMember::where('user_id',Auth::user()->id)->first();
+            $pedido = Pedidos::where('tech_id',$teammember->id)->where('id',$object->task->id)->first();
+
+            if(isset($pedido->tech_id))
+            {
+                if($teammember->id == $pedido->tech_id)
+                {
+                    Pedidos::where('id',$object->task->id)->update([
+                        "estado" => $object->selectedEstado
+                    ]);
+                }
+            }
+          
+           
+           
             
 
             return $intervencao;

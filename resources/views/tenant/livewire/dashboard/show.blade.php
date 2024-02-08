@@ -20,10 +20,8 @@ style="background:rgba(255, 255, 255, 0.8);z-index:999;position:fixed;top:0;left
        
       </div>
       <div class="modal-footer">
-        <!-- Fazer aqui   -->
-        <button type="button" id="abrirIntervencaoButton" class="btn btn-success" style="font-size: 12px;">Abrir Intervenção</button>
-        <button type="button" id="consultarPedidoButton" class="btn btn-danger" style="font-size: 12px;">Consultar Pedido</button> 
-        <button type="button" class="btn btn-secondary" data-dismiss="modal" style="font-size: 12px;">Fechar</button>
+        <button type='button' id='abrirIntervencaoButton' class='btn btn-success' style='font-size: 12px;'>Abrir Intervenção</button>
+        <button type='button' id='consultarPedidoButton' class='btn btn-danger' style='font-size: 12px;'>Consultar Pedido</button>
       </div>
     </div>
   </div>
@@ -48,7 +46,7 @@ style="background:rgba(255, 255, 255, 0.8);z-index:999;position:fixed;top:0;left
                       <tr>
                         <th>{{ __('Reference') }}</th>
                         <th>{{ __('Customer') }}</th>
-                        <th>{{ __('Descrição') }}</th>
+                        <th>Serviço</th>
                         <th>{{ __('Technical') }}</th>
                         <th>{{ __('Date') }}</th>
                         <th>{{ __('County') }}</th>
@@ -99,7 +97,7 @@ style="background:rgba(255, 255, 255, 0.8);z-index:999;position:fixed;top:0;left
                         <tr role="row" style="background:#326c91;">
                           <th class="sorting" style="color:white;" tabindex="0" aria-controls="data5" rowspan="1" colspan="1">{{ __('Technical') }}</th>
                           <th class="sorting" style="color:white;" tabindex="0" aria-controls="data5" rowspan="1" colspan="1">{{ __('Customer') }}</th>
-                          <th class="d-lg-inline-block sorting" style="color:white;" tabindex="0" aria-controls="data5" rowspan="1" colspan="1">{{ __('Task') }}</th>
+                          <th class="d-lg-inline-block sorting" style="color:white;" tabindex="0" aria-controls="data5" rowspan="1" colspan="1">Pedido</th>
                           <th class="sorting" style="color:white;" tabindex="0" aria-controls="data5" rowspan="1" colspan="1">{{ __('Time used') }}</th>
                           <th></th>
                         </tr> 
@@ -107,32 +105,42 @@ style="background:rgba(255, 255, 255, 0.8);z-index:999;position:fixed;top:0;left
                       <tbody>
                         @foreach($openTimes as $name => $time)
                           @if(!empty($time))
-                          <tr>
-                            <td>
-                            <h4>
-                                <a href="javascript:void(0)" class="text-black">{{ $name }}</a>
-                            </h4>
-                            </td>
-                            <td>{{ $time["cliente"] }}</td>
-                            <td>
-                              <i class="fa fa-tasks" aria-hidden="true"></i>
-                              {{ $time["reference"] }} <br>
-                            </td>
-                            <td>
-                              <i class="fa fa-calendar" aria-hidden="true"></i>
-                              {{ date('Y-m-d',strtotime($time["data"])) }} <br>
-                              <i class="fa fa-clock-o" aria-hidden="true"></i>
-                              {{ date('H:i:s',strtotime($time["data"])) }}
-                            </td>
-                         
-                          </tr>
+                            @foreach ($time as $des)
+                              <tr>
+                                <td>
+                                <h4>
+                                    <a href="javascript:void(0)" class="text-black">{{ $name }}</a>
+                                </h4>
+                                </td>
+                                <td>{{ $des["cliente"] }}</td>
+                                <td>
+                                  <i class="fa fa-tasks" aria-hidden="true"></i>
+                                  {{ $des["reference"] }} <br>
+                                </td>
+                                <td>
+                                  <i class="fa fa-calendar" aria-hidden="true"></i>
+                                  {{ date('Y-m-d',strtotime($des["data"])) }} <br>
+                                  <i class="fa fa-clock-o" aria-hidden="true"></i>
+                                  {{ date('H:i:s',strtotime($des["data"])) }}
+                                </td>
+                                <td>
+                                  <div class="d-flex">
+                                    @if (Auth::user()->type_user == 0 || (Auth::user()->id == $des["tecnico"]))
+                                      <a href="{{ route('tenant.tasks-reports.edit', $des["idpedido"])}}" class="btn btn-primary shadow  sharp mr-1">
+                                        <i class="fa fa-pencil"></i>
+                                      </a>
+                                    @endif
+                                  </div>
+                                </td>
+                              </tr>
+                            @endforeach
                           @endif
                         @endforeach
                       </tbody>
                   </table>
                 </div>
               </div>
-            </div>
+            </div> 
             
           {{-- @endif --}}
 
@@ -184,6 +192,7 @@ style="background:rgba(255, 255, 255, 0.8);z-index:999;position:fixed;top:0;left
 <script>
   jQuery( document ).ready(function() {
 
+
     window.addEventListener('interventionCheck',function(e){
 
         var nome_text = e.detail.parameter;
@@ -191,34 +200,64 @@ style="background:rgba(255, 255, 255, 0.8);z-index:999;position:fixed;top:0;left
         var idPedido = e.detail.idPedido;
         var cliente = e.detail.cliente;
 
-        if(nome_text == "fechar"){
-          jQuery("#abrirIntervencaoButton").text("Fechar Intervenção");
+        var textButtonConfirm = "";
+
+         if(nome_text == "fechar"){
+          textButtonConfirm = "Fechar Intervenção";
         } else {
-          jQuery("#abrirIntervencaoButton").text("Abrir Intervenção");
+          textButtonConfirm = "Abrir Intervenção";
         }
 
-          timer = setTimeout(function() {
-              if (!prevent) {
-                jQuery(".modal-body").empty();
+        var message = "Referência: "+referencia+ "<br>Cliente: "+cliente;
 
-                jQuery('#modalInfo').modal('show');
-                jQuery(".modal-body").append("Referência: "+referencia+ "<br>Cliente: "+cliente); 
+        swal.fire({
+                title: "Informação Pedido",
+                html: message,
+                confirmButtonText:textButtonConfirm,
+                showCancelButton: true,
+                cancelButtonText: "Consultar Pedido",
+                type: "info",
+                onOpen: function() {
 
-                
-                jQuery("body").on("click","#abrirIntervencaoButton",function(){
+                }
 
-                  window.location.href="tasks-reports/"+idPedido+"/edit";
-                });
+            }).then((result) => {  
 
-                jQuery("body").on("click","#consultarPedidoButton",function(){
+            
+              if(result.value == true) {
+                Livewire.emit("intervencaoCheck",e.detail.idPedido);
+              } else if(result.dismiss == "cancel") {
 
-                  window.location.href="tasks/"+idPedido+"/edit";
-                });
+                window.location.href="tasks/"+e.detail.idPedido+"/edit";
               }
-              prevent = false;
-          }, delay);
+                           
+                              
+            });
+
+
+       
+
+        // jQuery(".modal-body").empty();
+
+        // jQuery('#modalInfo').modal('show');
+        // jQuery(".modal-body").append("Referência: "+referencia+ "<br>Cliente: "+cliente); 
+
         
 
+        // jQuery("body").on("click","#abrirIntervencaoButton",function(){
+        
+        //   jQuery('#modalInfo').modal('hide');
+        //   console.log(idPedido);
+        //   Livewire.emit("intervencaoCheck",e.detail.idPedido);
+
+        // });
+
+        // jQuery("body").on("click","#consultarPedidoButton",function(){
+
+        //     window.location.href="tasks/"+e.detail.idPedido+"/edit";
+        // });
+
+        
     });
 
 

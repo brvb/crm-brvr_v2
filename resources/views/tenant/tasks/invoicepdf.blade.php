@@ -414,11 +414,11 @@
           <tr>
             <td>{{$impressao->descricaoRealizado}}</td>
             <td style="background: white;border-color:white;border:none;border-bottom:none;">
-            @if($impressao->horasAlterado != 0)
-            <td>{{$impressao->horasAlterado}}</td>
+            @if($impressao->horasAlterado != 0 && $impressao->horasAlterado != null)
+               <td>{{$impressao->horasAlterado}}</td>
             @else
-                      <td>{{$impressao->horasAtuais}}</td>
-                  @endif
+                <td>{{$impressao->horasAtuais}}</td>
+            @endif
           </tr>
         </tbody>
       </table>

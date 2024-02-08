@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Events\Tasks;
+namespace App\Events\Alerts;
 
-use App\Models\Tenant\Tasks;
-use App\Models\Tenant\Pedidos;
+use App\Models\Tenant\CustomerServices;
+use App\Models\User;
+use App\Models\Tenant\TeamMember;
 use App\Models\Tenant\TasksReports;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Queue\SerializesModels;
@@ -13,22 +14,20 @@ use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 
-class SendPDF
+class CheckFinalizadosEvent
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $valuesInfo;
-    public $pdf;
+    public $intervencoes;
 
     /**
      * Create a new event instance.
      *
      * @return void
      */
-    public function __construct(Pedidos $values, $pdf)
+    public function __construct(object $intervencao)
     {
-        $this->valuesInfo = $values;
-        $this->pdf = $pdf;
+        $this->intervencoes = $intervencao;
     }
 
 }

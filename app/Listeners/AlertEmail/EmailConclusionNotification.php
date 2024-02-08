@@ -2,12 +2,15 @@
 
 namespace App\Listeners\AlertEmail;
 
+use App\Models\User;
 use App\Models\Tenant\Tasks;
 use App\Models\Tenant\Config;
+use App\Models\Tenant\Pedidos;
 use App\Events\Alerts\AlertEvent;
 use App\Models\Tenant\TasksTimes;
 use App\Models\Tenant\TeamMember;
 use App\Mail\AlertEmail\AlertEmail;
+use App\Models\Tenant\Intervencoes;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\Tasks\TaskReportFinished;
 use App\Models\Tenant\CustomerServices;
@@ -18,7 +21,6 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use App\Models\Tenant\CustomerNotifications;
 use App\Mail\AlertEmail\AlertEmailConclusionDay;
 use App\Models\Tenant\TeamMember as TenantTeamMember;
-use App\Models\User;
 
 class EmailConclusionNotification
 {
@@ -49,71 +51,68 @@ class EmailConclusionNotification
                 
                foreach($teamMembers as $member)
                {
-                    $tasksRed = Tasks::
+                    $tasksRed = Pedidos::
                     where('tech_id',$member->id)
                     ->where('prioridade',1)
-                    ->whereHas('taskReports', function ($query) {
-                        $query->where('reportStatus','!=',2);
-                    })
-                    ->with('tasksTimes')
-                    ->with('prioridades')
+                    ->where('estado','!=',5)
+                    ->where('estado','!=',2)
+                    ->with('prioridadeStat')
+                    ->with('intervencoes')
                     ->with('servicesToDo')
-                    ->with('taskCustomer')
+                    ->with('customer')
                     ->with('tech')
                     ->orderBy('prioridade','ASC')
                     ->orderBy('tech_id','ASC')
-                    ->orderBy('preview_date','ASC')
+                    ->orderBy('created_at','ASC')
                     ->get();
     
                     /****************** */
     
                     /** Segundo Quadro **/
     
-                    $otherTasks = Tasks::where('tech_id',$member->id)
+                    $otherTasks = Pedidos::where('tech_id',$member->id)
                     ->where('prioridade','!=',1)
-                    ->whereHas('taskReports', function ($query) {
-                        $query->where('reportStatus','!=',2);
-                    })
-                    ->with('tasksTimes')
-                    ->with('prioridades')
+                    ->where('estado','!=',5)
+                    ->where('estado','!=',2)
+                    ->with('prioridadeStat')
+                    ->with('intervencoes')
                     ->with('servicesToDo')
-                    ->with('taskCustomer')
+                    ->with('customer')
                     ->with('tech')
                     ->orderBy('prioridade','ASC')
                     ->orderBy('tech_id','ASC')
-                    ->orderBy('preview_date','ASC')
+                    ->orderBy('created_at','ASC')
                     ->get();
     
                     /***************** */
     
                     /** Terceiro Quadro **/
     
-                    $finishedTasksToday = Tasks::
+                    $finishedTasksToday = Pedidos::
                     where('tech_id',$member->id)
-                    ->whereHas('taskReports', function ($query) {
-                        $query->where('reportStatus',2)->where('end_date',date('Y-m-d'));
-    
+                    ->where('estado',2)
+                    ->whereHas('intervencoes', function ($query) {
+                        $query->where('estado_pedido',2)->where('data_final',date('Y-m-d'));
                     })
-                    ->with('tasksTimes')
-                    ->with('prioridades')
+                    ->with('prioridadeStat')
+                    ->with('intervencoes')
                     ->with('servicesToDo')
-                    ->with('taskCustomer')
+                    ->with('customer')
                     ->with('tech')
                     ->orderBy('prioridade','ASC')
                     ->orderBy('tech_id','ASC')
-                    ->orderBy('preview_date','ASC')
+                    ->orderBy('created_at','ASC')
                     ->get();
     
                     /****************** */
 
                     /*** QUARTO QUADRO ***/
 
-                  $finishedTimesToday =  TasksTimes::whereHas('tasksReports')
-                  ->with('tasksReports')
-                  ->with('service')
-                  ->where('tech_id',$member->user_id)
-                  ->where('date_end',date('Y-m-d'))
-                  ->get();   
+                    $finishedTimesToday =  Intervencoes::
+                    where('user_id',$member->user_id)
+                    ->where('data_final',date('Y-m-d'))
+                    ->with('pedido')
+                    ->get();   
 
                   /******************** */
 
@@ -140,59 +139,57 @@ class EmailConclusionNotification
                 {
                     /** Primeiro Quadro **/
 
-                    $tasksRed = Tasks::
+                    $tasksRed = Pedidos::
                     where('tech_id',$dept->id)
                     ->where('prioridade',1)
-                    ->whereHas('taskReports', function ($query) {
-                        $query->where('reportStatus','!=',2);
-                    })
-                    ->with('tasksTimes')
-                    ->with('prioridades')
+                    ->where('estado','!=',5)
+                    ->where('estado','!=',2)
+                    ->with('prioridadeStat')
+                    ->with('intervencoes')
                     ->with('servicesToDo')
-                    ->with('taskCustomer')
+                    ->with('customer')
                     ->with('tech')
                     ->orderBy('prioridade','ASC')
                     ->orderBy('tech_id','ASC')
-                    ->orderBy('preview_date','ASC')
+                    ->orderBy('created_at','ASC')
                     ->get();
     
                     /****************** */
     
                     /** Segundo Quadro **/
     
-                    $otherTasks = Tasks::where('tech_id',$dept->id)
+                    $otherTasks = Pedidos::where('tech_id',$dept->id)
                     ->where('prioridade','!=',1)
-                    ->whereHas('taskReports', function ($query) {
-                        $query->where('reportStatus','!=',2);
-                    })
-                    ->with('tasksTimes')
-                    ->with('prioridades')
+                    ->where('estado','!=',5)
+                    ->where('estado','!=',2)
+                    ->with('prioridadeStat')
+                    ->with('intervencoes')
                     ->with('servicesToDo')
-                    ->with('taskCustomer')
+                    ->with('customer')
                     ->with('tech')
                     ->orderBy('prioridade','ASC')
                     ->orderBy('tech_id','ASC')
-                    ->orderBy('preview_date','ASC')
+                    ->orderBy('created_at','ASC')
                     ->get();
     
                     /***************** */
     
                     /** Terceiro Quadro **/
     
-                    $finishedTasksToday = Tasks::
+                    $finishedTasksToday = Pedidos::
                     where('tech_id',$dept->id)
-                    ->whereHas('taskReports', function ($query) {
-                        $query->where('reportStatus',2)->where('end_date',date('Y-m-d'));
-    
+                    ->where('estado',2)
+                    ->whereHas('intervencoes', function ($query) {
+                        $query->where('estado_pedido',2)->where('data_final',date('Y-m-d'));
                     })
-                    ->with('tasksTimes')
-                    ->with('prioridades')
+                    ->with('prioridadeStat')
+                    ->with('intervencoes')
                     ->with('servicesToDo')
-                    ->with('taskCustomer')
+                    ->with('customer')
                     ->with('tech')
                     ->orderBy('prioridade','ASC')
                     ->orderBy('tech_id','ASC')
-                    ->orderBy('preview_date','ASC')
+                    ->orderBy('created_at','ASC')
                     ->get();
     
                     /****************** */
@@ -200,11 +197,10 @@ class EmailConclusionNotification
 
                     /*** QUARTO QUADRO ***/
 
-                    $finishedTimesToday =  TasksTimes::whereHas('tasksReports')
-                    ->with('tasksReports')
-                    ->with('service')
-                    ->where('tech_id',$dept->user_id)
-                    ->where('date_end',date('Y-m-d'))
+                    $finishedTimesToday =  Intervencoes::
+                    where('user_id',$dept->user_id)
+                    ->where('data_final',date('Y-m-d'))
+                    ->with('pedido')
                     ->get();   
 
                     /******************** */
@@ -227,71 +223,69 @@ class EmailConclusionNotification
                  /** Primeiro Quadro **/
 
 
-                 $tasksRed = Tasks::
-                 where('tech_id',$usr["teamMember_id"])
-                 ->where('prioridade',1)
-                 ->whereHas('taskReports', function ($query) {
-                     $query->where('reportStatus','!=',2);
-                 })
-                 ->with('tasksTimes')
-                 ->with('prioridades')
-                 ->with('servicesToDo')
-                 ->with('taskCustomer')
-                 ->with('tech')
-                 ->orderBy('prioridade','ASC')
-                 ->orderBy('tech_id','ASC')
-                 ->orderBy('preview_date','ASC')
-                 ->get();
+                 $tasksRed = Pedidos::
+                    where('tech_id',$usr["teamMember_id"])
+                    ->where('prioridade',1)
+                    ->where('estado','!=',5)
+                    ->where('estado','!=',2)
+                    ->with('prioridadeStat')
+                    ->with('intervencoes')
+                    ->with('servicesToDo')
+                    ->with('customer')
+                    ->with('tech')
+                    ->orderBy('prioridade','ASC')
+                    ->orderBy('tech_id','ASC')
+                    ->orderBy('created_at','ASC')
+                    ->get();
  
                  /****************** */
  
                  /** Segundo Quadro **/
  
-                 $otherTasks = Tasks::where('tech_id',$usr["teamMember_id"])
-                 ->where('prioridade','!=',1)
-                 ->whereHas('taskReports', function ($query) {
-                     $query->where('reportStatus','!=',2);
-                 })
-                 ->with('tasksTimes')
-                 ->with('prioridades')
-                 ->with('servicesToDo')
-                 ->with('taskCustomer')
-                 ->with('tech')
-                 ->orderBy('prioridade','ASC')
-                 ->orderBy('tech_id','ASC')
-                 ->orderBy('preview_date','ASC')
-                 ->get();
+                $otherTasks = Pedidos::where('tech_id',$usr["teamMember_id"])
+                    ->where('prioridade','!=',1)
+                    ->where('estado','!=',5)
+                    ->where('estado','!=',2)
+                    ->with('prioridadeStat')
+                    ->with('intervencoes')
+                    ->with('servicesToDo')
+                    ->with('customer')
+                    ->with('tech')
+                    ->orderBy('prioridade','ASC')
+                    ->orderBy('tech_id','ASC')
+                    ->orderBy('created_at','ASC')
+                    ->get();
  
                  /***************** */
  
                  /** Terceiro Quadro **/
  
-                 $finishedTasksToday = Tasks::
-                 where('tech_id',$usr["teamMember_id"])
-                 ->whereHas('taskReports', function ($query) {
-                    $query->where('reportStatus',2)->where('end_date',date('Y-m-d'));
- 
-                 })
-                 ->with('tasksTimes')
-                 ->with('prioridades')
-                 ->with('servicesToDo')
-                 ->with('taskCustomer')
-                 ->with('tech')
-                 ->orderBy('prioridade','ASC')
-                 ->orderBy('tech_id','ASC')
-                 ->orderBy('preview_date','ASC')
-                 ->get();
+                 $finishedTasksToday = Pedidos::
+                    where('tech_id',$usr["teamMember_id"])
+                    ->where('estado',2)
+                    ->whereHas('intervencoes', function ($query) {
+                        $query->where('estado_pedido',2)->where('data_final',date('Y-m-d'));
+                    })
+                    ->with('prioridadeStat')
+                    ->with('intervencoes')
+                    ->with('servicesToDo')
+                    ->with('customer')
+                    ->with('tech')
+                    ->orderBy('prioridade','ASC')
+                    ->orderBy('tech_id','ASC')
+                    ->orderBy('created_at','ASC')
+                    ->get();
  
                  /****************** */
 
                   /*** QUARTO QUADRO ***/
 
-                  $finishedTimesToday =  TasksTimes::whereHas('tasksReports')
-                  ->with('tasksReports')
-                  ->with('service')
-                  ->where('tech_id',$teamMemberIndividual->user_id)
-                  ->where('date_end',date('Y-m-d'))
-                  ->get();   
+                $finishedTimesToday =  Intervencoes::
+                    where('user_id',$teamMemberIndividual->user_id)
+                    ->where('data_final',date('Y-m-d'))
+                    ->with('pedido')
+                    ->get();   
+
 
                   /******************** */
 

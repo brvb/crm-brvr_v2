@@ -25,6 +25,7 @@ class ShowTimes extends Component
     public ?object $taskInfo = NULL;
     public float $task_hours = 0;
     public string $horasAtuais = "";
+    public string $minutosAtuais = "";
 
     public string $serviceSelected = '';
     public string $date_inicial = '';
@@ -39,6 +40,10 @@ class ShowTimes extends Component
     public string $reference = '';
 
    
+
+    protected $listeners = ['mudarHora' => 'mudarHora'];
+
+
       /**
      * Livewire construct function
      *
@@ -62,6 +67,7 @@ class ShowTimes extends Component
 
         $somaDiferencasSegundos = 0;
 
+        $arrHours[$this->task] = [];
 
         foreach($horas as $hora)
         {
@@ -78,9 +84,10 @@ class ShowTimes extends Component
         //Converter segundos e horas e minutos
         $horas = floor($somaDiferencasSegundos / 3600);
         $minutos = floor(($somaDiferencasSegundos % 3600) / 60);
-        $horaFormatada = Carbon::createFromTime($horas, $minutos, 0)->format('H:i');
+        //$horaFormatada = Carbon::createFromTime($horas, $minutos, 0)->format('H:i');
 
-        $this->horasAtuais = $horaFormatada;
+        $this->horasAtuais = $horas;
+        $this->minutosAtuais = $minutos;
 
     }
 
@@ -128,17 +135,45 @@ class ShowTimes extends Component
     {
         $this->dispatchBrowserEvent("Intervencao",["anexos" => $anexos]);
     }
+
+    public function editarTempo($id)
+    {
+        $intervencao = Intervencoes::where('id',$id)->first();
+
+        $this->dispatchBrowserEvent("editarTempo",["id" => $id,"hora_final" => $intervencao->hora_final]);
+    }
+
+    public function removeTempo($id)
+    {
+        Intervencoes::where('id',$id)->delete();
+
+        $this->dispatchBrowserEvent("atualizarPagina");
+    }
      
+    public function mudarHora($id,$mudarHora)
+    {
+       
+        $intervencaoAtual = Intervencoes::where('id',$id)->first();
+       
+        Intervencoes::where('id',$id)->update([
+                "hora_final" => date("H:i:s",strtotime($mudarHora)),
+                "data_final" => date('Y-m-d')
+        ]);
+        
+        $this->dispatchBrowserEvent("atualizarPagina");
+    }
     
 
     public function render()
     {
-        $this->taskTimes =  Intervencoes::with('pedido')->where('estado_pedido',"!=","1")->where('id_pedido',$this->task)->paginate($this->perPage);
+        $this->taskTimes = Intervencoes::with('pedido')->where('id_pedido',$this->task)->paginate($this->perPage);
+
 
         return view('tenant.livewire.taskstimes.show-times',[
             'tasksTimes' => $this->taskTimes,
             'taskHours' => $this->task_hours,
             'totalHours' => $this->horasAtuais,
+            'totalMinutos' => $this->minutosAtuais,
             "taskInfo" => $this->taskInfo
         ]);
     }

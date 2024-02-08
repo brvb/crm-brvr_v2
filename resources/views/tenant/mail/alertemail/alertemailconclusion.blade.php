@@ -55,18 +55,17 @@
                                             <hr>
                                             <h4 style="text-align:center;">{{$infoSendEmail["nome"]}}</h4>
                                             <p style="text-align:center;">
-                                                TAREFAS URGENTES
+                                                PEDIDOS URGENTES
                                             </p>
                                             <table>
                                                 <thead>
                                                     <tr>
-                                                        <th>Nome Tarefa</th>
+                                                        <th>Referência</th>
                                                         <th>Nome Cliente</th>
                                                         <th>Resumo</th>
                                                         <th>Data Agendamento</th>
                                                         <th>Data Primeiro Tempo</th>
                                                         <th>Data ultima intervenção</th>
-                                                        <th>Tempo total gasto</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -77,15 +76,14 @@
                                                         $countForeach = 0;
                                                         foreach ($infoSendEmail["primeiro_quadro"] as $info )
                                                         {
-                                                           
-                                                            foreach($info->tasksTimes as $tsk)
+                                                            foreach($info->intervencoes as $tsk)
                                                             {
                                                                 $count++;
                                                                 if($count == 1)
                                                                 {
-                                                                    $firstTime[$countForeach] = $tsk->date_begin ."/". $tsk->hour_begin;
+                                                                    $firstTime[$countForeach] = $tsk->data_inicio ."/". $tsk->hora_inicio;
                                                                 }
-                                                                $lastTime[$countForeach] = $tsk->date_begin ."/". $tsk->hour_begin;
+                                                                $lastTime[$countForeach] = $tsk->data_inicio ."/". $tsk->hora_final;
                                                             }
                                                             $countForeach++;
                                                             $count = 0;
@@ -101,53 +99,33 @@
                                                    
                                                     <tr style="text-align:center;">                                                 
                                                         <td>{{$info->reference}}</td>
-                                                        <td>{{$info->taskCustomer->name}}</td>
-                                                        <td>{{$info->resume}}</td>
-                                                        <td>{{$info->preview_date}} / {{$info->preview_hour}}</td>
-                                                        @if(isset($info->tasksTimes))
-                                                         <td>@if(isset($firstTime[$countLOOP])) {{$firstTime[$countLOOP]}} @endif</td>
-                                                         <td>@if(isset($lastTime[$countLOOP])) {{$lastTime[$countLOOP]}} @endif</td>
-
-                                                         @php
-
-                                                          $countLOOP++;
-                                                            $arrayTimes = [];
-                                                            foreach($info->tasksTimes as $tsk)
-                                                            {
-                                                                if($tsk->date_end != "")
-                                                                {
-                                                                    array_push($arrayTimes,$tsk->total_hours);
-                                                                }
-                                                            }
-
-                                                           
-                                                            $minutes = 0; 
-
-                                                            foreach ($arrayTimes as $time) {
-                                                                list($hour, $minute) = explode(':', $time);
-                                                                $minutes += $hour * 60;
-                                                                $minutes += $minute;
-                                                            }
-                                                        
-                                                            $hours = floor($minutes / 60);
-                                                            $minutes -= $hours * 60;
-                                                        
+                                                        <td>{{$info->customer->name}}</td>
+                                                        <td>{{$info->descricao}}</td>
+                                                        <td>
+                                                            @if($info->data_agendamento == null)
+                                                               {{ date('Y-m-d',strtotime($info->created_at)) }} / {{date('H:i:s',strtotime($info->created_at))}}
+                                                            @else
+                                                               {{$info->data_agendamento}} / {{$info->hora_agendamento}}
+                                                            @endif
                                                             
-                                                            $totalHoursSpent = sprintf('%02d:%02d', $hours, $minutes);
-                                                            
-                                                         @endphp
-                                                        
-                                                         <td>{{$totalHoursSpent}}</td>
-
-                                                        @else
-                                                         <td>Não iniciou ainda</td>
-                                                         <td>Não iniciou ainda</td>
-                                                         <td>Não iniciou ainda</td>
-                                                        @endif
+                                                        </td>
+                                                        <td>
+                                                            @if(isset($firstTime[$countLOOP]))    
+                                                            {{$firstTime[$countLOOP]}}
+                                                            @endif
+                                                        </td>
+                                                        <td>
+                                                            @if(isset($lastTime[$countLOOP]))    
+                                                            {{$lastTime[$countLOOP]}}
+                                                            @endif
+                                                        </td>
                                                        
-                                                       
+                                
 
                                                     </tr>
+                                                    @php
+                                                        $countLOOP++;
+                                                    @endphp
                                                     @endforeach
                                                 </tbody>
                                               </table>
@@ -155,105 +133,76 @@
                                             <hr>
 
                                             <p style="text-align:center;">
-                                                OUTRAS TAREFAS
+                                                OUTROS PEDIDOS
                                             </p>
                                             <table>
                                                 <thead>
                                                     <tr>
-                                                        <th>Nome Tarefa</th>
+                                                        <th>Referência</th>
                                                         <th>Nome Cliente</th>
                                                         <th>Resumo</th>
                                                         <th>Data Agendamento</th>
                                                         <th>Data Primeiro Tempo</th>
                                                         <th>Data ultima intervenção</th>
-                                                        <th>Tempo total gasto</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
                                                     @php
-                                                        $lastTimeSegundo = [];
-                                                        $firstTimeSegundo = [];
+                                                        $lastTime = [];
+                                                        $firstTime = [];
                                                         $count = 0;
-                                                        $countForeachSegundo = 0;
-                                                    
+                                                        $countForeach = 0;
                                                         foreach ($infoSendEmail["segundo_quadro"] as $info )
                                                         {
-                
-                                                            foreach($info->tasksTimes as $tsk)
+                                                           
+                                                            foreach($info->intervencoes as $tsk)
                                                             {
                                                                 $count++;
                                                                 if($count == 1)
                                                                 {
-                                                                    $firstTimeSegundo[$countForeachSegundo] = $tsk->date_begin ."/". $tsk->hour_begin;
+                                                                    $firstTime[$countForeach] = $tsk->data_inicio ."/". $tsk->hora_inicio;
                                                                 }
-                                                                $lastTimeSegundo[$countForeachSegundo] = $tsk->date_begin ."/". $tsk->hour_begin;
+                                                                $lastTime[$countForeach] = $tsk->data_inicio ."/". $tsk->hora_final;
                                                             }
-                                                            $countForeachSegundo++;
+                                                            $countForeach++;
                                                             $count = 0;
                                                         }
-                                                   
+                                                       
                                                     @endphp
-                                                     @php
-                                                        $countLOOPSegundo = 0;
+
+                                                    @php
+                                                        $countLOOP = 0;
                                                     @endphp
+
                                                     @foreach ($infoSendEmail["segundo_quadro"] as $info )
                                                    
-                                                    <tr style="text-align:center;">
+                                                    <tr style="text-align:center;">                                                 
                                                         <td>{{$info->reference}}</td>
-                                                        <td>{{$info->taskCustomer->name}}</td>
-                                                        <td>{{$info->resume}}</td>
-                                                        <td>{{$info->preview_date}} / {{$info->preview_hour}}</td>
-                                                        @if(isset($info->tasksTimes))
-                                                         @if(isset($firstTimeSegundo[$countLOOPSegundo]))
-                                                            <td>{{$firstTimeSegundo[$countLOOPSegundo]}}</td>
-                                                         @else
-                                                           <td></td>
-                                                         @endif
-                                                         @if(isset($lastTimeSegundo[$countLOOPSegundo]))
-                                                            <td>{{$lastTimeSegundo[$countLOOPSegundo]}}</td>
-                                                         @else
-                                                            <td></td>
-                                                         @endif
-
-                                                         @php
-                                                          $countLOOPSegundo++;
-                                                            $arrayTimesSecond = [];
-                                                            foreach($info->tasksTimes as $tsk)
-                                                            {
-                                                                if($tsk->date_end != "")
-                                                                {
-                                                                    array_push($arrayTimesSecond,$tsk->total_hours);
-                                                                }
-                                                            }
-
-                                                           
-                                                            $minutes = 0; 
-
-                                                            foreach ($arrayTimesSecond as $time) {
-                                                                list($hour, $minute) = explode(':', $time);
-                                                                $minutes += $hour * 60;
-                                                                $minutes += $minute;
-                                                            }
-                                                        
-                                                            $hours = floor($minutes / 60);
-                                                            $minutes -= $hours * 60;
-                                                        
+                                                        <td>{{$info->customer->name}}</td>
+                                                        <td>{{$info->descricao}}</td>
+                                                        <td>
+                                                            @if($info->data_agendamento == null)
+                                                               {{ date('Y-m-d',strtotime($info->created_at)) }} / {{date('H:i:s',strtotime($info->created_at))}}
+                                                            @else
+                                                               {{$info->data_agendamento}} / {{$info->hora_agendamento}}
+                                                            @endif
                                                             
-                                                            $totalHoursSpentSecond = sprintf('%02d:%02d', $hours, $minutes);
-                                                            
-                                                         @endphp
-                                                        
-                                                         <td>{{$totalHoursSpentSecond}}</td>
-
-                                                        @else
-                                                         <td>Não iniciou ainda</td>
-                                                         <td>Não iniciou ainda</td>
-                                                         <td>Não iniciou ainda</td>
-                                                        @endif
-                                                       
-                                                       
-
+                                                        </td>
+                                                        <td>    
+                                                            @if(isset($firstTime[$countLOOP]))    
+                                                            {{$firstTime[$countLOOP]}}
+                                                            @endif
+                                                        </td>
+                                                        <td>
+                                                            @if(isset($lastTime[$countLOOP]))    
+                                                            {{$lastTime[$countLOOP]}}
+                                                            @endif
+                                                        </td>
+                                                                                                           
                                                     </tr>
+                                                    @php
+                                                    $countLOOP++;
+                                                @endphp
                                                     @endforeach
                                                 </tbody>
                                               </table>
@@ -261,54 +210,74 @@
                                               <hr>
 
                                               <p style="text-align:center;">
-                                                TAREFAS FECHADAS HOJE
+                                                PEDIDOS FECHADOS HOJE
                                             </p>
                                             {{-- <div class="row"> --}}
-
                                             
                                             <table>
                                                 <thead>
-                                                    <tr style="text-align:center;">
-                                                        <th>Nome Tarefa</th>
+                                                    <tr>
+                                                        <th>Referência</th>
                                                         <th>Nome Cliente</th>
-                                                        <th>Soma tempos gastos na tarefa</th>
+                                                        <th>Resumo</th>
+                                                        <th>Data Agendamento</th>
+                                                        <th>Data Primeiro Tempo</th>
+                                                        <th>Data ultima intervenção</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    @foreach ($infoSendEmail["terceiro_quadro"] as $info )
-                                                    <tr style="text-align:center;">
-                                                        <td>{{$info->reference}}</td>
-                                                        <td>{{$info->taskCustomer->name}}</td>
-
-                                                        @php
-                                                        $arrayTimesThird = [];
-                                                        foreach($info->tasksTimes as $tsk)
+                                                    @php
+                                                        $lastTime = [];
+                                                        $firstTime = [];
+                                                        $count = 0;
+                                                        $countForeach = 0;
+                                                        foreach ($infoSendEmail["terceiro_quadro"] as $info )
                                                         {
-                                                            if($tsk->date_end != "")
+                                                           
+                                                            foreach($info->intervencoes as $tsk)
                                                             {
-                                                                array_push($arrayTimesThird,$tsk->total_hours);
+                                                                $count++;
+                                                                if($count == 1)
+                                                                {
+                                                                    $firstTime[$countForeach] = $tsk->data_inicio ."/". $tsk->hora_inicio;
+                                                                }
+                                                                $lastTime[$countForeach] = $tsk->data_inicio ."/". $tsk->hora_final;
                                                             }
+                                                            $countForeach++;
+                                                            $count = 0;
                                                         }
-
                                                        
-                                                        $minutes = 0; 
+                                                    @endphp
 
-                                                        foreach ($arrayTimesThird as $time) {
-                                                            list($hour, $minute) = explode(':', $time);
-                                                            $minutes += $hour * 60;
-                                                            $minutes += $minute;
-                                                        }
-                                                    
-                                                        $hours = floor($minutes / 60);
-                                                        $minutes -= $hours * 60;
-                                                    
-                                                        
-                                                        $totalHoursSpentThird = sprintf('%02d:%02d', $hours, $minutes);
-                                                        
-                                                     @endphp
-                                                    
-                                                     <td>{{$totalHoursSpentThird}}</td>
+                                                    @php
+                                                        $countLOOP = 0;
+                                                    @endphp
+
+                                                    @foreach ($infoSendEmail["terceiro_quadro"] as $info )
+                                                   
+                                                    <tr style="text-align:center;">                                                 
+                                                        <td>{{$info->reference}}</td>
+                                                        <td>{{$info->customer->name}}</td>
+                                                        <td>{{$info->descricao}}</td>
+                                                        <td>
+                                                            @if($info->data_agendamento == null)
+                                                               {{ date('Y-m-d',strtotime($info->created_at)) }} / {{date('H:i:s',strtotime($info->created_at))}}
+                                                            @else
+                                                               {{$info->data_agendamento}} / {{$info->hora_agendamento}}
+                                                            @endif
+                                                            
+                                                        </td>
+                                                        <td>    
+                                                            {{$firstTime[$countLOOP]}}
+                                                        </td>
+                                                        <td>
+                                                            {{$lastTime[$countLOOP]}}
+                                                        </td>
+                                                                                                           
                                                     </tr>
+                                                    @php
+                                                    $countLOOP++;
+                                                @endphp
                                                     @endforeach
                                                 </tbody>
                                               </table>
@@ -317,7 +286,7 @@
                                             <hr>
 
                                             <p style="text-align:center;">
-                                                TEMPOS FECHADOS HOJE
+                                                INTERVENÇÕES DE HOJE
                                             </p>
                                             {{-- <div class="row"> --}}
 
@@ -326,7 +295,6 @@
                                                 <thead>
                                                     <tr style="text-align:center;">
                                                         <th>Referência</th>
-                                                        <th>Estado da Tarefa</th>
                                                         <th>Técnico</th>
                                                         <th>Data</th>
                                                         <th>Hora</th>
@@ -338,26 +306,36 @@
                                                 <tbody>
                                                     @foreach ($infoSendEmail["quarto_quadro"] as $item )
                                                     <tr style="text-align:center;">
-                                                        <td>{{ $item->tasksReports->reference }}</td>
-                                                        <td>
-                                                            @if($item->tasksReports->reportStatus == 0)
-                                                            {{__("Agendada")}}
-                                                            @elseif($item->tasksReports->reportStatus == 1)
-                                                            {{__("Em Curso")}}
-                                                            @else
-                                                                {{__("Finalizada")}}
-                                                            @endif
-                                                        </td>                                                      
+                                                        <td>{{ $item->pedido->reference }}</td>
+                                                                                         
                                                     
                                                         @php
-                                                            $user = \App\Models\User::where('id',$item->tech_id)->first();
+                                                            $user = \App\Models\User::where('id',$item->user_id)->first();
                                                         @endphp
                                                         <td>{{ $user->name}}</td>
-                                                        <td>{{ $item->date_begin }}</td>
-                                                        <td>{{ $item->hour_begin }} / {{ $item->hour_end }}</td>
-                                                        <td>{{ $item->tasksReports->taskCustomer->short_name }}</td>
-                                                        <td>{{ $item->descricao }}</td>
-                                                        <td>{{ global_hours_format($item->total_hours) }}</td>
+                                                        <td>{{ $item->data_inicio }}</td>
+                                                        <td>{{ $item->hora_inicio }} / {{ $item->hora_final }}</td>
+                                                        <td>
+                                                            @php
+                                                                $customer = \App\Models\Tenant\Customers::where('id',$item->pedido->customer_id)->first();
+                                                            @endphp
+                                                            {{ $customer->name }}
+                                                        </td>
+                                                        <td>{{ $item->descricao_realizado }}</td>
+                                                        <td>
+                                                            @if($item->hora_final != null)
+                                                            @php
+                                                                $dataHoraInicial = \Carbon\Carbon::parse("2024-02-01 $item->hora_inicio");
+                                                                $dataHoraFinal = \Carbon\Carbon::parse("2024-02-01 $item->hora_final");
+
+                                                                $diferencaDeTempo = $dataHoraFinal->diff($dataHoraInicial);
+                                                            @endphp
+                                                             {{$diferencaDeTempo->h}}horas : {{$diferencaDeTempo->i}}minutos
+                                                             @else
+                                                             00:00
+                                                            @endif
+                                                           
+                                                        </td>
                                                     </tr>
                                                     @endforeach
                                                 </tbody>

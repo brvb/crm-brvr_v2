@@ -57,7 +57,9 @@
                                     <select class="form-control" name="selectType" id="selectType" wire:model="typeTask">
                                         <option value="0">{{__("All")}}</option>
                                         @foreach ($estadosPedido as $estado)
+                                           @if($estado->id != 5)
                                             <option value={{$estado->id}}>{{$estado->nome_estado}}</option> 
+                                           @endif
                                         @endforeach
                                     </select>
                                 </div>
@@ -222,6 +224,11 @@
                                                     
                                                     <a class="dropdown-item" href="{{ route('tenant.tasks.edit', $item->id) }}">Atualizar Pedido</a>
                                                     
+                                                    <a class="dropdown-item" wire:click="enviaStatus({{$item->id}})">Enviar Status</a>
+
+                                                    @if($item->tipoEstado->id == 2)
+                                                        <a class="dropdown-item" wire:click="reabrirPedido({{$item->id}})">Reabrir pedido</a>
+                                                    @endif
 
                                                 
                                                     <button class="dropdown-item btn-sweet-alert" data-type="form"
@@ -268,6 +275,14 @@
 
     window.addEventListener('contentChanged', event => {
         restartObjects();
+    });
+
+    window.addEventListener('fireSwal',function(e){
+        swal.fire({
+                    title: e.detail.title,
+                    html: e.detail.message,
+                    type: e.detail.status,
+        });
     });
 
    

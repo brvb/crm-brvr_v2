@@ -66,7 +66,6 @@ class TasksReportsController extends Controller
     public function edit(int $taskReport): View
     {
         $task = $this->tasksInterface->getTaskById($taskReport);
-        
         return view('tenant.tasksreports.edit', [
             'themeAction' => 'form_element_data_table',
             'task' => $task,

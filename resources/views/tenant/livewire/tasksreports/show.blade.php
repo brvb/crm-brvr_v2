@@ -52,7 +52,9 @@
                                     <select class="form-control" name="selectType" id="selectType" wire:model="typeTask">
                                         <option value="0">{{__("All")}}</option>
                                         @foreach ($estadosPedido as $estado)
+                                          @if($estado->id != 5)
                                             <option value={{$estado->id}}>{{$estado->nome_estado}}</option> 
+                                          @endif
                                         @endforeach
                                     </select>
                                 </div>

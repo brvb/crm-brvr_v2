@@ -28,12 +28,16 @@ if (! function_exists('getCustomerConfig')) {
       
         foreach($get_hours as $hour)
         {
-            if($hour->total_hours == "")
+            foreach($hour as $hr)
             {
-                $hour->total_hours = "00:00";
+                if($hour == "")
+                {
+                    $hour = "00:00";
+                }
+                $explodedTime = array_map('intval',explode(':',$hr));
+                $sum_minutes += $explodedTime[0]*60+$explodedTime[1];
             }
-            $explodedTime = array_map('intval',explode(':',$hour->total_hours));
-            $sum_minutes += $explodedTime[0]*60+$explodedTime[1];
+           
         }
             
 
@@ -50,6 +54,47 @@ if (! function_exists('getCustomerConfig')) {
         else {
             $minutesCheck = floor($sum_minutes % 60);
         }
+
+
+        $sumTime = $hoursCheck. ':' .$minutesCheck;
+
+
+        return global_hours_format($sumTime);
+    }
+
+    function global_hours_sum_individual($get_hours)
+    {
+        $sum_minutes = 0;
+
+      
+        foreach($get_hours as $hour)
+        {
+           
+            if($hour == "")
+            {
+                $hour = "00:00";
+            }
+            $explodedTime = array_map('intval',explode(':',$hour));
+            $sum_minutes += $explodedTime[0]*60+$explodedTime[1];
+            
+           
+        }
+            
+
+        if(strlen(floor($sum_minutes/60)) == 1){
+            $hoursCheck = '0'.floor($sum_minutes/60);
+        }
+        else {
+            $hoursCheck = floor($sum_minutes/60);
+        }
+
+        if(strlen(floor($sum_minutes % 60)) == 1){
+            $minutesCheck = '0'.floor($sum_minutes % 60);
+        }
+        else {
+            $minutesCheck = floor($sum_minutes % 60);
+        }
+
 
         $sumTime = $hoursCheck. ':' .$minutesCheck;
 

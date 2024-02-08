@@ -53,9 +53,12 @@ class EditTasks extends Component
     public string $selectedServico = '';
     public ?object $servicosList = NULL;
     public string $serviceDescription = '';
+    public string $descriptionReabertura = '';
     public ?object $membersList = NULL;
     public ?object $customerLocations = NULL;
     public string $selectedLocation = '';
+
+    public $iteration = 0;
     
     public string $dateCreate = '';
     public string $timeCreate = '';
@@ -154,6 +157,12 @@ class EditTasks extends Component
 
         $this->serviceDescription = $taskToUpdate->descricao;
 
+        if($taskToUpdate->descricao_reabertura != null)
+        {
+            $this->descriptionReabertura = $taskToUpdate->descricao_reabertura;
+        }
+        
+
         $this->customerLocations = CustomerLocations::where('customer_id',$taskToUpdate->customer_id)->get();
         $this->selectedLocation = $taskToUpdate->location_id;
 
@@ -242,6 +251,29 @@ class EditTasks extends Component
     {
         $this->countEquipamentoUploaded++;
         $this->arrayEquipamentoUploaded[$this->countEquipamentoUploaded] = [$this->uploadFileEquipamento];
+    }
+
+    public function updatedSelectedCustomer(): Void
+    {
+        // if(!empty($this->customer))
+        // {
+        //     $this->dispatchBrowserEvent('refreshPage');
+        // }
+
+        $customer = Customers::where('id', $this->selectedCustomer)->with('customerCounty')->with('customerDistrict')->first();
+        $this->customerLocations = CustomerLocations::where('customer_id', $this->selectedCustomer)->with('locationCounty')->get();
+
+        
+        $this->dispatchBrowserEvent('contentChanged');
+        $this->iteration++;
+        
+
+        if($customer->customerCounty == null)
+        {
+             $this->dispatchBrowserEvent('swal', ['title' => __('Services'), 'message' => __('You need to select a county for this customer'), 'status'=>'error','function' => 'client']);
+             $this->skipRender();
+        }
+ 
     }
 
     

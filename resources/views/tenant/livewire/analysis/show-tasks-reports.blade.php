@@ -201,11 +201,12 @@
                                     
                                     $somaDiferencasSegundos = 0;
 
+                                
 
                                     foreach($intervencoes as $hora)
                                     {
-                                        $data1 = Carbon\Carbon::parse($hora->data_inicio);
-                                        $data2 = Carbon\Carbon::parse($hora->created_at);
+                                        $data1 = Carbon\Carbon::parse($hora->hora_inicio);
+                                        $data2 = Carbon\Carbon::parse($hora->hora_final);
                                         $result = $data1->diff($data2);
                                     
                                         $data = Carbon\Carbon::createFromTime($result->h, $result->i, $result->s);
@@ -215,15 +216,17 @@
 
 
                                     //Converter segundos e horas e minutos
-                                    $horas = floor($somaDiferencasSegundos / 3600);
-                                    $minutos = floor(($somaDiferencasSegundos % 3600) / 60);
-                                    $horaFormatada = Carbon\Carbon::createFromTime($horas, $minutos, 0)->format('H:i');
+                                    //$horas = floor($somaDiferencasSegundos / 3600);
+                                    //$minutos = floor(($somaDiferencasSegundos % 3600) / 60);
 
-                                    $horasAtuais = $horaFormatada;
+                                  
+                                    //$horaFormatada = Carbon\Carbon::createFromTime($horas, $minutos, 0);
+
+                               
 
                                 @endphp
 
-                                    {{$horasAtuais}}
+                                    {{gmdate('H:i', $somaDiferencasSegundos)}}
                             </td>
                            
                             <td>
