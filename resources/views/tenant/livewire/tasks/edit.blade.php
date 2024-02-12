@@ -177,7 +177,7 @@
                                             <textarea name="serviceDescription"
                                             class="form-control serviceDesription" id="serviceDescription"
                                             wire:model.defer="serviceDescription"
-                                            rows="4">@if(isset($serviceDescription)) {{$serviceDescription}} @endif</textarea>
+                                            rows="4" @if($taskToUpdate->estado == "6") disabled @endif>@if(isset($serviceDescription)) {{$serviceDescription}} @endif</textarea>
                                         </div>
                                     </div>
 
