@@ -227,7 +227,7 @@
                                                     <a class="dropdown-item" wire:click="enviaStatus({{$item->id}})">Enviar Status</a>
 
                                                     @if($item->tipoEstado->id == 2)
-                                                        <a class="dropdown-item" wire:click="reabrirPedido({{$item->id}})">Reabrir pedido</a>
+                                                        <a class="dropdown-item" wire:click="reabrirPedido({{$item->id}})">Reclamação Pedido</a>
                                                     @endif
 
                                                 

@@ -55,13 +55,32 @@
                                             <hr>
                                             <div class="table" style="font-family: Avenir, Helvetica, sans-serif; box-sizing: border-box;">
                                                 <p style="font-family:Arial, Helvetica, sans-serif; color: #74787e;">
-                                                    <b>Informamos que o pedido {{$task->reference}} encontra-se {{$task->tipoEstado->nome_estado}}!</b>
+                                                    <b>O seu pedido #{{$task->reference}} está {{strtoupper($task->tipoEstado->nome_estado)}}!</b>
                                                 </p>
+                                                <p>
+                                                    {{date('Y-m-d H:i:s')}}
+                                                </p>
+                                                <p>
+                                                    <span>Cliente: {{$task->customer->name}}</span><br>
+                                                    <span>Telefone: {{$task->customer->contact}}</span><br>
+                                                    <span>Email: {{$task->customer->email}}</span><br>
+                                                    <span>Técnico: {{$task->tech->name}}</span><br>
+                                                    <span>Assunto: {{$task->descricao}}</span><br>
+                                                </p>
+                                                <p>Qualquer informação que ache oportuna, peço que nos avise.</p>
                                             </div>
                                             <hr>
                                                 <p style="font-family: Avenir, Helvetica, sans-serif; box-sizing: border-box; color: #74787e; font-size: 16px; line-height: 1.5em; margin-top: 0; text-align: left;">
                                                     {{__("Compliments")}},<br>
-                                                    <strong>{{ $company_name }}</strong>
+                                                    <strong>{{$task->tech->name}}</strong>
+                                                </p>
+                                                <p>
+                                                    <small>
+                                                    Não responda a este email. <br>
+                                                    Para qualquer esclarecimento use os contactos habituais:<br>
+                                                            Telefone: 252646260 Email: suporte@brvr.pt <br>
+                                                            Identifique sempre o número de pedido.
+                                                    </small>
                                                 </p>
                                         </td>
                                     </tr>

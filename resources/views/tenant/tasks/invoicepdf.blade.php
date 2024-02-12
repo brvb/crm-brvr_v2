@@ -424,9 +424,10 @@
       </table>
       <hr class="barra-final" style="margin-top:2rem"></hr>
 
-      <p style="font-size: 1.2rem;font-weight:bold;">Assinaturas :</p>
-      <div class="table-flex">
+     
        @if($impressao->signatureTecnico != null)
+       <p style="font-size: 1.2rem;font-weight:bold;">Assinaturas :</p>
+       <div class="table-flex">
        <table class="invoice-table last" style="border-bottom:none;">
         <thead>
           <tr>
@@ -449,8 +450,9 @@
           </tr>
         </tbody>
       </table>
+    </div>
       @endif
-      </div>
+     
      
       
      

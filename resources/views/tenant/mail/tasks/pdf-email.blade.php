@@ -49,20 +49,34 @@
                                             <p style="text-align:center;padding-bottom:6px;">
                                                 <img src="{{ global_tenancy_asset('/app/public/images/logo/' . $logotipo) }}" alt="{{ $company_name }}">
                                             </p>
-                                            <h1 style="font-family: Avenir, Helvetica, sans-serif; box-sizing: border-box; color: #2F3133; font-size: 19px; font-weight: bold; margin-top: 0; text-align: left;">
-                                                {{ $subject }}
-                                            </h1>
+                                          
                                             <hr>
                                             <div class="table" style="font-family: Avenir, Helvetica, sans-serif; box-sizing: border-box;">
                                                    
                                                    <p style="font-family:Arial, Helvetica, sans-serif; color: #74787e;">
-                                                       <b>Foi finalizado o pedido, segue em anexo as informações</b>
+                                                      O seu pedido #{{$task->reference}} foi <b>CONCLUÍDA</b> {{$dataInicio}} - {{$horaInicio}}
+                                                   </p>
+                                                   @if($pdf == "1")
+                                                        <p style="font-family:Arial, Helvetica, sans-serif; color: #74787e;">
+                                                            Segue em ANEXO o relatório. <b>Verifique se está em conformidade.</b>
+                                                        </p>
+                                                   @endif
+                                                   <p style="font-family:Arial, Helvetica, sans-serif; color: #74787e;">
+                                                      A ausência de qualquer resposta/reclamação em 48h, o seu pedido será encerrado passando para o departamento administrativo/financeiro.
                                                    </p>
                                             </div>
                                             <hr>
                                                 <p style="font-family: Avenir, Helvetica, sans-serif; box-sizing: border-box; color: #74787e; font-size: 16px; line-height: 1.5em; margin-top: 0; text-align: left;">
                                                     {{__("Compliments")}},<br>
-                                                    <strong>{{ $company_name }}</strong>
+                                                    <strong>{{ $task->tech->name }}</strong>
+                                                </p>
+                                                <p>
+                                                    <small>
+                                                    Não responda a este email. <br>
+                                                    Para qualquer esclarecimento use os contactos habituais:<br>
+                                                            Telefone: 252646260 Email: suporte@brvr.pt <br>
+                                                            Identifique sempre o número de pedido.
+                                                    </small>
                                                 </p>
                                         </td>
                                     </tr>

@@ -140,10 +140,10 @@
                                                 
                                                 <section class="col-xl-12 col-xs-12 form-group" style="display:{{$signaturePad}}">
                                                     <div class="container text-center" style="margin-top: 0">
-                                                        <div class="form-check custom-checkbox checkbox-success">
+                                                        {{-- <div class="form-check custom-checkbox checkbox-success">
                                                             <input type="checkbox" name="email_pdf" class="form-check-input" id="customCheckBox3" wire:model.defer="email_pdf">
                                                             <label class="form-check-label" for="customCheckBox3">Enviar PDF ao cliente</label>
-                                                        </div>
+                                                        </div> --}}
                                                     </div>
                                                 </section>
 

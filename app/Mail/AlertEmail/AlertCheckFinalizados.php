@@ -2,6 +2,7 @@
 
 namespace App\Mail\AlertEmail;
 
+use App\Models\Tenant\Config;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Support\Facades\URL;
@@ -18,15 +19,18 @@ class AlertCheckFinalizados extends Mailable
     use Queueable, SerializesModels;
 
     public $pedido;
+    public $intervencao;
+
 
     /**
      * Create a new message instance.
      *
      * @return void
      */
-    public function __construct($pedido)
+    public function __construct($pedido, $intervencao)
     {
         $this->pedido = $pedido;
+        $this->intervencao = $intervencao;
     }
 
     /**
@@ -37,14 +41,12 @@ class AlertCheckFinalizados extends Mailable
     public function envelope()
     {
           //env('MAIL_USERNAME')
-        $subject = 'Tarefa #' . $this->pedido->reference . ' finalizada com sucesso.';
+        $subject = 'O pedido #' . $this->pedido->reference . ' FOI ENCERRADO';
         return new Envelope(
             subject: $subject,
             from: new Address("fsdfss@gmail.com", session('sender_name')),
         );
     }
-
-  
 
     /**
      * Get the message content definition.
@@ -70,21 +72,19 @@ class AlertCheckFinalizados extends Mailable
 
     public function build()
     {
-        $subject = 'Tarefa #' . $this->pedido->reference . ' finalizada com sucesso.';
-
+        $config = Config::first();
         $email = $this
             ->view('tenant.mail.alertemail.alertemailfinalizados',[
-                "subject" => $subject,
-                "task" => $this->pedido,
-                "company_name" => session('company_name'),
-                "vat" => session('vat'),
-                "contact" => session('contact'),
-                "email" => session('email'),
-                "address" => session('address'),
-                "logotipo" => session('logotipo'),
-            ]);
 
-            
+                "task" => $this->pedido,
+                "intervencoes" => $this->intervencao,
+                "company_name" => $config->company_name,
+                "vat" => $config->vat,
+                "contact" =>$config->contact,
+                "email" => $config->email,
+                "address" =>$config->address,
+                "logotipo" => $config->logotipo,
+            ]);
 
         return $email;
     }

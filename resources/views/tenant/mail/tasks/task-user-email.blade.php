@@ -49,23 +49,41 @@
                                             <p style="text-align:center;padding-bottom:6px;">
                                                 <img src="{{ global_tenancy_asset('/app/public/images/logo/' . $logotipo) }}" alt="{{ $company_name }}">
                                             </p>
-                                            <h1 style="font-family: Avenir, Helvetica, sans-serif; box-sizing: border-box; color: #2F3133; font-size: 19px; font-weight: bold; margin-top: 0; text-align: left;">
-                                                {{ $subject }}
-                                            </h1>
                                             <hr>
+                                        
                                             <div class="table" style="font-family: Avenir, Helvetica, sans-serif; box-sizing: border-box;">
-                                                  Novo Pedido {{$task->reference}} criado com sucesso!
+                                                <p>O seu pedido #{{$pedido->reference}} foi registado com sucesso em {{ $pedido->created_at->format('d/m/Y H:i') }}</p>
+                                                
+                                                <p>Cliente:{{$pedido->customer->name}}</p>
+                                                <p>Telefone:{{$pedido->customer->contact}}</p>
+                                                <p>Email:{{$pedido->customer->email}}</p>
+                                                <p>Técnico designado:{{$pedido->tech->name}}</p>
+                                                <p>Assunto:{{$pedido->descricao}}</p>
+                                                
+                                                
                                             </div>
+                                            
+                                            <p>Brevemente daremos notícias,</p>
                                             <hr>
-                                                <p style="font-family: Avenir, Helvetica, sans-serif; box-sizing: border-box; color: #74787e; font-size: 16px; line-height: 1.5em; margin-top: 0; text-align: left;">
-                                                    {{__("Compliments")}},<br>
-                                                    <strong>{{ $company_name }}</strong>
-                                                </p>
+                                            <p style="font-family: Avenir, Helvetica, sans-serif; box-sizing: border-box; color: #74787e; font-size: 16px; line-height: 1.5em; margin-top: 0; text-align: left;">
+                                                {{__("Compliments")}},<br>
+                                                <strong>{{ $company_name }}</strong>
+                                            </p>
+                                            <p>
+                                                <small>
+                                                    Não responda a este email. <br>
+                                                    Para qualquer esclarecimento use os contactos habituais:<br>
+                                                    Telefone: 252646260 Email: suporte@brvr.pt <br>
+                                                    Identifique sempre o número de pedido.
+                                                </small>
+                                            </p>
+                                        </td>
                                         </td>
                                     </tr>
                                 </table>
                             </td>
                         </tr>
+                        
                         <tr>
                             <td style="font-family: Avenir, Helvetica, sans-serif; box-sizing: border-box;">
                                 <table class="footer" align="center" width="570" cellpadding="0" cellspacing="0"

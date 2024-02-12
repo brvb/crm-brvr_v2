@@ -38,7 +38,7 @@ class AlertReaberturaPedido extends Mailable
     {
           //env('MAIL_USERNAME')
 
-        $subject = 'Reabertura do pedido #' . $this->pedido->reference . '';
+        $subject = 'RECLAMAÇÃO do pedido #' . $this->pedido->reference . '';
         return new Envelope(
             subject: $subject,
             from: new Address("fsdfss@gmail.com", session('sender_name')),

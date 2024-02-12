@@ -378,11 +378,6 @@ class EditTasksReports extends Component
         }
 
 
-        //Converter segundos e horas e minutos
-        // $horas = floor($somaDiferencasSegundos / 3600);
-        // $minutos = floor(($somaDiferencasSegundos % 3600) / 60);
-        // $horaFormatada = Carbon::createFromTime($horas, $minutos, 0)->format('H:i');
-
         $this->horasAtuais = global_hours_sum($arrHours);
 
          
@@ -397,7 +392,7 @@ class EditTasksReports extends Component
         if($this->selectedEstado == "2")
         {
 
-            $pedido = Pedidos::where('id',$this->task->id)->first();
+            $pedido = Pedidos::where('id',$this->task->id)->with('tech')->with('intervencoes')->with('customer')->first();
             event(new SendPDF($pedido, $this->email_pdf));
         }
 

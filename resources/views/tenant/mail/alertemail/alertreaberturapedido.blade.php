@@ -49,19 +49,34 @@
                                             <p style="text-align:center;padding-bottom:6px;">
                                                 <img src="{{ global_tenancy_asset('/app/public/images/logo/' . $logotipo) }}" alt="{{ $company_name }}">
                                             </p>
-                                            <h1 style="font-family: Avenir, Helvetica, sans-serif; box-sizing: border-box; color: #2F3133; font-size: 19px; font-weight: bold; margin-top: 0; text-align: left;">
-                                                {{ $subject }}
-                                            </h1>
-                                            <hr>
+                                           <hr>
+                                            
                                             <div class="table" style="font-family: Avenir, Helvetica, sans-serif; box-sizing: border-box;">
                                                 <p style="font-family:Arial, Helvetica, sans-serif; color: #74787e;">
-                                                    <b>Informamos que o pedido {{$task->reference}} foi reaberto!</b>
+                                                    <b>O pedido #{{$task->reference}} sofreu uma RECLAMAÇÃO! {{date('Y-m-d H:i:s')}}</b>
                                                 </p>
+                                        
+                                                <p>
+                                                    <span>Cliente: {{$task->customer->name}}</span><br>
+                                                    <span>Telefone: {{$task->customer->contact}}</span><br>
+                                                    <span>Email: {{$task->customer->email}}</span><br>
+                                                    <span>Técnico: {{$task->tech->name}}</span><br>
+                                                    <span>Assunto: {{$task->descricao}}</span><br>
+                                                </p>
+                                                <p>A sua reclamação será tratada com a maior brevidade possível.</p>
                                             </div>
                                             <hr>
                                                 <p style="font-family: Avenir, Helvetica, sans-serif; box-sizing: border-box; color: #74787e; font-size: 16px; line-height: 1.5em; margin-top: 0; text-align: left;">
                                                     {{__("Compliments")}},<br>
                                                     <strong>{{ $company_name }}</strong>
+                                                </p>
+                                                <p>
+                                                    <small>
+                                                    Não responda a este email. <br>
+                                                    Para qualquer esclarecimento use os contactos habituais:<br>
+                                                            Telefone: 252646260 Email: suporte@brvr.pt <br>
+                                                            Identifique sempre o número de pedido.
+                                                    </small>
                                                 </p>
                                         </td>
                                     </tr>

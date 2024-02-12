@@ -196,6 +196,14 @@ class AddTasks extends Component
         $this->customer = Customers::where('id', $this->selectedCustomer)->with('customerCounty')->with('customerDistrict')->first();
         $this->customerLocations = CustomerLocations::where('customer_id', $this->selectedCustomer)->with('locationCounty')->get();
 
+        $conta = count($this->customerLocations);
+
+        if($conta == 1)
+        {
+            $this->selectedLocation = $this->customerLocations[0]->id;
+        }else {
+            $this->selectedLocation = "";
+        }
         
         $this->dispatchBrowserEvent('contentChanged');
         $this->iteration++;
@@ -485,14 +493,14 @@ class AddTasks extends Component
 
         //TENTAR VER ESTA SITUAÇÃO PARA ENVIAR PARA O DASHBOARD
         $usr = User::where('id',Auth::user()->id)->first();
-        $pedido = Pedidos::where('id',$this->pedido_id)->first();
+        $pedido = Pedidos::where('id',$this->pedido_id->id)->first();
+        $teamM = TeamMember::where('id',$pedido->tech_id)->first();
 
-        $usrRecebido = User::where('id',$pedido->user_id)->first();
 
-        if(Auth::user()->id == $pedido->user_id){
+        if(Auth::user()->id == $teamM->user_id){
             $message = "adicionou um pedido novo";
         } else {
-            $message = "adicionou um pedido novo para ".$usrRecebido->name."";
+            $message = "adicionou um pedido novo para ".$teamM->name."";
         }
 
         

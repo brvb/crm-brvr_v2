@@ -16,17 +16,17 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 class TaskReceiveEmailUser extends Mailable
 {
     use Queueable, SerializesModels;
-
-    public $task;
+    public $pedido;
 
     /**
      * Create a new message instance.
      *
      * @return void
      */
-    public function __construct($task)
+    public function __construct($pedido)
     {
-        $this->task = $task->taskCustomer;
+        $this->pedido = $pedido;
+
     }
 
     /**
@@ -37,14 +37,14 @@ class TaskReceiveEmailUser extends Mailable
     public function envelope()
     {
           //env('MAIL_USERNAME')
-        $subject = 'Pedido #' . $this->task["reference"] . ' criado com sucesso.';
+
+        $subject = 'ABERTURA do pedido #' . $this->pedido->reference;
+        
         return new Envelope(
             subject: $subject,
             from: new Address("fsdfsd@gmail.com", session('sender_name')),
         );
     }
-
-  
 
     /**
      * Get the message content definition.
@@ -68,15 +68,14 @@ class TaskReceiveEmailUser extends Mailable
     //     return [];
     // }
 
+
     public function build()
     {
-        $subject = 'Pedido #' . $this->task["reference"] . ' criado com sucesso.';
 
        
         $email = $this
             ->view('tenant.mail.tasks.task-user-email',[
-                "subject" => $subject,
-                "task" => $this->task,
+                "pedido" => $this->pedido,
                 "company_name" => session('company_name'),
                 "vat" => session('vat'),
                 "contact" => session('contact'),
@@ -84,10 +83,6 @@ class TaskReceiveEmailUser extends Mailable
                 "address" => session('address'),
                 "logotipo" => session('logotipo'),
             ]);
-
-          
-            
-
         return $email;
     }
 

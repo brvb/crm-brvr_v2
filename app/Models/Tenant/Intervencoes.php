@@ -11,7 +11,7 @@ class Intervencoes extends Model
     use HasFactory;
 
     protected $table = 'intervencoes';
-    protected $fillable = ['id_pedido', 'material_ref_intervencao','material_descricao_intervencao','material_quantidade_intervencao','estado_pedido','descricao_realizado','anexos','assinatura_tecnico','assinatura_cliente','horas_alterado','user_id','data_inicio','hora_inicio','hora_final','data_final','created_at','updated_at'];
+    protected $fillable = ['id','id_pedido', 'material_ref_intervencao','material_descricao_intervencao','material_quantidade_intervencao','estado_pedido','descricao_realizado','anexos','assinatura_tecnico','assinatura_cliente','horas_alterado','user_id','data_inicio','hora_inicio','hora_final','data_final','created_at','updated_at'];
 
 
     public function pedido()

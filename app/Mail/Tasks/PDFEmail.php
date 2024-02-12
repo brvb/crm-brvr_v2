@@ -2,6 +2,7 @@
 
 namespace App\Mail\Tasks;
 
+use App\Models\Tenant\TeamMember;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Support\Facades\URL;
@@ -40,7 +41,7 @@ class PDFEmail extends Mailable
     {
        
         //env('MAIL_USERNAME')
-        $subject = 'Pedido #' . $this->info->reference . ' pedido finalizado com sucesso.';
+        $subject = 'Pedido #' . $this->info->reference . ' foi CONCLUÍDA.';
 
         return new Envelope(
             subject: $subject,
@@ -76,12 +77,27 @@ class PDFEmail extends Mailable
     {
 
                
-        $subject = 'Pedido #' . $this->info->reference . ' pedido finalizado com sucesso.';
+        $subject = 'Pedido #' . $this->info->reference . ' foi CONCLUÍDA.';
+
+        $tM = TeamMember::where('id',$this->info->tech_id)->first();
+
+        foreach($this->info->intervencoes as $int)
+        {
+            if(($int->estado_pedido == 2) && ($int->user_id == $tM->user_id))
+            {
+                $dataInicio = $int->data_inicio;
+                $horaInicio = $int->hora_inicio;
+            }
+        }
+
 
         $email = $this
             ->view('tenant.mail.tasks.pdf-email',[
                 "subject" => $subject,
                 "task" => $this->info,
+                "dataInicio" => $dataInicio,
+                "horaInicio" => $horaInicio,
+                "pdf" => $this->pdf,
                 "company_name" => session('company_name'),
                 "vat" => session('vat'),
                 "contact" => session('contact'),
@@ -92,11 +108,10 @@ class PDFEmail extends Mailable
 
 
 
-         if($this->pdf == "1")
-         {
-            \Log::info("entrou aqui");
+        //  if($this->pdf == "1")
+        //  {
             $email->attach(global_tenancy_asset('/app/public/pedidos/pdfs_conclusao/'.$this->info->reference.'/'.$this->info->reference.'.pdf'));
-         }
+        //  }
         //Junta o PDF 
         
 

@@ -284,7 +284,7 @@ class ShowTasks extends Component
 
     public function enviaStatus($id)
     {
-        $pedido = Pedidos::where('id',$id)->with('tipoEstado')->first();
+        $pedido = Pedidos::where('id',$id)->with('tipoEstado')->with('customer')->with('tech')->first();
 
         event(new SendStatusEvent($pedido));
 

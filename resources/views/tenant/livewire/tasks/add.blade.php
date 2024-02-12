@@ -641,7 +641,9 @@
 
              restartObjects();
 
-             jQuery('#selectedLocation').select2();
+             jQuery("#selectedLocation").on("select2:select", function (e) {
+               @this.set('selectedLocation', jQuery('#selectedLocation').find(':selected').val());
+            });
 
         });
 

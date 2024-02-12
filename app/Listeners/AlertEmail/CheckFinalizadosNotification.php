@@ -21,6 +21,7 @@ use App\Models\Tenant\CustomerNotifications;
 use App\Mail\AlertEmail\AlertEmailConclusionDay;
 use App\Models\Tenant\Customers;
 use App\Models\Tenant\Pedidos;
+use App\Models\Tenant\Intervencoes;
 use App\Models\Tenant\TeamMember as TenantTeamMember;
 use App\Models\User;
 
@@ -50,16 +51,13 @@ class CheckFinalizadosNotification
 
         $pedido = Pedidos::where('id',$eventIntervencoes->id_pedido)->first();
 
+        $intervencao = Intervencoes::where('id_pedido', $pedido->id)->Get();
+
         $customer = Customers::where('id',$pedido->customer_id)->first();
 
-        Mail::to($user->email)->queue(new AlertCheckFinalizados(($pedido)));
+        Mail::to($user->email)->queue(new AlertCheckFinalizados($pedido, $intervencao));
 
-        Mail::to($customer->email)->queue(new AlertCheckFinalizados(($pedido)));
+        Mail::to($customer->email)->queue(new AlertCheckFinalizados($pedido, $intervencao));
 
-           
-              
-    
-
-              
     }
 }

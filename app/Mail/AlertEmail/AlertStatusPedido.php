@@ -38,7 +38,7 @@ class AlertStatusPedido extends Mailable
     {
           //env('MAIL_USERNAME')
 
-        $subject = 'Estado do pedido #' . $this->pedido->reference . '';
+        $subject = 'AGENDAMENTO do pedido #' . $this->pedido->reference . '';
         return new Envelope(
             subject: $subject,
             from: new Address("fsdfss@gmail.com", session('sender_name')),
@@ -71,7 +71,9 @@ class AlertStatusPedido extends Mailable
 
     public function build()
     {
-        $subject = 'Estado do pedido #' . $this->pedido->reference . '';
+        $subject = 'AGENDAMENTO do pedido #' . $this->pedido->reference . '';
+
+
 
         $email = $this
             ->view('tenant.mail.alertemail.alertstatuspedido',[

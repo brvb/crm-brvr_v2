@@ -44,4 +44,7 @@
             </script>
         @endif
     </div>
+
+
+
 </x-tenant-layout>

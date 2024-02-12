@@ -37,6 +37,8 @@ class Kernel extends ConsoleKernel
 
         $schedule->command('alerts:check_finalizados')->dailyAt('07:00');
 
+        // $schedule->command('alerts:check_finalizados')->everyMinute();
+
     }
 
     /**

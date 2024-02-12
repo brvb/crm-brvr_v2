@@ -263,6 +263,14 @@ class EditTasks extends Component
         $customer = Customers::where('id', $this->selectedCustomer)->with('customerCounty')->with('customerDistrict')->first();
         $this->customerLocations = CustomerLocations::where('customer_id', $this->selectedCustomer)->with('locationCounty')->get();
 
+        $conta = count($this->customerLocations);
+
+        if($conta == 1)
+        {
+            $this->selectedLocation = $this->customerLocations[0]->id;
+        }else {
+            $this->selectedLocation = "";
+        }
         
         $this->dispatchBrowserEvent('contentChanged');
         $this->iteration++;
@@ -404,7 +412,7 @@ class EditTasks extends Component
        
 
         return redirect()->route('tenant.tasks.index')
-            ->with('message', "Pedido criado com sucesso!")
+            ->with('message', "Pedido editado com sucesso!")
             ->with('status', 'info');
      
 
