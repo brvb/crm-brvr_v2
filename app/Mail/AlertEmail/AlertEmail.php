@@ -18,16 +18,19 @@ class AlertEmail extends Mailable
     use Queueable, SerializesModels;
 
     public $customerService;
+    public $cliente;
+    public $clienteLocation;
 
     /**
      * Create a new message instance.
      *
      * @return void
      */
-    public function __construct($customerService)
+    public function __construct($customerService,$cliente,$clienteLocation)
     {
         $this->customerService = $customerService;
-
+        $this->cliente = $cliente;
+        $this->clienteLocation = $clienteLocation;
     }
 
     /**
@@ -72,6 +75,8 @@ class AlertEmail extends Mailable
     public function build()
     {
         $customerService = $this->customerService;
+
+
 
         $config = Config::first();
        

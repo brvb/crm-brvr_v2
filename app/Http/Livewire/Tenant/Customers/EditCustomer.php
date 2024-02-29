@@ -20,16 +20,10 @@ class EditCustomer extends Component
     private string $account_manager;
     private object $allAccountManager;
 
-    public function mount($customer, $account_manager): void
+    public function mount($customer): void
     {
         $this->customer = $customer;
-        $this->account_manager = $account_manager;
-        // $this->districts = tenancy()->central(function () {
-        //     return Districts::all();
-        // });
-        // $this->counties = tenancy()->central(function () {
-        //     return Counties::where('district_id', $this->customer->district)->get();
-        // });
+        
         $this->allAccountManager = TeamMember::all();
         $this->districts = Districts::all();
         $this->counties = Counties::all();
@@ -43,10 +37,8 @@ class EditCustomer extends Component
             'customer' => $this->customer,
             'districts' => $this->districts,
             'counties' => $this->counties,
-            'district' => $this->customer->district,
-            'county' => $this->customer->county,
-            'account_manager' => $this->account_manager,
-            'allAccountManagers' => $this->allAccountManager
+            'district' => $this->customer->state,
+            'county' => $this->customer->city,
         ]);
     }
 

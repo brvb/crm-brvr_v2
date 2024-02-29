@@ -55,10 +55,13 @@ style="background:rgba(255, 255, 255, 0.8);z-index:999;position:fixed;top:0;left
                   </thead>
                   <tbody>
                     @foreach ($pedidos as $item)
-                      <tr id="pedidoLinha" data-id="{{$item->id}}" data-cliente="{{str_replace(' ', '£', $item->customer->short_name)}}" data-referencia="{{$item->reference}}" style="background:{{ $item->prioridadeStat->cor }};">
+                       @php
+                         $cust = $customersRepository->getSpecificCustomerInfo($item->customer_id);
+                       @endphp
+                      <tr id="pedidoLinha" data-id="{{$item->id}}" data-cliente="{{str_replace(' ', '£', $cust->customers->name)}}" data-referencia="{{$item->reference}}" style="background:{{ $item->prioridadeStat->cor }};">
               
                         <td>{{ $item->reference }}</td>
-                        <td>{{ $item->customer->short_name }}</td>
+                        <td>{{ $cust->customers->name }}</td>
                         <td>{{ $item->servicesToDo->name}}</td>
                         <td>{{ $item->tech->name }}</td>
                         <td>
@@ -71,7 +74,12 @@ style="background:rgba(255, 255, 255, 0.8);z-index:999;position:fixed;top:0;left
                             <i class="fa fa-clock-o" aria-hidden="true"></i> {{ date('H:i',strtotime($item->created_at)) }}
                             @endif
                         </td>
-                        <td>{{ $item->location->locationCounty->name }}</td>
+                        <td>
+                          @php
+                              $locations = $customerLocationInterface->getSpecificLocationInfo($item->location_id); 
+                          @endphp
+                          {{ $locations->locations->address }}
+                        </td>
 
                         <td>{{ $item->tipoEstado->nome_estado }}</td>
                       </tr> 
@@ -201,11 +209,17 @@ style="background:rgba(255, 255, 255, 0.8);z-index:999;position:fixed;top:0;left
         var cliente = e.detail.cliente;
 
         var textButtonConfirm = "";
+        var showConfirmButtonResponse;
 
          if(nome_text == "fechar"){
           textButtonConfirm = "Fechar Intervenção";
-        } else {
+          showConfirmButtonResponse = true;
+        } else if(nome_text == "abrir") {
           textButtonConfirm = "Abrir Intervenção";
+          showConfirmButtonResponse = true;
+        } else {
+          textButtonConfirm = "";
+          showConfirmButtonResponse = false;
         }
 
         var message = "Referência: "+referencia+ "<br>Cliente: "+cliente;
@@ -215,6 +229,7 @@ style="background:rgba(255, 255, 255, 0.8);z-index:999;position:fixed;top:0;left
                 html: message,
                 confirmButtonText:textButtonConfirm,
                 showCancelButton: true,
+                showConfirmButton: showConfirmButtonResponse,
                 cancelButtonText: "Consultar Pedido",
                 type: "info",
                 onOpen: function() {

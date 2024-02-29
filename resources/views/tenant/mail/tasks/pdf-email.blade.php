@@ -54,13 +54,13 @@
                                             <div class="table" style="font-family: Avenir, Helvetica, sans-serif; box-sizing: border-box;">
                                                    
                                                    <p style="font-family:Arial, Helvetica, sans-serif; color: #74787e;">
-                                                      O seu pedido #{{$task->reference}} foi <b>CONCLUÍDA</b> {{$dataInicio}} - {{$horaInicio}}
+                                                      <b>O seu pedido {{strtolower($task->tipoPedido->name)}} #{{$task->reference}} foi <b>CONCLUÍDA</b> {{$dataInicio}} - {{$horaInicio}}</b>
                                                    </p>
-                                                   @if($pdf == "1")
+                                                   {{-- @if($pdf == "1") --}}
                                                         <p style="font-family:Arial, Helvetica, sans-serif; color: #74787e;">
-                                                            Segue em ANEXO o relatório. <b>Verifique se está em conformidade.</b>
+                                                            Segue em <label style="text-decoration: underline;">ANEXO</label> o relatório. <b style="text-decoration: underline;">Verifique se está em conformidade.</b>
                                                         </p>
-                                                   @endif
+                                                   {{-- @endif --}}
                                                    <p style="font-family:Arial, Helvetica, sans-serif; color: #74787e;">
                                                       A ausência de qualquer resposta/reclamação em 48h, o seu pedido será encerrado passando para o departamento administrativo/financeiro.
                                                    </p>
@@ -72,7 +72,7 @@
                                                 </p>
                                                 <p>
                                                     <small>
-                                                    Não responda a este email. <br>
+                                                        <label style="font-size: 1.5em;font-weight: bold;text-decoration: underline;">Não responda a este email. </label><br>
                                                     Para qualquer esclarecimento use os contactos habituais:<br>
                                                             Telefone: 252646260 Email: suporte@brvr.pt <br>
                                                             Identifique sempre o número de pedido.

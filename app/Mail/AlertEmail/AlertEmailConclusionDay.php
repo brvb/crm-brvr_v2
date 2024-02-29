@@ -12,21 +12,24 @@ use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use App\Interfaces\Tenant\Customers\CustomersInterface;
 
 class AlertEmailConclusionDay extends Mailable
 {
     use Queueable, SerializesModels;
 
     public $infoSendEmail;
+    protected object $customersRepository;
 
     /**
      * Create a new message instance.
      *
      * @return void
      */
-    public function __construct($infoSendEmail)
+    public function __construct($infoSendEmail,$customersRepository)
     {
         $this->infoSendEmail = $infoSendEmail;
+        $this->customersRepository = $customersRepository;
     }
 
     /**
@@ -82,6 +85,7 @@ class AlertEmailConclusionDay extends Mailable
             ->view('tenant.mail.alertemail.alertemailconclusion',[
                 "subject" => $subject,
                 "infoSendEmail" => $infoSendEmail,
+                "customersRepository" => $this->customersRepository,
                 "company_name" => $config->company_name,
                 "vat" => $config->vat,
                 "contact" => $config->contact,

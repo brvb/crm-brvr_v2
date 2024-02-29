@@ -1,4 +1,4 @@
-<x-tenant-layout title="Listagem de Tarefas" :themeAction="$themeAction" :status="$status" :message="$message">
+<x-tenant-layout title="Listagem de Pedidos" :themeAction="$themeAction" :status="$status" :message="$message">
 {{-- :status="$status" :message="$message"> --}}
     <div class="container-fluid">
         <div class="row">

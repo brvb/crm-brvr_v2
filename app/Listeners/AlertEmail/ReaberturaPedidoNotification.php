@@ -2,6 +2,7 @@
 
 namespace App\Listeners\AlertEmail;
 
+use Exception;
 use App\Models\User;
 use App\Models\Tenant\Tasks;
 use App\Models\Tenant\Config;
@@ -17,16 +18,17 @@ use App\Mail\Tasks\TaskReportFinished;
 use App\Models\Tenant\CustomerServices;
 use Illuminate\Queue\InteractsWithQueue;
 use App\Events\TeamMember\TeamMemberEvent;
+use App\Mail\AlertEmail\AlertStatusPedido;
 use App\Events\Alerts\EmailConclusionEvent;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use App\Events\Alerts\CheckFinalizadosEvent;
 use App\Events\Alerts\ReaberturaPedidoEvent;
 use App\Models\Tenant\CustomerNotifications;
 use App\Mail\AlertEmail\AlertCheckFinalizados;
-use App\Mail\AlertEmail\AlertEmailConclusionDay;
 use App\Mail\AlertEmail\AlertReaberturaPedido;
-use App\Mail\AlertEmail\AlertStatusPedido;
+use App\Mail\AlertEmail\AlertEmailConclusionDay;
 use App\Models\Tenant\TeamMember as TenantTeamMember;
+use App\Interfaces\Tenant\Customers\CustomersInterface;
 
 class ReaberturaPedidoNotification
 {
@@ -35,9 +37,11 @@ class ReaberturaPedidoNotification
      *
      * @return void
      */
-    public function __construct()
+    protected object $customerRepository;
+
+    public function __construct(CustomersInterface $interfaceCustomers)
     {
-        //
+        $this->customerRepository = $interfaceCustomers;
     }
 
    
@@ -47,9 +51,27 @@ class ReaberturaPedidoNotification
         $eventPedido = $sendStatusEvent->pedido;
 
        
-        $customer = Customers::where('id',$eventPedido->customer_id)->first();
+        //$customer = Customers::where('id',$eventPedido->customer_id)->first();
 
-        Mail::to($customer->email)->queue(new AlertReaberturaPedido(($eventPedido)));
+        $customer = $this->customerRepository->getSpecificCustomerInfo($eventPedido->customer_id);
+
+        try {
+            if($customer->customers->email != "")
+            {
+                $array = explode(";",$customer->customers->email);
+        
+                foreach($array as $email)
+                {
+                    //CLIENTE
+                    Mail::to($email)->queue(new AlertReaberturaPedido($eventPedido,$customer));
+                }
+            }
+            
+        }
+        catch (Exception $e) {
+            echo $e;
+        }
+        
 
            
               

@@ -2,11 +2,12 @@
 
 namespace App\Repositories\Tenant\CustomerServices;
 
-use App\Http\Livewire\Tenant\Common\Location;
+use stdClass;
 use App\Models\Tenant\Customers;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use App\Models\Tenant\CustomerServices;
+use App\Http\Livewire\Tenant\Common\Location;
 use Illuminate\Pagination\LengthAwarePaginator;
 use App\Http\Requests\Tenant\Customers\CustomersFormRequest;
 use App\Interfaces\Tenant\CustomerServices\CustomerServicesInterface;
@@ -14,6 +15,34 @@ use App\Http\Requests\Tenant\CustomersServices\CustomersServicesFormRequest;
 
 class CustomerServicesRepository implements CustomerServicesInterface
 {
+
+    public function getAllCustomers(): object
+    {
+        $curl = curl_init();
+
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => 'http://172.19.20.4:24004/customers/customers',
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'GET',
+            CURLOPT_HTTPHEADER => array(
+                'Content-Type: application/json'
+            ),
+        ));
+
+        $response = curl_exec($curl);
+
+        curl_close($curl);
+
+        $response_decoded = json_decode($response);
+
+        return $response_decoded; 
+    }
+
     public function getAllCustomerServices($perPage): LengthAwarePaginator
     {
         $customerServices = CustomerServices::with('customer')
@@ -38,12 +67,10 @@ class CustomerServicesRepository implements CustomerServicesInterface
 
     public function getSearchedCustomerServiceWithFilterCostumer($customerId,$searchString,$perPage): LengthAwarePaginator
     {
-        $customerServices = CustomerServices::where('customer_id', $customerId)->whereHas('customer', function ($query) use($searchString) {
-            $query->where('name', 'like', '%' . $searchString . '%');
-        })
+        $customerServices = CustomerServices::where('customer_id', $customerId)
         ->with('service')
-        ->with('customerLocation')
-        ->paginate($perPage);
+        ->paginate($perPage);      
+
 
         return $customerServices;
     }

@@ -8,10 +8,11 @@ use Livewire\Component;
 use App\Events\ChatMessage;
 use Livewire\WithPagination;
 use App\Models\Tenant\TasksTimes;
+use App\Models\Tenant\Intervencoes;
 use App\Models\Tenant\TasksReports;
 use Illuminate\Support\Facades\Auth;
+use App\Interfaces\Tenant\Customers\CustomersInterface;
 use App\Interfaces\Tenant\TasksTimes\TasksTimesInterface;
-use App\Models\Tenant\Intervencoes;
 
 class ShowTimes extends Component
 {
@@ -39,6 +40,7 @@ class ShowTimes extends Component
     public string $tenant = '';
     public string $reference = '';
 
+    protected object $customersRepository;
    
 
     protected $listeners = ['mudarHora' => 'mudarHora'];
@@ -50,6 +52,14 @@ class ShowTimes extends Component
      * @param TasksInterface $tasksInterface
      * @return Void
      */
+
+     public function boot(CustomersInterface $interfaceCustomers): Void
+     {
+            
+         $this->customersRepository = $interfaceCustomers;
+      
+ 
+     }
     
 
     public function mount($task = NULL)
@@ -140,7 +150,7 @@ class ShowTimes extends Component
     {
         $intervencao = Intervencoes::where('id',$id)->first();
 
-        $this->dispatchBrowserEvent("editarTempo",["id" => $id,"hora_final" => $intervencao->hora_final]);
+        $this->dispatchBrowserEvent("editarTempo",["id" => $id]);
     }
 
     public function removeTempo($id)
@@ -150,14 +160,19 @@ class ShowTimes extends Component
         $this->dispatchBrowserEvent("atualizarPagina");
     }
      
-    public function mudarHora($id,$mudarHora)
+    public function mudarHora($id,$mudarHora,$selectedSinal,$desconto_descricao)
     {
-       
         $intervencaoAtual = Intervencoes::where('id',$id)->first();
+
+        if($selectedSinal == "mais"){
+            $selectedSinal = "+";
+        } else {
+            $selectedSinal = "-";
+        }
        
         Intervencoes::where('id',$id)->update([
-                "hora_final" => date("H:i:s",strtotime($mudarHora)),
-                "data_final" => date('Y-m-d')
+               "descontos" => $selectedSinal.$mudarHora,
+               "descricao_desconto" => $desconto_descricao
         ]);
         
         $this->dispatchBrowserEvent("atualizarPagina");
@@ -174,7 +189,8 @@ class ShowTimes extends Component
             'taskHours' => $this->task_hours,
             'totalHours' => $this->horasAtuais,
             'totalMinutos' => $this->minutosAtuais,
-            "taskInfo" => $this->taskInfo
+            "taskInfo" => $this->taskInfo,
+            "customersRepository" => $this->customersRepository
         ]);
     }
 }

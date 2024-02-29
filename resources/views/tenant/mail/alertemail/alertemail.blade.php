@@ -54,8 +54,8 @@
                                             </h1>
                                             <hr>
                                                 <strong>{{__("Service") }} :</strong> {{$customerService->service->name}}<br>
-                                                <strong>{{__("Customer") }}:</strong> {{$customerService->customer->name}}<br>
-                                                <strong>{{__("Customer Location")}}:</strong> {{$customerService->customerLocation->description}}<br>
+                                                <strong>{{__("Customer") }}:</strong> {{$cliente->customers->name}}<br>
+                                                <strong>{{__("Customer Location")}}:</strong> {{$clienteLocation->locations->address}}<br>
                                                 <strong>{{__("Type of Contract")}}:</strong> {{$customerService->selectedTypeContract}}<br>
                                                 <strong>{{__("Service Final Date")}}:</strong> {{$customerService->end_date}} 
                                             <hr>

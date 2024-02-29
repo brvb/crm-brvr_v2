@@ -41,7 +41,7 @@ class PDFEmail extends Mailable
     {
        
         //env('MAIL_USERNAME')
-        $subject = 'Pedido #' . $this->info->reference . ' foi CONCLUÍDA.';
+        $subject = 'O pedido #' . $this->info->reference . ' foi CONCLUÍDO.';
 
         return new Envelope(
             subject: $subject,

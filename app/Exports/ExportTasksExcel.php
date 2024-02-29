@@ -4,8 +4,8 @@ namespace App\Exports;
 
 use Carbon\Carbon;
 use App\Models\User;
-use App\Models\Tenant\Intervencoes;
 use App\Models\Tenant\TeamMember;
+use App\Models\Tenant\Intervencoes;
 use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\Style;
@@ -15,14 +15,19 @@ use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use App\Interfaces\Tenant\Customers\CustomersInterface;
 
 class ExportTasksExcel implements FromCollection, WithHeadings, WithEvents,ShouldAutoSize, WithStyles
 {
 
     protected $analysis;
+    protected object $customersRepository;
 
-    public function __construct($analysis) {
+
+    public function __construct($analysis,$customersRepository) {
         $this->analysis = $analysis;
+
+        $this->customersRepository = $customersRepository;
     }
 
     public function styles(Worksheet $sheet)
@@ -35,22 +40,81 @@ class ExportTasksExcel implements FromCollection, WithHeadings, WithEvents,Shoul
         $resultado_soma = "";
         $somaDiferencasSegundos = 0;
 
-
         foreach($this->analysis as $ana)
         {
             $intervencoes = Intervencoes::where('id_pedido',$ana["id"])->where('data_inicio','!=',null)->get();
                                 
             $arrHours[$ana["id"]] = [];
            
+            // foreach($intervencoes as $hora)
+            // {
+            //     $data1 = Carbon::parse($hora->hora_inicio);
+            //     $data2 = Carbon::parse($hora->hora_final);
+            //     $result = $data1->diff($data2)->format("%h.%i");
+            //     $hours = date("H:i",strtotime($result));
+
+            //     array_push($arrHours[$ana["id"]],$hours);
+            //     //$somaDiferencasSegundos += $result->diffInSeconds(Carbon::createFromTime(0, 0, 0));
+            // }
+
             foreach($intervencoes as $hora)
             {
-                $data1 = Carbon::parse($hora->hora_inicio);
-                $data2 = Carbon::parse($hora->hora_final);
-                $result = $data1->diff($data2)->format("%h.%i");
-                $hours = date("H:i",strtotime($result));
-
-                array_push($arrHours[$ana["id"]],$hours);
-                //$somaDiferencasSegundos += $result->diffInSeconds(Carbon::createFromTime(0, 0, 0));
+                
+                $dia_inicial = $hora->data_inicio.' '.$hora->hora_inicio;
+                $dia_final = $hora->data_final.' '.$hora->hora_final;
+    
+                $data1 = Carbon::parse($dia_inicial);
+                $data2 = Carbon::parse($dia_final);
+    
+                $result = $data1->diff($data2);
+    
+                $hours = $result->days * 24 + $result->h;
+                $minutes = $result->i;
+    
+                $hoursMinutesDifference = sprintf('%d:%02d', $hours, $minutes);
+    
+               
+    
+                //*****PARTE A DESCONTAR********/
+    
+                $valorOriginal = $hoursMinutesDifference;
+    
+                list($horas, $minutos) = explode(':', $valorOriginal);
+    
+                $valorEmHorasDecimais = $horas + ($minutos / 60);
+    
+                if(!isset($hora->descontos[0]))
+                {
+                    $sinal = "+";
+                }
+                else {
+                    $sinal = $hora->descontos[0];
+                }
+    
+                if($hora->descontos == "")
+                {
+                    $hora->descontos = "+0";  
+                }
+    
+    
+                if($sinal == "+"){
+                    $novoValorEmHorasDecimais = $valorEmHorasDecimais + substr($hora->descontos, 1);
+                }
+                else {
+                    $novoValorEmHorasDecimais = $valorEmHorasDecimais - substr($hora->descontos, 1);
+                }
+            
+                $novoValorEmHorasDecimais = max(0, $novoValorEmHorasDecimais);
+    
+                $novoHoras = floor($novoValorEmHorasDecimais);
+                $novoMinutos = ($novoValorEmHorasDecimais - $novoHoras) * 60;
+    
+                $novoValor = sprintf('%d:%02d', $novoHoras, $novoMinutos);
+    
+                /*********************** */
+    
+                array_push($arrHours[$ana["id"]],$novoValor);
+    
             }
            
 
@@ -116,34 +180,82 @@ class ExportTasksExcel implements FromCollection, WithHeadings, WithEvents,Shoul
             $somaDiferencasSegundos = 0;
 
 
+            // foreach($intervencoes as $hora)
+            // {
+            //     $data1 = Carbon::parse($hora->hora_inicio);
+            //     $data2 = Carbon::parse($hora->hora_final);
+            //     $result = $data1->diff($data2)->format("%h.%i");
+            //     $hours = date("H:i",strtotime($result));
+
+            //     array_push($arrHours[$analysis["id"]],$hours);
+            // }
+
             foreach($intervencoes as $hora)
             {
-                // $data1 = Carbon::parse($hora->hora_inicio);
-                // $data2 = Carbon::parse($hora->hora_final);
-                // $result = $data1->diff($data2);
+                
+                $dia_inicial = $hora->data_inicio.' '.$hora->hora_inicio;
+                $dia_final = $hora->data_final.' '.$hora->hora_final;
+    
+                $data1 = Carbon::parse($dia_inicial);
+                $data2 = Carbon::parse($dia_final);
+    
+                $result = $data1->diff($data2);
+    
+                $hours = $result->days * 24 + $result->h;
+                $minutes = $result->i;
+    
+                $hoursMinutesDifference = sprintf('%d:%02d', $hours, $minutes);
+    
+               
+    
+                //*****PARTE A DESCONTAR********/
+    
+                $valorOriginal = $hoursMinutesDifference;
+    
+                list($horas, $minutos) = explode(':', $valorOriginal);
+    
+                $valorEmHorasDecimais = $horas + ($minutos / 60);
+    
+                if(!isset($hora->descontos[0]))
+                {
+                    $sinal = "+";
+                }
+                else {
+                    $sinal = $hora->descontos[0];
+                }
+    
+                if($hora->descontos == "")
+                {
+                    $hora->descontos = "+0";  
+                }
+    
+    
+                if($sinal == "+"){
+                    $novoValorEmHorasDecimais = $valorEmHorasDecimais + substr($hora->descontos, 1);
+                }
+                else {
+                    $novoValorEmHorasDecimais = $valorEmHorasDecimais - substr($hora->descontos, 1);
+                }
             
-                // $data = Carbon::createFromTime($result->h, $result->i, $result->s);
-
-                // $somaDiferencasSegundos += $data->diffInSeconds(Carbon::createFromTime(0, 0, 0));
-
-                $data1 = Carbon::parse($hora->hora_inicio);
-                $data2 = Carbon::parse($hora->hora_final);
-                $result = $data1->diff($data2)->format("%h.%i");
-                $hours = date("H:i",strtotime($result));
-
-                array_push($arrHours[$analysis["id"]],$hours);
+                $novoValorEmHorasDecimais = max(0, $novoValorEmHorasDecimais);
+    
+                $novoHoras = floor($novoValorEmHorasDecimais);
+                $novoMinutos = ($novoValorEmHorasDecimais - $novoHoras) * 60;
+    
+                $novoValor = sprintf('%d:%02d', $novoHoras, $novoMinutos);
+    
+                /*********************** */
+    
+                array_push($arrHours[$analysis["id"]],$novoValor);
+    
             }
 
-
-            //Converter segundos e horas e minutos
-            // $horas = floor($somaDiferencasSegundos / 3600);
-            // $minutos = floor(($somaDiferencasSegundos % 3600) / 60);
-            // $horaFormatada = Carbon::createFromTime($horas, $minutos, 0)->format('H:i');
 
             $horasAtuais = global_hours_sum($arrHours);
 
             $teamMember = TeamMember::where('id',$analysis["tech_id"])->first();
 
+            $cst = $this->customersRepository->getSpecificCustomerInfo($analysis["customer_id"]);
            
             return [
                 'reference' => $analysis["reference"],
@@ -151,7 +263,7 @@ class ExportTasksExcel implements FromCollection, WithHeadings, WithEvents,Shoul
                 'tech' => $teamMember->name,
                 'dateBegin' => $analysis["data_agendamento"],
                 'hourBegin' => $analysis["hora_agendamento"],
-                'shortName' => $analysis["customer"]["short_name"],
+                'shortName' => $cst->customers->name,
                 'serviceName' => $analysis["services_to_do"]["name"],
                 'descricao' => $analysis["descricao"],
                 'totalHours' => $horasAtuais

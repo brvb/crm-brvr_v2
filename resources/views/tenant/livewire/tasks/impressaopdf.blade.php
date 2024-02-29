@@ -24,12 +24,12 @@
                         <td style="font-size:30px;">{{ date('Y-m-d') }}</td>
                     </tr>
                     <tr>
-                        @if(isset($impressao->customer->short_name))
-                            <td style="font-size:30px;">{{ $impressao->customer->short_name }}</td>
-                         @else
-                            <td style="font-size:30px;">{{$impressao->taskToUpdate->customer->short_name}}</td>
-                         @endif
+                                                    
                        
+                        <td style="font-size:15px;">  
+                            {{ $customer->customers->name }}
+                        </td>
+                                              
                     </tr>
             
             </table>

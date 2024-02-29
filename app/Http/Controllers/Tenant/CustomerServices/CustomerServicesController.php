@@ -13,18 +13,24 @@ use Illuminate\Http\RedirectResponse;
 use App\Models\Tenant\CustomerServices;
 
 use App\Models\Tenant\CustomerLocations;
+use App\Interfaces\Tenant\Customers\CustomersInterface;
 use App\Http\Requests\Tenant\Customers\CustomersFormRequest;
 use App\Interfaces\Tenant\CustomerServices\CustomerServicesInterface;
+use App\Interfaces\Tenant\CustomerLocation\CustomerLocationsInterface;
 use App\Http\Requests\Tenant\CustomersServices\CustomersServicesFormRequest;
 
 class CustomerServicesController extends Controller
 {
 
     private CustomerServicesInterface $customerServicesRepository;
+    protected object $customersRepository;
+    protected object $customerLocationRepository;
 
-    public function __construct(CustomerServicesInterface $customersServicesRepository)
+    public function __construct(CustomerServicesInterface $customersServicesRepository,CustomersInterface $customerInterface,CustomerLocationsInterface $customerLocationInterface)
     {
         $this->customerServicesRepository = $customersServicesRepository;
+        $this->customersRepository = $customerInterface;
+        $this->customerLocationRepository = $customerLocationInterface;
     }
     /**
      * Display the customers list.
@@ -47,9 +53,11 @@ class CustomerServicesController extends Controller
      */
     public function create(): View
     {
+        $customerList = $this->customerServicesRepository->getAllCustomers();
+
         return view('tenant.customerservices.create', [
             'themeAction' => 'form_element',
-            'customerList' => Customers::all(),
+            'customerList' => $customerList,
             'serviceList' => Services::all(),
             'selectedCustomer' => '',
             'selectedService' => '',
@@ -65,13 +73,12 @@ class CustomerServicesController extends Controller
      */
     public function edit(CustomerServices $service): View
     {    
-        $customerOfService = CustomerLocations::where('customer_id',$service->customer_id)->first();
-        $clientForService = Customers::where('id',$customerOfService->customer_id)->first();
+        $clientForService = $this->customersRepository->getSpecificCustomerInfo($service->customer_id);
 
         return view('tenant.customerservices.edit',
             [
                 'service' => $service,
-                'customer' => $clientForService->short_name,
+                'customer' => $clientForService->customers->name,
                 'themeAction' => 'form_element_data_table'
             ]
         );
@@ -85,6 +92,7 @@ class CustomerServicesController extends Controller
      */
     public function store(CustomersServicesFormRequest $request): RedirectResponse
     { 
+
         $getCustomer = CustomerServices::where('customer_id',$request->selectedCustomer)
                             ->where('service_id',$request->selectedService)
                             ->where('location_id',$request->selectedLocation)

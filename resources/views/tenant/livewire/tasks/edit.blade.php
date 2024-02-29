@@ -36,14 +36,16 @@
                                     </div>
                                     <div class="row">
                                         <div class="col-12">
-    
                                             <div class="row form-group">
+                                                @php
+                                                    $customerList = $customersInterface->getAllCustomersCollection();
+                                                @endphp
                                                 <section class="col" style="margin-top:20px;" wire:ignore>
                                                     <label>{{ __('Customer Name') }}</label>
                                                     <select name="selectedCustomer" id="selectedCustomer">
                                                         <option value="">{{ __('Select customer') }}</option>
-                                                        @forelse ($customerList as $item)
-                                                            <option @if(isset($selectedCustomer)) @if($item->id == $selectedCustomer) selected @endif @endif value="{{ $item->id }}">{{ $item->vat }} | {{ $item->name }}</option>
+                                                        @forelse ($customerList->customers as $item)
+                                                            <option @if(isset($selectedCustomer)) @if($item->id == $selectedCustomer) selected @endif @endif value="{{ $item->id }}">{{ $item->nif }} | {{ $item->name }}</option>
                                                         @empty
                                                         @endforelse
                                                     </select>
@@ -51,15 +53,34 @@
                                             </div>
                                             @if(isset($selectedCustomer) && $selectedCustomer <> '')
                                               @php
-                                                  $customer = \App\Models\Tenant\Customers::where('id',$selectedCustomer)->first();
+                                                  //$customer = \App\Models\Tenant\Customers::where('id',$selectedCustomer)->first();
+                                                  $customer = $customersInterface->getSpecificCustomerInfo($selectedCustomer);
+            
                                               @endphp
+                                               <span style="display:block;justify-content:center;">Verificar cliente contas: <input type="checkbox" id="verificaContrato" @if(Auth::user()->type_user == 0) checked @endif></span><br>
+                                               <div id="contaROW" class="row form-group" @if(Auth::user()->type_user == 0) style="display:block;" @else style="display:none;" @endif>
+                                                   <div class="row" style="margin-left:0px;margin-right:0px;">
+                                                       <section class="col-xl-4 col-xs-12">
+                                                           <label>Tipo de Contrato:</label>
+                                                           <input type="text" value="{{ $customer->customers->type}}" class="form-control" readonly>
+                                                       </section>
+                                                       <section class="col-xl-4 col-xs-12">
+                                                           <label>Horas:</label>
+                                                           <input type="text" value="{{ date('H:i',strtotime($customer->customers->hours_spent)) }}" class="form-control" readonly>
+                                                       </section>
+                                                       <section class="col-xl-4 col-xs-12">
+                                                           <label>Conta Corrente:</label>
+                                                           <input type="text" value="{{ $customer->customers->current_account}}" class="form-control" readonly>
+                                                       </section>
+                                                   </div>
+                                               </div>
                                             <div class="row form-group">
                                                 <section class="col-xl-4 col-xs-12">
                                                 
                                                     <label>{{ __('VAT') }}:</label>
                                                     
                                                     <input type="text" name="vat" id="vat" class="form-control"
-                                                                value="{{ $customer->vat }}" readonly>
+                                                                value="{{ $customer->customers->nif }}" readonly>
                                                                                                     
                                                     
                                                 </section>
@@ -68,7 +89,7 @@
                                                     <label>{{ __('Phone number') }}</label>
                             
                                                     <input type="text" name="phone" id="phone" class="form-control"
-                                                    value="{{ $customer->contact }}" readonly>
+                                                    value="{{ $customer->customers->phone }}" readonly>
                                                     
                                                 
                                                 </section>
@@ -77,7 +98,7 @@
                                                     <label>{{ __('Primary e-mail address') }}</label>
                                                 
                                                     <input type="text" name="email" id="email" class="form-control"
-                                                    value="{{ $customer->email }}" readonly>
+                                                    value="{{ $customer->customers->email }}" readonly>
                                                     
                                                                                                 
                                                 </section>
@@ -101,12 +122,13 @@
                                     </div>
                                     <div class="row">
                                         @php
+                
                                             if($customerLocations == null)
                                             {
                                                 $contaCustomers = 0;
                                             }
                                             else {
-                                                $contaCustomers = count($customerLocations);
+                                                $contaCustomers = count($customerLocations->locations);
                                             }
                                            
                                         @endphp
@@ -117,9 +139,9 @@
                                                     <select name="selectedLocation" id="selectedLocation" >
                                                         <option value="">{{ __('Please select location') }}</option>
                                                         @if($customerLocations != null)
-                                                            @forelse ($customerLocations as $item)
-                                                                <option value="{{ $item->id }}" @if($contaCustomers == 1) selected @endif>
-                                                                    {{ $item->description }} | {{ $item->locationCounty->name }}
+                                                            @forelse ($customerLocations->locations as $item)
+                                                                <option value="{{ $item->id }}" @if($selectedLocation == $item->id) selected @endif>
+                                                                    {{ $item->city }} | {{ $item->addressname }}
                                                                 </option>
                                                             @empty
                                                             @endforelse
@@ -235,27 +257,43 @@
                                             <div class="row form-group">
                                                 <section class="col" style="margin-top:20px;" wire:ignore>
                                                     <div class="form-check custom-checkbox checkbox-success">
-                                                        <input type="checkbox" name="equipamentoServico" class="form-check-input" id="equipamentoServico" @if($riscado != "0" || $partido != "0" || $bomestado != "0" || $normalestado != "0") checked @endif>
+                                                        <input type="checkbox" name="equipamentoServico" class="form-check-input" id="equipamentoServico" @if($serieNumber != null) checked @endif>
                                                         <label class="form-check-label" for="customCheckBox3" style="font-size:18px;margin-top:0px;!important">{{ __('Equipment?') }}</label>
                                                     </div>
                                                 </section>
                                             </div>
 
-                                            <div class="row form-group" id="equipamentosSection" style="display:{{$stateEquipment}};">
+                                            <div class="row form-group" id="equipamentosSection" style="display:{{$stateEquipment}};" wire:key="modelEq-{{ $iterationEquipment }}">
                                                 <section class="col" style="margin-top:20px;" wire:ignore>
+                                                    <div class="form-group row">
+                                                        <div class="col-12">
+                                                            <label>Equipamento</label>
+                                                            @if(!empty($equipamentosList->equipments))
+                                                            <select name="selectedEquipamentos" id="selectedEquipamentos">
+                                                                <option value="">Selecione Equipamentos</option>
+                                                                {{-- @if(!empty($equipamentosList->equipments)) --}}
+                                                                    @forelse ($equipamentosList->equipments as $item)
+                                                                        <option value="{{ $item->serialnumber }}" @if($item->serialnumber == $serieNumber) selected @endif>{{ $item->description }} | {{ $item->serialnumber }}</option>
+                                                                    @empty
+                                                                    @endforelse
+                                                                {{-- @endif --}}
+                                                            </select>
+                                                            @endif
+                                                        </div>
+                                                    </div>
                                                 <div class="form-group row">
                                                     <section class="col-xl-4 col-xs-12">
                                                         <div class="row">
-                                                            <div class="col-9">
+                                                            <div class="col-12">
                                                                 <label>{{ __('Serie Number') }}</label>
                                                                 <input type="text" name="serie_number" id="serie_number" class="form-control" @if($serieNumber != "") value="{{ $serieNumber }}" @endif wire:model.defer="serieNumber">
                                                             </div>
-                                                            <div class="col-3" style="padding-left:0px;">
+                                                            {{-- <div class="col-3" style="padding-left:0px;">
                                                                 <label style="visibility:hidden;">Acesso</label>
                                                                 <a class="btn btn-primary" wire:click="searchSerieNumber">
                                                                     <i class="fa fa-search"></i>
                                                                 </a>
-                                                            </div>
+                                                            </div> --}}
                                                         </div>
                                                         
                                                     </section>
@@ -362,7 +400,7 @@
                                                   
                                                 </div>
 
-                                                @if($taskToUpdate->riscado != "0" || $taskToUpdate->partido != "0" || $taskToUpdate->bom_estado != "0" || $taskToUpdate->estado_normal != "0" || $taskToUpdate->transformador != "0" || $taskToUpdate->mala != "0" || $taskToUpdate->tinteiro != "0" || $taskToUpdate->ac != "0")
+                                                @if($serieNumber != null)
 
                                                     <div class="form-group row pr-2 pl-2">
                                                     
@@ -684,6 +722,18 @@
     @push('custom-scripts')
     <script>
         var services = [];
+
+        jQuery("body").on('click','#verificaContrato', function(){
+            if(jQuery(this).is(":checked"))
+            {
+                jQuery("#contaROW").css("display","block")
+            }
+            else {
+                jQuery("#contaROW").css("display","none")
+            }
+            
+        });
+        
         document.addEventListener('livewire:load', function () {
 
             restartObjects();
@@ -966,6 +1016,10 @@
                 @this.set('selectedLocation', jQuery('#selectedLocation').find(':selected').val());
             });
 
+            jQuery('#selectedEquipamentos').select2();
+            jQuery("#selectedEquipamentos").on("select2:select", function (e) {
+                @this.set('selectedEquipamentos', jQuery('#selectedEquipamentos').find(':selected').val());
+            });
 
 
             //***AGENDAMENTOS*//

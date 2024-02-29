@@ -44,12 +44,15 @@
                                     <label class="custom-control-label" for="checkAll"></label>
                                 </div>
                             </th>
-                            <th>Cliente</th>
+                            {{-- <th>Cliente</th> --}}
                             <th>Realizado</th>
                             <th>Tecnico</th>
                             <th>Data de inicio intervenção</th>
                             <th>Hora fim</th>
                             <th>Horas Gastas</th>
+                            <th>Descontos</th>
+                            <th>Razão do desconto</th>
+                            <th>Horas descontadas</th>
                             <th>Anexos</th>
                             <th>Ações</th>
                         </tr>
@@ -64,13 +67,15 @@
                                         <label class="custom-control-label" for="customCheckBox{{ $item->id }}"></label>
                                     </div>
                                 </td>
-                                <td>
+                                {{-- <td>
                                     @php
-                                        $cliente = \App\Models\Tenant\Customers::where('id',$item->pedido->customer_id)->first();
-                                
+                                      
+                                        // $cliente = \App\Models\Tenant\Customers::where('id',$item->pedido->customer_id)->first();
+                                        $cliente  = $customersRepository->getSpecificCustomerInfo($item->pedido->customer_id);
+                                        
                                     @endphp
-                                   {{$cliente->name}}
-                                </td>
+                                   {{$cliente->customers->name}}
+                                </td> --}}
                                 <td>
                                     {{$item->descricao_realizado}}
                                 </td>
@@ -85,7 +90,7 @@
                                     {{$item->data_inicio}} / {{$item->hora_inicio}}
                                 </td>
                                 <td>
-                                    {{$item->hora_final}}
+                                    {{$item->data_final}} / {{$item->hora_final}}
                                 </td>
                                 <td>
                                     @php
@@ -94,29 +99,78 @@
 
                                         $arrHours[$item->id] = [];
 
-                                        $data1 = Carbon\Carbon::parse($item->hora_inicio);
-                                        $data2 = Carbon\Carbon::parse($item->hora_final);
-                                        $result = $data1->diff($data2)->format("%h.%i");
-                                        $hours = date("H:i",strtotime($result));
+                                        $dia_inicial = $item->data_inicio.' '.$item->hora_inicio;
+                                        $dia_final = $item->data_final.' '.$item->hora_final;
+
+                                        $data1 = Carbon\Carbon::parse($dia_inicial);
+                                        $data2 = Carbon\Carbon::parse($dia_final);
+
+                           
+                                        $result = $data1->diff($data2);
+
+                                        $hours = $result->days * 24 + $result->h;
+                                        $minutes = $result->i;
+                                        // $hours = date("H:i",strtotime($result));
   
+                                        $hoursMinutesDifference = sprintf('%d:%02d', $hours, $minutes);
+
                                         array_push($arrHours[$item->id],$hours);
-                                        // $data = Carbon\Carbon::createFromTime($result->h, $result->i, $result->s);
-
-                                        // $somaDiferencasSegundos += $data->diffInSeconds(Carbon\Carbon::createFromTime(0, 0, 0));
-
-                                        // //Converter segundos e horas e minutos
-                                        // $horas = floor($somaDiferencasSegundos / 3600);
-                                        // $minutos = floor(($somaDiferencasSegundos % 3600) / 60);
-                                        // $horaFormatada = Carbon\Carbon::createFromTime($horas, $minutos, 0)->format('H:i');
                                        
                                         
                                     @endphp
                                     @if($item->hora_final == null)
                                        00:00
                                     @else
-                                       {{global_hours_sum_individual($arrHours[$item->id])}}
+                                       {{-- {{global_hours_sum_individual($arrHours[$item->id])}} --}}
+                                       {{$hoursMinutesDifference}}
                                     @endif
                                     
+                                </td>
+                                <td>
+                                    @if($item->descontos != "")
+                                        {{$item->descontos}} horas
+                                    @endif
+                                </td>
+                                <td>
+                                    {{$item->descricao_desconto}}
+                                </td>
+                                <td>
+                                    @php
+                                    if($item->descontos == "")
+                                    {
+                                        $item->descontos = "+0";
+                                    }
+                                        $valorOriginal = $hoursMinutesDifference; // Exemplo de valor original em horas
+
+                                        // Dividindo o valor original em horas e minutos
+                                        list($horas, $minutos) = explode(':', $valorOriginal);
+
+                                        // Convertendo o valor original para horas decimais
+                                        $valorEmHorasDecimais = $horas + ($minutos / 60);
+
+                                        // Subtraindo 0.50 horas
+                                        if($item->descontos[0] == "+"){
+                                            $novoValorEmHorasDecimais = $valorEmHorasDecimais + substr($item->descontos, 1);
+                                        }
+                                        else {
+                                            $novoValorEmHorasDecimais = $valorEmHorasDecimais - substr($item->descontos, 1);
+                                        }
+                                       
+
+                                        // Certificando-se de que o novo valor não seja negativo
+                                        $novoValorEmHorasDecimais = max(0, $novoValorEmHorasDecimais);
+
+                                        // Convertendo o novo valor de volta para o formato "horas:minutos"
+                                        $novoHoras = floor($novoValorEmHorasDecimais);
+                                        $novoMinutos = ($novoValorEmHorasDecimais - $novoHoras) * 60;
+
+                                        // Formatando o novo valor
+                                        $novoValor = sprintf('%d:%02d', $novoHoras, $novoMinutos);
+                                    @endphp
+                                    @if($item->hora_final != null)
+                                        {{$novoValor}}
+                                    @endif
+
                                 </td>
                                <td>
                                  @if($item->anexos != "[]")
@@ -208,9 +262,22 @@
 
             message = "";
 
-            message += "<div class='input-group scheduled_hour'>";
-                message += "<input type='text' id='horaFinal' class='form-control'><span class='input-group-append'><span class='input-group-text'>";
-                message +="<i class='fa fa-clock-o'></i></span></span>";
+            message += "<div>";
+                message += "<label>Sinal</label><br>";
+                message += "<select name='selectedSinal' id='selectedSinal' class='form-control'>";
+                    message += "<option value='mais'>+</option>";
+                    message += "<option value='menos' selected>-</option>";
+                message += "</select>";
+            message += "</div>";
+
+            message += "<div>";
+                message += "<label>Tempo a descontar</label><br>";
+                message += "<input type='number' id='horaFinal' class='form-control'>";
+            message += "</div>";
+
+            message += "<div>";
+                message += "<label>Descrição do desconto</label><br>";
+                message += "<textarea class='form-control' id='desconto_descricao' name='desconto_descricao' rows='4' cols='50'></textarea>";
             message += "</div>";
 
             swal.fire({
@@ -221,23 +288,25 @@
                 type: "info",
                 onOpen: function() {
 
-                    jQuery('#horaFinal').clockpicker({
-                        donetext: '<i class="fa fa-check" aria-hidden="true"></i>',
-                        }).find('input').change(function () {
-                            @this.set('previewHour', this.value, true);
-                    });
+                    // jQuery('#horaFinal').clockpicker({
+                    //     donetext: '<i class="fa fa-check" aria-hidden="true"></i>',
+                    //     }).find('input').change(function () {
+                    //         @this.set('previewHour', this.value, true);
+                    // });
 
-                    jQuery("#horaFinal").val(e.detail.hora_final);
+                    // jQuery("#horaFinal").val(e.detail.hora_final);
 
                 }
 
             }).then((result) => {  
 
                 var horaFinal = jQuery("#horaFinal").val();
+                var selectedSinal = jQuery("#selectedSinal").val();
+                var desconto_descricao = jQuery("#desconto_descricao").val();
 
-                if(horaFinal != "")
+                if(horaFinal != "" && desconto_descricao != "")
                 {
-                    Livewire.emit("mudarHora",e.detail.id, horaFinal);
+                    Livewire.emit("mudarHora",e.detail.id, horaFinal,selectedSinal,desconto_descricao);
                 }
 
             

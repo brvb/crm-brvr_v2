@@ -29,6 +29,11 @@ class Pedidos extends Model
         return $this->belongsTo(Services::class, 'tipo_servico', 'id');
     }
 
+    public function tipoPedido()
+    {
+        return $this->belongsTo(TiposPedidos::class, 'tipo_pedido', 'id');
+    }
+
     public function tipoEstado()
     {
         return $this->belongsTo(EstadoPedido::class, 'estado', 'id');

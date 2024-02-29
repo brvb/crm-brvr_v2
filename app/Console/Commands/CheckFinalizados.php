@@ -53,6 +53,7 @@ class CheckFinalizados extends Command
 
             $getPedidos = Pedidos::where('estado','2')->get();
 
+
             foreach($getPedidos as $pedido)
             {
                 $teamMember = TeamMember::where('id',$pedido->tech_id)->first();
@@ -63,6 +64,7 @@ class CheckFinalizados extends Command
                 $dataHoraMais48Horas = $dataHora->addHours(48);
 
                 $now = Carbon::now();
+
 
                 if ($now->greaterThanOrEqualTo($dataHoraMais48Horas)) {
                     event(new CheckFinalizadosEvent($getIntervencao));

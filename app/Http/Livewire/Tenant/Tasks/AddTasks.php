@@ -29,10 +29,12 @@ use App\Models\Tenant\CustomerLocations;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Traits\GenerateTaskReference;
+use App\Interfaces\Tenant\Customers\CustomersInterface;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use App\Interfaces\Tenant\Tasks\TasksInterface;
 use App\Interfaces\Tenant\CustomerServices\CustomerServicesInterface;
 use App\Models\Tenant\Pedidos;
+use App\Models\Tenant\PivotEstados;
 
 class AddTasks extends Component
 {
@@ -47,15 +49,19 @@ class AddTasks extends Component
     public string $stateAgenda = 'none';
 
     public string $selectedCustomer = '';
-    public ?object $customerList = NULL;
+    private object $customerList;
     public string $contactoAdicional = '';
     public string $selectedPedido = '';
     public ?object $pedidosList = NULL;
     public string $selectedServico = '';
     public ?object $servicosList = NULL;
     public string $serviceDescription = '';
+    public string $selectedEquipamentos = '';
+    private ?object $equipamentosList = NULL;
 
     public $iteration = 0;
+    public $iterationEquipment = 0;
+    public $iterationAnexos = 0;
 
     //Parte das Imagens
 
@@ -67,6 +73,10 @@ class AddTasks extends Component
     public array $arrayEquipamentoUploaded = [];
 
     /****/
+
+    public ?string $vat = '';
+    public ?string $phone = '';
+    public ?string $email = ''; 
 
     //PARTE DO EQUIPAMENTO
 
@@ -91,6 +101,8 @@ class AddTasks extends Component
 
     public ?string $imagem = '';
 
+    public ?string $anexosEquipamentosFromList = '';
+
 
     /********* */
 
@@ -113,10 +125,10 @@ class AddTasks extends Component
 
     /******* */
 
-    public ?object $customer = NULL;
+    protected ?object $customer = NULL;
     public string $selectedLocation = '';
     public ?object $customerServicesList = NULL;
-    public ?object $customerLocations = NULL;
+    protected ?object $customerLocations = NULL;
 
    
    
@@ -142,8 +154,9 @@ class AddTasks extends Component
 
     private CustomerServicesInterface $customerServicesInterface;
     private TasksInterface $tasksInterface;
+    private CustomersInterface $customersInterface;
 
-    protected $listeners = ['resetChanges' => 'resetChanges', 'responseEmailCustomer' => 'responseEmailCustomer', 'FormAddClient' => 'FormAddClient', 'createCustomerFormResponse' => 'createCustomerFormResponse'];
+    protected $listeners = ['resetChanges' => 'resetChanges', 'responseEmailCustomer' => 'responseEmailCustomer', 'FormAddClient' => 'FormAddClient', 'createCustomerFormResponse' => 'createCustomerFormResponse','getEquipments' => 'getEquipments','atualiza_equipments' =>'atualiza_equipments'];
 
     /**
      * Livewire construct function
@@ -151,10 +164,11 @@ class AddTasks extends Component
      * @param TasksInterface $tasksInterface
      * @return Void
      */
-    public function boot(CustomerServicesInterface $customerServicesInterface, TasksInterface $tasksInterface): Void
+    public function boot(CustomerServicesInterface $customerServicesInterface, TasksInterface $tasksInterface, CustomersInterface $customersInterface): Void
     {
         $this->customerServicesInterface = $customerServicesInterface;
         $this->tasksInterface = $tasksInterface;
+        $this->customersInterface = $customersInterface;
     }
 
     public function mount($customerList): void
@@ -172,6 +186,9 @@ class AddTasks extends Component
         $this->coresObject = Prioridades::all();
 
         $this->alert_email = 0;
+
+        // $this->anexosEquipamentosFromList = [];
+
     }
 
     public function updatedUploadFile()
@@ -188,35 +205,39 @@ class AddTasks extends Component
 
     public function updatedSelectedCustomer(): Void
     {
-        // if(!empty($this->customer))
-        // {
-        //     $this->dispatchBrowserEvent('refreshPage');
-        // }
+        
+        //$this->customer = Customers::where('id', $this->selectedCustomer)->with('customerCounty')->with('customerDistrict')->first();
+        
+        //$this->customerLocations = CustomerLocations::where('customer_id', $this->selectedCustomer)->with('locationCounty')->get();
 
-        $this->customer = Customers::where('id', $this->selectedCustomer)->with('customerCounty')->with('customerDistrict')->first();
-        $this->customerLocations = CustomerLocations::where('customer_id', $this->selectedCustomer)->with('locationCounty')->get();
+        $this->customer = $this->customersInterface->getSpecificCustomerInfo($this->selectedCustomer);
 
-        $conta = count($this->customerLocations);
+        $this->vat = $this->customer->customers->nif;
+        $this->phone = $this->customer->customers->phone;
+        $this->email = $this->customer->customers->email;
+
+        $this->customerLocations = $this->customersInterface->getLocationsFromCustomerCollection($this->customer->customers->no);
+      
+        $conta = count($this->customerLocations->locations);
 
         if($conta == 1)
         {
-            $this->selectedLocation = $this->customerLocations[0]->id;
+            $this->selectedLocation = $this->customerLocations->locations[0]->id;
         }else {
             $this->selectedLocation = "";
         }
         
         $this->dispatchBrowserEvent('contentChanged');
         $this->iteration++;
-        
+        $this->iterationEquipment++;
 
-        if($this->customer->customerCounty == null)
-        {
-             $this->dispatchBrowserEvent('swal', ['title' => __('Services'), 'message' => __('You need to select a county for this customer'), 'status'=>'error','function' => 'client']);
-             $this->skipRender();
-        }
+        // if($this->customer->customerCounty == null)
+        // {
+        //      $this->dispatchBrowserEvent('swal', ['title' => __('Services'), 'message' => __('You need to select a county for this customer'), 'status'=>'error','function' => 'client']);
+        //      $this->skipRender();
+        // }
  
     }
-
       
 
     public function FormAddClient()
@@ -260,19 +281,16 @@ class AddTasks extends Component
                 'name' => $name,
                 'nif'  => $nif,
                 'contact' => $contact,
-                'email' => $email
             ],
             [
                 'name'  => 'required',
                 'nif'  => 'required|min:9|max:9',
                 'contact'  => 'required',
-                'email' => 'required'
             ],
             [
                 'name'  => "Tem de inserir um nome!",
                 'nif' => "Tem de inserir um nif com 9 digitos!",
                 'contact' => "Tem de inserir um contacto!",
-                'email' => "Tem de inserir um email!"
             ]
         );
 
@@ -293,45 +311,213 @@ class AddTasks extends Component
             return;
         }
 
-        $response = Customers::Create([
+        $arrayPHC = [
             "name" => $name,
             "slug" => $slug,
-            "short_name" => $slug,
-            "username" => $email,
-            "vat" => $nif,
-            "contact" => $contact,
+            "nif" => $nif,
+            "surname" => $slug,
+            "phone" => $contact,
             "email" => $email,
+            "address" =>"Rua de Regufe, 33",
+            "username" => $email,
+            "zipcode" => "4480-246",
+            "state" => "Porto",
+            "city" => "Vila do Conde"
+        ];
+
+
+        $encoded = json_encode($arrayPHC);
+
+        $curl = curl_init();
+
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => 'http://172.19.20.4:24004/customers/customers',
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'POST',
+            CURLOPT_POSTFIELDS => $encoded,
+            CURLOPT_HTTPHEADER => array(
+                'Content-Type: application/json'
+            ),
+        ));
+
+        $response = curl_exec($curl);
+
+        curl_close($curl);
+
+        $getClient = json_decode($response);
+
+        /******* LOCALIZAÇÕES ****/
+
+        $arrayPHCLocation = [
+            "name" => "Sede",
+            "no" => $getClient->no,
+            "addressname" => "Sede",
+            "managername" => "",
+            "locationmainornot" => true,
+            "phonemanager" => "",
             "address" => "Rua de Regufe, 33",
             "zipcode" => "4480-246",
-            "district" => '13',
-            "county" => '16',
-            "account_manager" => '9'
+            "state" => "Porto",
+            "longitude" => "",
+            "latitude" => "",
+            "city" => "Vila do Conde"
+        ];
+
+
+        $encodedLocation = json_encode($arrayPHCLocation);
+
+        $curl = curl_init();
+
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => 'http://172.19.20.4:24004/location/locations',
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'POST',
+            CURLOPT_POSTFIELDS => $encodedLocation,
+            CURLOPT_HTTPHEADER => array(
+                'Content-Type: application/json'
+            ),
+        ));
+
+        $response = curl_exec($curl);
+
+        curl_close($curl);
+        
+        $getLocation = json_decode($response);
+
+        CustomerServices::create([
+            'customer_id' => $getClient->id,
+            'service_id' => 4,
+            'location_id' => $getLocation->id,
+            'start_date' => date('Y-m-d'),
+            'end_date' => date('Y-m-d', strtotime('+1 year')),
+            'type' => 'Anual',
+            'alert' => '0',
+            'selectedTypeContract' => 'anualmente',
+            'time_repeat' => '1',
+            'number_times' => '999999',
+            'allMails' => '0',
+            'new_date' => date('Y-m-d'),
+            'member_associated' => 9
         ]);
 
-        $location = CustomerLocations::Create([
-            "description" => "Sede",
-            "customer_id" => $response->id,
-            "main" => "1",
-            "address" => "Rua de Regufe, 33",
-            "zipcode" => "4480-246",
-            "contact" => $contact,
-            "district_id" => '13',
-            "county_id" => '16',
-            "manager_name" => "Vitor Oliveira",
-            "manager_contact" => $contact
-        ]);
-
-        CustomerServices::Create([
-            "customer_id" => $response->id,
-            "service_id" => "4",
-            "location_id" => $location->id,
-            "start_date" => date('Y-m-d')
-        ]);
-
-
+       
 
         $this->dispatchBrowserEvent('swal', ['title' => "Cliente", 'message' => 'Cliente criado com sucesso!', 'status'=>'sucess', 'whatfunction'=>"finishInsert"]);
 
+    }
+
+    public function atualizar_equipment()
+    {
+        $anexosEquipamento = [];
+        if(!empty($this->arrayEquipamentoUploaded)){
+            foreach($this->arrayEquipamentoUploaded as $img)
+            {
+                array_push($anexosEquipamento,$img[0]->getClientOriginalName()); 
+                $img[0]->storeAs(tenant('id') . '/app/public/pedidos/equipamentos_pedidos/'.$this->taskReference.'/', $img[0]->getClientOriginalName());
+            }
+        }
+
+        if($this->riscado == 1)
+        {
+            $riscado = true;
+        } else {
+            $riscado = false;
+        }
+
+        if($this->partido == 1)
+        {
+            $partido = true;
+        } else {
+            $partido = false;
+        }
+
+        if($this->bomestado == 1)
+        {
+            $bomestado = true;
+        } else {
+            $bomestado = false;
+        }
+
+        if($this->normalestado == 1)
+        {
+            $normalestado = true;
+        } else {
+            $normalestado = false;
+        }
+
+        if($this->transformador == 1)
+        {
+            $transformador = true;
+        } else {
+            $transformador = false;
+        }
+
+        if($this->mala == 1)
+        {
+            $mala = true;
+        } else {
+            $mala = false;
+        }
+
+        if($this->tinteiro == 1)
+        {
+            $tinteiro = true;
+        } else {
+            $tinteiro = false;
+        }
+
+        if($this->ac == 1)
+        {
+            $ac = true;
+        } else {
+            $ac = false;
+        }
+
+        $array = [
+            "serialnumber" => $this->serieNumber,
+            "brand" => $this->marcaEquipment,
+            "model" => $this->modelEquipment,
+            "equipmentname"  => $this->nameEquipment,
+            "description" => $this->descriptionEquipment,
+            "riscado" => $riscado,
+            "partido" => $partido,
+            "bom_estado" => $bomestado,
+            "estado_normal" => $normalestado,
+            "transformador" => $transformador,
+            "mala" => $mala,
+            "tinteiro_toner" => $tinteiro,
+            "rato_pen" => $ac,
+            "extradescription" => $this->descriptionExtra,
+            "equipmentattachmentslink" => json_encode($anexosEquipamento)
+        ];
+
+        if($this->selectedEquipamentos != ""){
+            //atualiza equipamento
+            $this->tasksInterface->atualizarEquipamento($array);
+            $this->dispatchBrowserEvent('swalEquip', ['title' => "Identificação", 'message' => "Equipamento alterado com sucesso", 'status'=>'success']);
+        } else {
+            //adiciona novo
+            $this->tasksInterface->adicionarEquipamento($array);
+            $this->dispatchBrowserEvent('swalEquip', ['title' => "Identificação", 'message' => "Equipamento adicionado com sucesso", 'status'=>'success']);
+        }
+
+        $this->iterationEquipment++;
+    }
+
+    public function atualiza_equipments()
+    {
+        $this->customerList = $this->customerServicesInterface->getAllCustomers();
+        $this->render();
     }
 
     public function searchSerieNumber()
@@ -363,7 +549,6 @@ class AddTasks extends Component
 
     public function savePedido()
     {
-
        
         //RECEBER OS VALORES TODOS
         $validatedData = Validator::make(
@@ -380,11 +565,11 @@ class AddTasks extends Component
             'quem_pediu' => $this->quem_pediu,
          ],
          [
-            'selectedCustomer' => 'required|int',
+            'selectedCustomer' => 'required|string',
             'selectedPedido' => 'required|int',
             'selectedServico' => 'required|int',
             'serviceDescription' => 'required|string',
-            'selectedLocation' => 'required|int',
+            'selectedLocation' => 'required|string',
             'selectPrioridade' => 'required|int',
             'selectedTechinician' => 'required|int',
             'origem_pedido' => 'required|string',
@@ -444,12 +629,14 @@ class AddTasks extends Component
       
       
         //fazer a criacao do PDF da etiqueta
-        if($this->riscado != 0 || $this->partido != 0 || $this->bomestado != 0 || $this->normalestado != 0 || $this->transformador != 0 || $this->mala != 0 || $this->tinteiro != 0 || $this->ac != 0)
+        if($this->serieNumber != null)
         {
+
+            $customer = $this->customersInterface->getSpecificCustomerInfo($this->selectedCustomer);
             $qrcode = base64_encode(QrCode::size(150)->generate('https://hihello.me/pt/p/adc8b89e-a3de-4033-beeb-43384aafa1c3?f=email'));
        
             $customPaper = array(0, 0, 400.00, 216.00);
-            $pdf = PDF::loadView('tenant.livewire.tasks.impressaopdf',["impressao" => $this, "qrcode" => $qrcode])->setPaper($customPaper);
+            $pdf = PDF::loadView('tenant.livewire.tasks.impressaopdf',["impressao" => $this,"customer" => $customer, "qrcode" => $qrcode])->setPaper($customPaper);
         
             $content = $pdf->download()->getOriginalContent();
 
@@ -560,9 +747,109 @@ class AddTasks extends Component
             ->with('status', 'info');
     }
 
+    public function updatedSelectedEquipamentos()
+    {
+        $infoEquipamento = $this->tasksInterface->getEquipmentBySerial($this->selectedEquipamentos);
+
+
+        $this->serieNumber = $infoEquipamento->equipments->serialnumber;
+        $this->marcaEquipment = $infoEquipamento->equipments->brand;
+        $this->modelEquipment = $infoEquipamento->equipments->model;
+
+        $this->nameEquipment = $infoEquipamento->equipments->equipmentname;
+        $this->descriptionEquipment = $infoEquipamento->equipments->description;
+
+        $this->riscado = $infoEquipamento->equipments->riscado;
+        $this->partido = $infoEquipamento->equipments->partido;
+        $this->bomestado = $infoEquipamento->equipments->bom_estado;
+        $this->normalestado = $infoEquipamento->equipments->estado_normal;
+        $this->transformador = $infoEquipamento->equipments->transformador;
+        $this->mala = $infoEquipamento->equipments->mala;
+        $this->tinteiro = $infoEquipamento->equipments->tinteiro_toner;
+        $this->ac = $infoEquipamento->equipments->rato_pen;
+        $this->descriptionExtra = $infoEquipamento->equipments->extradescription;
+
+        // $anexos = $infoEquipamento->equipments->equipmentattachmentslink;
+        $this->anexosEquipamentosFromList = $infoEquipamento->equipments->equipmentattachmentslink;
+
+    }
+
+    public function atualizarCliente()
+    {
+        $customer = $this->customersInterface->getSpecificCustomerInfo($this->selectedCustomer);
+
+        if($this->vat == ""){
+            $vat = $customer->customers->nif;
+        } else {
+            $vat = $this->vat;
+        }
+
+        if($this->phone == ""){
+            $phone = $customer->customers->phone;
+        } else {
+            $phone = $this->phone;
+        }
+
+        if($this->email == ""){
+            $email = $customer->customers->email;
+        } else {
+            $email = $this->email;
+        }
+
+        $arrayPHC = [
+            "id"=> $customer->customers->id,
+            "no"=> $customer->customers->no,
+            "name" => $customer->customers->name,
+            "slug" => $customer->customers->slug,
+            "nif" => $vat,
+            "surname" => $customer->customers->slug,
+            "phone" => $phone,
+            "email" => $email,
+            "address" => $customer->customers->address,
+            "username" => $email,
+            "zipcode" => $customer->customers->zipcode,
+            "state" => $customer->customers->state,
+            "city" => $customer->customers->city,
+        ];
+
+
+        $encoded = json_encode($arrayPHC);
+
+        $curl = curl_init();
+
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => 'http://172.19.20.4:24004/customers/customers',
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'PUT',
+            CURLOPT_POSTFIELDS => $encoded,
+            CURLOPT_HTTPHEADER => array(
+                'Content-Type: application/json'
+            ),
+        ));
+
+        $response = curl_exec($curl);
+
+        curl_close($curl);
+
+        $this->dispatchBrowserEvent('swalEquip', ['title' => "Cliente", 'message' => "Cliente alterado com sucesso", 'status'=>'success']);
+    }
+
+  
     public function render(): View
     {
-        return view('tenant.livewire.tasks.add');
+        $this->customerList = $this->customerServicesInterface->getAllCustomers();
+
+        $getClient = $this->customersInterface->getSpecificCustomerInfo($this->selectedCustomer);
+        // dd($getClient);
+        $this->equipamentosList = $this->tasksInterface->getEquipments($getClient->customers->no);
+
+
+        return view('tenant.livewire.tasks.add',["customerList" => $this->customerList, "customer" => $this->customer, "customerLocations" => $this->customerLocations, "customerInterface" => $this->customersInterface, "equipamentosList" => $this->equipamentosList]);
     }
 
 }

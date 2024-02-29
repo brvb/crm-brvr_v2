@@ -20,17 +20,18 @@ class AlertCheckFinalizados extends Mailable
 
     public $pedido;
     public $intervencao;
-
+    public $cst;
 
     /**
      * Create a new message instance.
      *
      * @return void
      */
-    public function __construct($pedido, $intervencao)
+    public function __construct($pedido, $intervencao,$cst)
     {
         $this->pedido = $pedido;
         $this->intervencao = $intervencao;
+        $this->cst = $cst;
     }
 
     /**
@@ -41,7 +42,7 @@ class AlertCheckFinalizados extends Mailable
     public function envelope()
     {
           //env('MAIL_USERNAME')
-        $subject = 'O pedido #' . $this->pedido->reference . ' FOI ENCERRADO';
+        $subject = 'O pedido #' . $this->pedido->reference . ' FOI FINALIZADO';
         return new Envelope(
             subject: $subject,
             from: new Address("fsdfss@gmail.com", session('sender_name')),
@@ -75,7 +76,7 @@ class AlertCheckFinalizados extends Mailable
         $config = Config::first();
         $email = $this
             ->view('tenant.mail.alertemail.alertemailfinalizados',[
-
+                "cst" => $this->cst,
                 "task" => $this->pedido,
                 "intervencoes" => $this->intervencao,
                 "company_name" => $config->company_name,

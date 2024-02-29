@@ -9,21 +9,28 @@ use App\Models\Tenant\Pedidos;
 use App\Models\Tenant\Customers;
 use App\Models\Tenant\TasksTimes;
 use App\Models\Tenant\TeamMember;
+use App\Models\Tenant\Intervencoes;
 use App\Models\Tenant\TasksReports;
 use App\Http\Controllers\Controller;
+use App\Models\Tenant\CustomerServices;
 use Illuminate\Support\Facades\Redirect;
 use App\Interfaces\Tenant\Tasks\TasksInterface;
+use App\Interfaces\Tenant\Customers\CustomersInterface;
 use App\Interfaces\Tenant\TasksReports\TasksReportsInterface;
-use App\Models\Tenant\Intervencoes;
+use App\Interfaces\Tenant\CustomerServices\CustomerServicesInterface;
 
 class TasksController extends Controller
 {
     private TasksInterface $tasksInterface;
+    private CustomersInterface $customersRepository;
+    private CustomerServicesInterface $customerServicesRepository;
 
-    public function __construct(TasksInterface $tasksInterface, TasksReportsInterface $tasksReportsInterface)
+    public function __construct(TasksInterface $tasksInterface, TasksReportsInterface $tasksReportsInterface,CustomersInterface $customersInterface,CustomerServicesInterface $customersServicesRepository)
     {
         $this->tasksInterface = $tasksInterface;
         $this->tasksReportsInterface = $tasksReportsInterface;
+        $this->customersRepository = $customersInterface;
+        $this->customerServicesRepository = $customersServicesRepository;
     }
 
     /**
@@ -48,9 +55,11 @@ class TasksController extends Controller
      */
     public function create(): View
     {
+        $customerList = $this->customerServicesRepository->getAllCustomers();
+        // $customers = $this->customersRepository->getAllCustomersCollection();
         return view('tenant.tasks.create', [
             'themeAction' => 'form_element_data_table',
-            'customerList' => Customers::all(),
+            'customerList' => $customerList,
         ]);
     }
 
@@ -114,7 +123,7 @@ class TasksController extends Controller
         Intervencoes::where('id_pedido',$task->id)->delete();
     
         return to_route('tenant.tasks.index')
-            ->with('message', __('Task deleted with success!'))
+            ->with('message', "Pedido eliminado com sucesso!")
             ->with('status', 'sucess');
     }
 
@@ -129,7 +138,7 @@ class TasksController extends Controller
         TasksTimes::where('task_id',$taskNumber)->delete();
 
         return to_route('login')
-            ->with('message', __('Task deleted with success!'))
+            ->with('message', "Pedido eliminado com sucesso!")
             ->with('status', 'sucess');
     }
 

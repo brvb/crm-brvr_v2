@@ -20,6 +20,7 @@ use App\Http\Requests\Tenant\CustomerContacts\CustomerContactsFormRequest;
 
 class CustomersController extends Controller
 {
+    private $customerInfo;
     private CustomersInterface $customersRepository;
 
     public function __construct(CustomersInterface $customersRepository)
@@ -67,17 +68,17 @@ class CustomersController extends Controller
      * @param Customers $customer
      * @return void
      */
-    public function edit(Customers $customer) : View
+    public function edit($customer) : View
     {
-        $customer = Customers::where('id',$customer->id)->with('customerCounty')->first();
+        //$customer = Customers::where('id',$customer->id)->with('customerCounty')->first();
+
+
+        $customerInfo = $this->customersRepository->getSpecificCustomerInfo($customer);
    
-        $districts = Districts::all();
-        $counties = Counties::all();
-        $account_manager = $customer->account_manager;
            
         $themeAction = 'form_element_data_table';
        
-        return view('tenant.customers.edit', compact('customer', 'themeAction', 'districts', 'counties', 'account_manager'));
+        return view('tenant.customers.edit', compact('customerInfo', 'themeAction'));
     }
 
     /**
@@ -89,6 +90,7 @@ class CustomersController extends Controller
     public function store(CustomersFormRequest $request) : RedirectResponse
     {
         $this->customersRepository->add($request);
+
         if(Auth::user()->type_user == '2')
         {
             $customer = Customers::where('user_id',Auth::user()->id)->first();
@@ -108,9 +110,10 @@ class CustomersController extends Controller
      * @param CustomersFormRequest $request
      * @return RedirectResponse
      */
-    public function update(Customers $customer, CustomersFormRequest $request) : RedirectResponse
+    public function update($noClient,CustomersFormRequest $request) : RedirectResponse
     {
-        $this->customersRepository->update($customer,$request);
+
+        $this->customersRepository->update($noClient,$request);
         
         if(Auth::user()->type_user == '2')
         {

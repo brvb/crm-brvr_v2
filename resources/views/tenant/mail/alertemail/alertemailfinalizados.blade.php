@@ -53,54 +53,99 @@
                                             <hr>
                                             <div class="table" style="font-family:Arial, Helvetica, sans-serif; box-sizing: border-box; color: #74787e;">
                                                 @php
-                                                    $totalHorasMes = 0;
+
+                                                    $somaDiferencasSegundos = 0;
+
+                                                    $arrHours= [];
+                                                    $horas = 0;
+                                                    $novoValor = 0;
+
+                                                    foreach ($intervencao as $hora)
+                                                    {
+                                                        $somaDiferencasSegundos = 0;
+                                                        $horaFormatada = "";
+
+                                                        $dia_inicial = $hora->data_inicio.' '.$hora->hora_inicio;
+                                                        $dia_final = $hora->data_final.' '.$hora->hora_final;
+
+                                                        $data1 = Carbon\Carbon::parse($dia_inicial);
+                                                        $data2 = Carbon\Carbon::parse($dia_final);
+
+                                        
+                                                        $result = $data1->diff($data2);
+
+                                                        $hours = $result->days * 24 + $result->h;
+                                                        $minutes = $result->i;
+                                        
+                
+                                                        $hoursMinutesDifference = sprintf('%d:%02d', $hours, $minutes);
+
+
+                                                        $arrHours[$hora->id] = [
+                                                            "valor" => $hoursMinutesDifference,
+                                                            "descontos" => $hora->descontos
+                                                        ];
+                                                    }
+
+                                                    $arrDescontado = [];
+
+                                                    foreach($arrHours as $hora)
+                                                    {
+                                                        if($hora["descontos"] == null)
+                                                        {
+                                                            $hora["descontos"] = "+0";
+                                                        }
+
+                                                        $valorOriginal = $hora["valor"]; // Exemplo de valor original em horas
+
+                                                    
+                                                        list($horas, $minutos) = explode(':', $valorOriginal);
+
+
+                                                        $valorEmHorasDecimais = $horas + ($minutos / 60);
+
+                                                        if($hora["descontos"][0] == "+"){
+                                                            $novoValorEmHorasDecimais = $valorEmHorasDecimais + substr($hora["descontos"], 1);
+                                                        }
+                                                        else {
+                                                            $novoValorEmHorasDecimais = $valorEmHorasDecimais - substr($hora["descontos"], 1);
+                                                        }
+                                                    
+
+                                                        $novoValorEmHorasDecimais = max(0, $novoValorEmHorasDecimais);
+
+
+                                                        $novoHoras = floor($novoValorEmHorasDecimais);
+                                                        $novoMinutos = ($novoValorEmHorasDecimais - $novoHoras) * 60;
+
+
+                                                        $novoValor = sprintf('%d:%02d', $novoHoras, $novoMinutos);
+
+                                                        array_push($arrDescontado,$novoValor);
+
+                                                    }
+
+                                                    $horas = global_hours_sum_individual($arrDescontado);
+
+                                                    
                                                 @endphp
-
-                                                @foreach ($intervencao as $intervencaoItem)
-                                                    @php
-                                                        $inicioTimestamp = strtotime($intervencaoItem->data_inicio . ' ' . $intervencaoItem->hora_inicio);
-                                                        $finalTimestamp = strtotime($intervencaoItem->data_final . ' ' . $intervencaoItem->hora_final);
-                                                        $diferencaEmSegundos = $finalTimestamp - $inicioTimestamp;
-                                                        $totalHorasMes += $diferencaEmSegundos;
-                                                    @endphp
-                                                @endforeach
-
-                                                @php
-                                                    $totalHoras = floor($totalHorasMes / 3600);
-                                                    $totalMinutos = floor(($totalHorasMes % 3600) / 60);
-                                                    $tempoTotalFormatado = sprintf('%02d:%02d', $totalHoras, $totalMinutos);
-
-                                                    $ultimaIntervencao = $intervencao->last();
-                                                @endphp
-
-                                                
-                                                <p>
-                                                    @php
-                                                        $inicioTimestamp = strtotime($ultimaIntervencao->data_inicio . ' ' . $ultimaIntervencao->hora_inicio);
-                                                        $finalTimestamp = strtotime($ultimaIntervencao->data_final . ' ' . $ultimaIntervencao->hora_final);
-                                                        $diferencaEmSegundos = $finalTimestamp - $inicioTimestamp;
-
-                                                        $horasUltimaIntervencao = floor($diferencaEmSegundos / 3600);
-                                                        $minutosUltimaIntervencao = floor(($diferencaEmSegundos % 3600) / 60);
-                                                        $tempoTotalFormatadoUltimaIntervencao = sprintf('%02d:%02d', $horasUltimaIntervencao, $minutosUltimaIntervencao);
-                                                    @endphp
-                                                </p>
-                                                
-
-                                                <p>O seu pedido #{{$task->reference}}foi <b>ENCERRADO</b> dia {{ $ultimaIntervencao->data_final }} às {{ $ultimaIntervencao->hora_final }}.</p>
-                                                <p>O pedido durou {{ $tempoTotalFormatadoUltimaIntervencao }} horas</p><br>
-                                                <p>Atualmente o seu saldo é de XXX horas</p><!-- No caso de cliente com bolsa de horas (falta adicionar no banco de dados e verificar aqui)-->
-                                                <p>Neste mês já consumiu XXX horas</p><!-- No caso de cliente com avença mensal -->
-                                            
+                                                <p>O seu pedido {{strtolower($task->tipoPedido->name)}} #{{$task->reference}} foi <b>FINALIZADO</b> dia {{ date('Y-m-d') }} às {{ date('H:i:s') }}.</p>
+                                                @if($cst->customers->type == "Faturação Normal")
+                                                <p>O pedido teve uma duração de {{ $horas }} minutos.</p><br>
+                                                @elseif($cst->customers->type == "Bolsa de Horas")
+                                                <p>Atualmente o seu saldo é de {{date('H:i:s',strtotime($cst->customers->balance_hours))}} horas.</p><!-- No caso de cliente com bolsa de horas (falta adicionar no banco de dados e verificar aqui)-->
+                                                @else
+                                                <p>Neste mês já consumiu {{date('H:i:s',strtotime($cst->customers->hours_spent))}} horas.</p><!-- No caso de cliente com avença mensal -->
+                                                @endif
                                             </div>
                                             <hr>
-                                            <p style="font-family: Avenir, Helvetica, sans-serif;white-space: nowrap; box-sizing: border-box; color: #3d3d3d; font-size: 16px; line-height: 1.5em; margin-top: 0; text-align: left;">
+                                            <p style="font-family: Avenir, Helvetica, sans-serif; box-sizing: border-box; color: #74787e; font-size: 16px; line-height: 1.5em; margin-top: 0; text-align: left;">
                                                 {{__("Compliments")}},<br>
                                                 <strong>{{ $company_name }}</strong>
                                             </p>
                                             <p>
                                                 <small>
-                                                    Não responda a este email. <br>
+                                                    <label style="font-size: 1.5em;font-weight: bold;text-decoration: underline;">Não responda a este email. </label><br>
                                                     Para qualquer esclarecimento use os contactos habituais:<br>
                                                     Telefone: 252646260 Email: suporte@brvr.pt <br>
                                                     Identifique sempre o número de pedido.

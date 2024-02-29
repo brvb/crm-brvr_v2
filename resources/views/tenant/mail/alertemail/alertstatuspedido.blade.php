@@ -49,25 +49,23 @@
                                             <p style="text-align:center;padding-bottom:6px;">
                                                 <img src="{{ global_tenancy_asset('/app/public/images/logo/' . $logotipo) }}" alt="{{ $company_name }}">
                                             </p>
-                                            <h1 style="font-family: Avenir, Helvetica, sans-serif; box-sizing: border-box; color: #2F3133; font-size: 19px; font-weight: bold; margin-top: 0; text-align: left;">
-                                                {{ $subject }}
-                                            </h1>
+                                           
                                             <hr>
                                             <div class="table" style="font-family: Avenir, Helvetica, sans-serif; box-sizing: border-box;">
                                                 <p style="font-family:Arial, Helvetica, sans-serif; color: #74787e;">
-                                                    <b>O seu pedido #{{$task->reference}} está {{strtoupper($task->tipoEstado->nome_estado)}}!</b>
+                                                    <b>O seu pedido {{strtolower($task->tipoPedido->name)}} #{{$task->reference}} está {{strtolower($task->tipoEstado->nome_estado)}} á data de {{date("Y-m-d H:i:s")}}</b>
                                                 </p>
                                                 <p>
-                                                    {{date('Y-m-d H:i:s')}}
-                                                </p>
-                                                <p>
-                                                    <span>Cliente: {{$task->customer->name}}</span><br>
-                                                    <span>Telefone: {{$task->customer->contact}}</span><br>
-                                                    <span>Email: {{$task->customer->email}}</span><br>
-                                                    <span>Técnico: {{$task->tech->name}}</span><br>
+                                                    <span>Cliente: {{$cliente->customers->name}}</span><br>
+                                                    <span>Telefone: {{$cliente->customers->phone}}</span><br>
+                                                    <span>Email: {{$cliente->customers->email}}</span><br>
+                                                    <span>Técnico designado: {{$task->tech->name}}</span><br>
                                                     <span>Assunto: {{$task->descricao}}</span><br>
                                                 </p>
-                                                <p>Qualquer informação que ache oportuna, peço que nos avise.</p>
+                                                @if($mensagem != "")
+                                                    <p><span style="font-weight:bolder;">Observações:</span> {{$mensagem}}</p>
+                                                @endif
+                                                <p><u>Qualquer informação que ache oportuna, peço que nos avise.</u></p>
                                             </div>
                                             <hr>
                                                 <p style="font-family: Avenir, Helvetica, sans-serif; box-sizing: border-box; color: #74787e; font-size: 16px; line-height: 1.5em; margin-top: 0; text-align: left;">
@@ -75,11 +73,12 @@
                                                     <strong>{{$task->tech->name}}</strong>
                                                 </p>
                                                 <p>
+                                                    
+                                                    <u style="font-size: 20px;font-weight:bolder;">Não responda a este email.</u> <br>
                                                     <small>
-                                                    Não responda a este email. <br>
-                                                    Para qualquer esclarecimento use os contactos habituais:<br>
-                                                            Telefone: 252646260 Email: suporte@brvr.pt <br>
-                                                            Identifique sempre o número de pedido.
+                                                        Para qualquer esclarecimento use os contactos habituais:<br>
+                                                        Telefone: 252646260 Email: suporte@brvr.pt <br>
+                                                        Identifique sempre o número de pedido.
                                                     </small>
                                                 </p>
                                         </td>

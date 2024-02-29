@@ -17,16 +17,17 @@ class TaskReceiveEmailUser extends Mailable
 {
     use Queueable, SerializesModels;
     public $pedido;
+    public $customer;
 
     /**
      * Create a new message instance.
      *
      * @return void
      */
-    public function __construct($pedido)
+    public function __construct($pedido,$customer)
     {
         $this->pedido = $pedido;
-
+        $this->customer = $customer;
     }
 
     /**

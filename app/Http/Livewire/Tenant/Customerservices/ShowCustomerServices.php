@@ -2,6 +2,8 @@
 
 namespace App\Http\Livewire\Tenant\Customerservices;
 
+use App\Interfaces\Tenant\CustomerLocation\CustomerLocationsInterface;
+use App\Interfaces\Tenant\Customers\CustomersInterface;
 use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\Tenant\Services;
@@ -24,10 +26,14 @@ class ShowCustomerServices extends Component
      ];
 
     protected object $customerServicesRepository;
+    protected object $customersRepository;
+    protected object $customerLocationRepository;
 
-    public function boot(CustomerServicesInterface $customerService)
+    public function boot(CustomerServicesInterface $customerService,CustomersInterface $customerInterface,CustomerLocationsInterface $customerLocationInterface)
     {
         $this->customerServicesRepository = $customerService;
+        $this->customersRepository = $customerInterface;
+        $this->customerLocationRepository =  $customerLocationInterface;
     }
 
     public function mount(): void
@@ -89,10 +95,12 @@ class ShowCustomerServices extends Component
         } else {
             $this->customerServices = $this->customerServicesRepository->getAllCustomerServices($this->perPage);
         }
-
+        
 
         return view('tenant.livewire.customerservices.show', [
-            'customerServices' => $this->customerServices
+            'customerServices' => $this->customerServices,
+            'customersRepository' => $this->customersRepository,
+            'customerLocationRepository' => $this->customerLocationRepository
         ]);
     }
 }

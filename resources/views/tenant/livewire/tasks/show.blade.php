@@ -43,10 +43,13 @@
                             <div class="col-12 col-sm-6 col-md-3">
                                 <div class="form-group">
                                     <label>{{__("Select Customer")}}</label>
+                                    @php
+                                        $customers = $customersRepository->getAllCustomersCollection();
+                                    @endphp
                                     <select class="form-control" name="selectCustomer" id="selectCustomer" wire:model="client">
                                         <option value="0">{{__("All")}}</option>
-                                            @foreach ($customers as $customer)
-                                                <option value={{$customer->id}}>{{$customer->short_name}}</option> 
+                                            @foreach ($customers->customers as $customer)
+                                                <option value={{$customer->id}}>{{$customer->name}}</option> 
                                             @endforeach
                                     </select>
                                 </div>
@@ -140,10 +143,10 @@
                         </select>
                         {{ __('entries') }}</label>
                 </div>
-                <div id="dataTables_search_filter" class="dataTables_filter">
+                {{-- <div id="dataTables_search_filter" class="dataTables_filter">
                     <label>{{ __('Search') }}:
                         <input type="search" name="searchString" wire:model="searchString"></label>
-                </div>
+                </div> --}}
             </div>
             <!-- display dataTable no-footer -->
             <div class="table-responsive w-100">
@@ -179,7 +182,12 @@
                                     </div>
                                 </td>
                                 <td>{{ $item->reference }}</td>
-                                <td>{{ $item->customer->short_name }}</td>
+                                <td>
+                                    @php
+                                         $customer = $customersRepository->getSpecificCustomerInfo($item->customer_id);
+                                    @endphp
+                                    {{ $customer->customers->name }}
+                                </td>
                                 <td>{{ $item->servicesToDo->name}}</td>
                                 <td>{{ $item->tech->name }}</td>
                                 <td>
@@ -192,7 +200,12 @@
                                     <i class="fa fa-clock-o" aria-hidden="true"></i> {{ date('H:i',strtotime($item->created_at)) }}
                                     @endif
                                 </td>
-                                <td>{{ $item->location->locationCounty->name }}</td>
+                                <td>
+                                    @php
+                                       $locations = $locationRepository->getSpecificLocationInfo($item->location_id); 
+                                    @endphp
+                                    {{ $locations->locations->address }}
+                                </td>
 
                                 <td>{{ $item->tipoEstado->nome_estado }}</td>
 
@@ -224,12 +237,19 @@
                                                     
                                                     <a class="dropdown-item" href="{{ route('tenant.tasks.edit', $item->id) }}">Atualizar Pedido</a>
                                                     
-                                                    <a class="dropdown-item" wire:click="enviaStatus({{$item->id}})">Enviar Status</a>
+                                                    {{-- <a class="dropdown-item" wire:click="enviaStatus({{$item->id}})">Enviar Status</a> --}}
+
+                                                    <button class="dropdown-item" data-type="form" data-title="Título do Alerta" wire:click="abrirPopUp({{$item->id}})" id="btnLoc">
+                                                        Enviar Status
+                                                    </button>
 
                                                     @if($item->tipoEstado->id == 2)
-                                                        <a class="dropdown-item" wire:click="reabrirPedido({{$item->id}})">Reclamação Pedido</a>
+                                                        <button class="dropdown-item" wire:click="reabrirPedido({{$item->id}})">Reclamação Pedido</button>
                                                     @endif
 
+                                                    @if($item->tipoEstado->id == 2 && Auth::user()->type_user == 0)
+                                                        <button class="dropdown-item" wire:click="finalizarPedido({{$item->id}})">Finalizar Pedido</button>
+                                                    @endif
                                                 
                                                     <button class="dropdown-item btn-sweet-alert" data-type="form"
                                                         data-route="{{ route('tenant.tasks.destroy', $item->id) }}"
@@ -268,6 +288,31 @@
     //     jQuery('#selectedService').select2();
     //     jQuery("#selectedService").on("select2:select", function (e) { @this.selectedService = jQuery('#selectedService').find(':selected').val(); });
     // });
+
+    window.addEventListener('abrirPopUp', function(e) {
+
+        swal.fire({
+            title: e.detail.title,
+            html: e.detail.message,
+            type: e.detail.status,
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            confirmButtonText: "Envia Status",
+            cancelButtonText: "Cancela"
+            }).then((result) => { 
+
+                if(result.value){
+
+                    var descricao = document.getElementById('qtdrececionada').value;
+                    var itemId = e.detail.itemId; 
+                
+                    livewire.emit("enviaStatus",itemId,descricao);
+                }   
+                             
+            })
+
+    });
+
 
     window.addEventListener('livewire:load', event => {
         restartObjects();

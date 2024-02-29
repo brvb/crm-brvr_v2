@@ -61,6 +61,7 @@
                 </thead>
                 <tbody>
                     @foreach ($customerServices as $customer)
+                       
                         <tr>
                             <td>
                                 <div class="custom-control custom-checkbox">
@@ -69,8 +70,18 @@
                                     <label class="custom-control-label" for="customCheckBox{{ $customer->id }}"></label>
                                 </div>
                             </td>
-                            <td>{{ $customer->customer->name }}</td>
-                            <td>{{ $customer->customerLocation->description }}</td>
+                            <td>
+                                @php       
+                                    $customerInfo = $customersRepository->getSpecificCustomerInfo($customer->customer_id);
+                                @endphp
+                                {{ $customerInfo->customers->name }}
+                            </td>
+                            <td>
+                                @php
+                                     $customerLocationInfo = $customerLocationRepository->getSpecificLocationInfo($customer->location_id);
+                                @endphp
+                                {{ $customerLocationInfo->locations->address }}
+                            </td>
                             <td>{{ $customer->service->name }}</td>
                             <td>{{ $customer->start_date }}</td>
                             <td>{{ $customer->type }}</td>

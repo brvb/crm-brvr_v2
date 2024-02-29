@@ -99,7 +99,15 @@
                                                    
                                                     <tr style="text-align:center;">                                                 
                                                         <td>{{$info->reference}}</td>
-                                                        <td>{{$info->customer->name}}</td>
+                                                        <td>
+                                                            @if(isset($info->customer_id))
+                                                                @php
+                                                                    //$customer = \App\Models\Tenant\Customers::where('id',$item->pedido->customer_id)->first();
+                                                                    $customer = $customersRepository->getSpecificCustomerInfo($info->customer_id);
+                                                                @endphp
+                                                                {{ $customer->customers->name }}
+                                                            @endif
+                                                        </td>
                                                         <td>{{$info->descricao}}</td>
                                                         <td>
                                                             @if($info->data_agendamento == null)
@@ -178,7 +186,17 @@
                                                    
                                                     <tr style="text-align:center;">                                                 
                                                         <td>{{$info->reference}}</td>
-                                                        <td>{{$info->customer->name}}</td>
+                                                        <td>
+        
+                                                            @if(isset($info->customer_id))
+                                                                @php
+                                                                    //$customer = \App\Models\Tenant\Customers::where('id',$item->pedido->customer_id)->first();
+                                                                    $customer = $customersRepository->getSpecificCustomerInfo($info->customer_id);
+                                                                    
+                                                                @endphp
+                                                                {{ $customer->customers->name }}
+                                                            @endif
+                                                        </td>
                                                         <td>{{$info->descricao}}</td>
                                                         <td>
                                                             @if($info->data_agendamento == null)
@@ -257,7 +275,15 @@
                                                    
                                                     <tr style="text-align:center;">                                                 
                                                         <td>{{$info->reference}}</td>
-                                                        <td>{{$info->customer->name}}</td>
+                                                        <td>
+                                                            @if(isset($info->customer_id))
+                                                                @php
+                                                                    //$customer = \App\Models\Tenant\Customers::where('id',$item->pedido->customer_id)->first();
+                                                                    $customer = $customersRepository->getSpecificCustomerInfo($info->customer_id);
+                                                                @endphp
+                                                                {{ $customer->customers->name }}
+                                                            @endif
+                                                        </td>
                                                         <td>{{$info->descricao}}</td>
                                                         <td>
                                                             @if($info->data_agendamento == null)
@@ -316,10 +342,13 @@
                                                         <td>{{ $item->data_inicio }}</td>
                                                         <td>{{ $item->hora_inicio }} / {{ $item->hora_final }}</td>
                                                         <td>
-                                                            @php
-                                                                $customer = \App\Models\Tenant\Customers::where('id',$item->pedido->customer_id)->first();
-                                                            @endphp
-                                                            {{ $customer->name }}
+                                                            @if(isset($item->pedido->customer_id))
+                                                                @php
+                                                                    //$customer = \App\Models\Tenant\Customers::where('id',$item->pedido->customer_id)->first();
+                                                                    $customer = $customersRepository->getSpecificCustomerInfo($item->pedido->customer_id);
+                                                                @endphp
+                                                                {{ $customer->customers->name }}
+                                                            @endif
                                                         </td>
                                                         <td>{{ $item->descricao_realizado }}</td>
                                                         <td>

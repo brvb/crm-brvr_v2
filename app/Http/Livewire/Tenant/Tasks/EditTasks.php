@@ -6,6 +6,7 @@ use App\Models\User;
 use Livewire\Component;
 use Livewire\Redirector;
 use App\Events\ChatMessage;
+use App\Interfaces\Tenant\CustomerLocation\CustomerLocationsInterface;
 use Livewire\WithFileUploads;
 use App\Models\Tenant\Services;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -25,6 +26,7 @@ use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Validator;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use App\Interfaces\Tenant\Tasks\TasksInterface;
+use App\Interfaces\Tenant\Customers\CustomersInterface;
 use App\Interfaces\Tenant\TasksReports\TasksReportsInterface;
 use App\Interfaces\Tenant\CustomerServices\CustomerServicesInterface;
 
@@ -46,7 +48,7 @@ class EditTasks extends Component
     public ?string $taskReference = "";
     public int $selectedId;
     public string $selectedCustomer = '';
-    public ?object $customerList = NULL;
+    protected ?object $customerList = NULL;
     public string $contactoAdicional = '';
     public string $selectedPedido = '';
     public ?object $pedidosList = NULL;
@@ -55,10 +57,13 @@ class EditTasks extends Component
     public string $serviceDescription = '';
     public string $descriptionReabertura = '';
     public ?object $membersList = NULL;
-    public ?object $customerLocations = NULL;
+    protected ?object $customerLocations = NULL;
     public string $selectedLocation = '';
+    public string $selectedEquipamentos = '';
+    private ?object $equipamentosList = NULL;
 
     public $iteration = 0;
+    public $iterationEquipment = 0;
     
     public string $dateCreate = '';
     public string $timeCreate = '';
@@ -113,6 +118,8 @@ class EditTasks extends Component
 
     private TasksInterface $tasksInterface;
     private TasksReportsInterface $tasksReportsInterface;
+    private CustomersInterface $customersInterface;
+    private CustomerLocationsInterface $locationsInterface;
 
     protected $listeners = ['resetChanges' => 'resetChanges'];
 
@@ -123,10 +130,12 @@ class EditTasks extends Component
      * @param TasksInterface $tasksInterface
      * @return Void
      */
-    public function boot(TasksInterface $tasksInterface, TasksReportsInterface $tasksReportsInterface): Void
+    public function boot(TasksInterface $tasksInterface, TasksReportsInterface $tasksReportsInterface,CustomersInterface $customersInterface,CustomerLocationsInterface $customerLocation): Void
     {
         $this->tasksInterface = $tasksInterface;
         $this->tasksReportsInterface = $tasksReportsInterface;
+        $this->customersInterface = $customersInterface;
+        $this->locationsInterface = $customerLocation;
     }
 
    
@@ -145,7 +154,7 @@ class EditTasks extends Component
         $this->selectedId = $taskToUpdate->id;
        
         $this->selectedCustomer = $taskToUpdate->customer_id;
-        $this->customerList = Customers::all();
+        $this->customerList = $this->customersInterface->getAllCustomersCollection();
 
         $this->selectedPedido = $taskToUpdate->tipo_pedido;
         $this->pedidosList = TiposPedidos::all();
@@ -163,8 +172,13 @@ class EditTasks extends Component
         }
         
 
-        $this->customerLocations = CustomerLocations::where('customer_id',$taskToUpdate->customer_id)->get();
-        $this->selectedLocation = $taskToUpdate->location_id;
+        //$this->customerLocations = CustomerLocations::where('customer_id',$taskToUpdate->customer_id)->get();
+        $cust = $this->customersInterface->getSpecificCustomerInfo($taskToUpdate->customer_id);
+
+        $this->customerLocations = $this->customersInterface->getLocationsFromCustomerCollection($cust->customers->no);
+    
+        $location = $this->locationsInterface->getSpecificLocationInfo($taskToUpdate->location_id);
+        $this->selectedLocation = $location->locations->id;
 
 
         $this->selectedTechnician = $taskToUpdate->tech_id;
@@ -179,6 +193,11 @@ class EditTasks extends Component
         if($taskToUpdate->alert_email != null)
         {
             $this->alert_email = $taskToUpdate->alert_email;
+        }
+
+        if($taskToUpdate->nr_serie != null)
+        {
+            $this->stateEquipment = "block";
         }
 
         $this->serieNumber = $taskToUpdate->nr_serie;
@@ -274,9 +293,10 @@ class EditTasks extends Component
         
         $this->dispatchBrowserEvent('contentChanged');
         $this->iteration++;
+        $this->iterationEquipment++;
         
 
-        if($customer->customerCounty == null)
+        if(!isset($customer->customerCounty))
         {
              $this->dispatchBrowserEvent('swal', ['title' => __('Services'), 'message' => __('You need to select a county for this customer'), 'status'=>'error','function' => 'client']);
              $this->skipRender();
@@ -306,11 +326,11 @@ class EditTasks extends Component
             'quem_pediu' => $this->quem_pediu,
          ],
          [
-            'selectedCustomer' => 'required|int',
+            'selectedCustomer' => 'required|string',
             'selectedPedido' => 'required|int',
             'selectedServico' => 'required|int',
             'serviceDescription' => 'required|string',
-            'selectedLocation' => 'required|int',
+            'selectedLocation' => 'required|string',
             'selectPrioridade' => 'required|int',
             'selectedTechinician' => 'required|int',
             'origem_pedido' => 'required|string',
@@ -355,12 +375,13 @@ class EditTasks extends Component
       
       
         //fazer a criacao do PDF da etiqueta
-        if($this->riscado != 0 || $this->partido != 0 || $this->bomestado != 0 || $this->normalestado != 0 || $this->transformador != 0 || $this->mala != 0 || $this->tinteiro != 0 || $this->ac != 0)
+        if($this->serieNumber != null)
         {
+            $customer = $this->customersInterface->getSpecificCustomerInfo($this->selectedCustomer);
             $qrcode = base64_encode(QrCode::size(150)->generate('https://hihello.me/pt/p/adc8b89e-a3de-4033-beeb-43384aafa1c3?f=email'));
        
             $customPaper = array(0, 0, 400.00, 216.00);
-            $pdf = PDF::loadView('tenant.livewire.tasks.impressaopdf',["impressao" => $this, "qrcode" => $qrcode])->setPaper($customPaper);
+            $pdf = PDF::loadView('tenant.livewire.tasks.impressaopdf',["impressao" => $this,"customer" => $customer, "qrcode" => $qrcode])->setPaper($customPaper);
         
             $content = $pdf->download()->getOriginalContent();
 
@@ -465,6 +486,28 @@ class EditTasks extends Component
             ->with('status', 'info');
     }
 
+    public function updatedSelectedEquipamentos()
+    {
+        $infoEquipamento = $this->tasksInterface->getEquipmentBySerial($this->selectedEquipamentos);
+
+        $this->serieNumber = $infoEquipamento->equipments->serialnumber;
+        $this->marcaEquipment = $infoEquipamento->equipments->brand;
+        $this->modelEquipment = $infoEquipamento->equipments->model;
+
+        $this->nameEquipment = $infoEquipamento->equipments->equipmentname;
+        $this->descriptionEquipment = $infoEquipamento->equipments->description;
+
+        $this->riscado = $infoEquipamento->equipments->riscado;
+        $this->partido = $infoEquipamento->equipments->partido;
+        $this->bomestado = $infoEquipamento->equipments->bom_estado;
+        $this->normalestado = $infoEquipamento->equipments->estado_normal;
+        $this->transformador = $infoEquipamento->equipments->transformador;
+        $this->mala = $infoEquipamento->equipments->mala;
+        $this->tinteiro = $infoEquipamento->equipments->tinteiro_toner;
+        $this->ac = $infoEquipamento->equipments->rato_pen;
+        $this->descriptionExtra = $infoEquipamento->equipments->extradescription;
+    }
+
     /**
      * Returns the view of the task edit
      *
@@ -472,7 +515,10 @@ class EditTasks extends Component
      */
     public function render(): View
     {
-        return view('tenant.livewire.tasks.edit');
+        $getClient = $this->customersInterface->getSpecificCustomerInfo($this->selectedCustomer);
+        $this->equipamentosList = $this->tasksInterface->getEquipments($getClient->customers->no);
+
+        return view('tenant.livewire.tasks.edit',["customersInterface" => $this->customersInterface, "locationsInterface" => $this->locationsInterface, "customerList" => $this->customerList, "customerLocations" => $this->customerLocations, "equipamentosList" => $this->equipamentosList]);
     }
 
 }

@@ -2,39 +2,42 @@
 
 namespace App\Listeners\AlertEmail;
 
+use Exception;
+use App\Models\User;
 use App\Models\Tenant\Tasks;
 use App\Models\Tenant\Config;
+use App\Models\Tenant\Pedidos;
+use App\Models\Tenant\Customers;
 use App\Events\Alerts\AlertEvent;
-use App\Events\Alerts\CheckFinalizadosEvent;
 use App\Models\Tenant\TasksTimes;
 use App\Models\Tenant\TeamMember;
 use App\Mail\AlertEmail\AlertEmail;
+use App\Models\Tenant\Intervencoes;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\Tasks\TaskReportFinished;
 use App\Models\Tenant\CustomerServices;
 use Illuminate\Queue\InteractsWithQueue;
 use App\Events\TeamMember\TeamMemberEvent;
 use App\Events\Alerts\EmailConclusionEvent;
-use App\Mail\AlertEmail\AlertCheckFinalizados;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use App\Events\Alerts\CheckFinalizadosEvent;
 use App\Models\Tenant\CustomerNotifications;
+use App\Mail\AlertEmail\AlertCheckFinalizados;
 use App\Mail\AlertEmail\AlertEmailConclusionDay;
-use App\Models\Tenant\Customers;
-use App\Models\Tenant\Pedidos;
-use App\Models\Tenant\Intervencoes;
 use App\Models\Tenant\TeamMember as TenantTeamMember;
-use App\Models\User;
+use App\Interfaces\Tenant\Customers\CustomersInterface;
 
 class CheckFinalizadosNotification
 {
+    protected object $customerRepository;
     /**
      * Create the event listener.
      *
      * @return void
      */
-    public function __construct()
+    public function __construct(CustomersInterface $interfaceCustomers)
     {
-        //
+        $this->customerRepository = $interfaceCustomers;
     }
 
    
@@ -43,21 +46,46 @@ class CheckFinalizadosNotification
  
         $eventIntervencoes = $checkFinalizadosEvent->intervencoes;
 
+
         Pedidos::where('id',$eventIntervencoes->id_pedido)->update([
            "estado" => 5
         ]);
 
         $user = User::where('id',$eventIntervencoes->user_id)->first();
 
-        $pedido = Pedidos::where('id',$eventIntervencoes->id_pedido)->first();
+        $pedido = Pedidos::where('id',$eventIntervencoes->id_pedido)->with('tipoPedido')->first();
 
-        $intervencao = Intervencoes::where('id_pedido', $pedido->id)->Get();
+        $intervencao = Intervencoes::where('id_pedido', $pedido->id)->get();
 
-        $customer = Customers::where('id',$pedido->customer_id)->first();
+        $cst = $this->customerRepository->getSpecificCustomerInfo($pedido->customer_id);
 
-        Mail::to($user->email)->queue(new AlertCheckFinalizados($pedido, $intervencao));
+        
+        //PASSAR AQUI PARA O PHC ARRAY DO PEDIDO FINALIZADO
+      
 
-        Mail::to($customer->email)->queue(new AlertCheckFinalizados($pedido, $intervencao));
+
+
+
+        Mail::to($user->email)->queue(new AlertCheckFinalizados($pedido, $intervencao,$cst));
+
+
+        try {
+            if($cst->customers->email != "")
+            {
+                $array = explode(";",$cst->customers->email);
+        
+                foreach($array as $email)
+                {
+                    //CLIENTE
+                    Mail::to($email)->queue(new AlertCheckFinalizados($pedido, $intervencao,$cst));
+                }
+            }
+            
+        }
+        catch (Exception $e) {
+            echo $e;
+        }
+        
 
     }
 }

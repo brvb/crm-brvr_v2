@@ -18,15 +18,17 @@ class AlertReaberturaPedido extends Mailable
     use Queueable, SerializesModels;
 
     public $pedido;
+    public $cliente;
 
     /**
      * Create a new message instance.
      *
      * @return void
      */
-    public function __construct($pedido)
+    public function __construct($pedido,$cliente)
     {
         $this->pedido = $pedido;
+        $this->cliente = $cliente;
     }
 
     /**
@@ -38,7 +40,8 @@ class AlertReaberturaPedido extends Mailable
     {
           //env('MAIL_USERNAME')
 
-        $subject = 'RECLAMAÇÃO do pedido #' . $this->pedido->reference . '';
+        // $subject = 'RECLAMAÇÃO do pedido #' . $this->pedido->reference . '';
+        $subject = '🔴 RECLAMAÇÃO 🔴 do pedido #' . $this->pedido->reference . '';
         return new Envelope(
             subject: $subject,
             from: new Address("fsdfss@gmail.com", session('sender_name')),

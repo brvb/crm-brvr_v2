@@ -75,7 +75,7 @@ class CompletedAnalysisRepository implements CompletedAnalysisInterface
                 $query->where('reportStatus',2);
                 
                 $query->whereHas('taskCustomer', function ($queryy) use ($client){
-                    if($client != 0)
+                    if($client != "")
                     {
                         $queryy->Where('id',$client);
                     }
@@ -109,7 +109,7 @@ class CompletedAnalysisRepository implements CompletedAnalysisInterface
                 $query->where('reportStatus',2);
                 
                 $query->whereHas('taskCustomer', function ($queryy) use ($client){
-                    if($client != 0)
+                    if($client != "")
                     {
                         $queryy->where('id',$client);
                     }
@@ -220,13 +220,13 @@ class CompletedAnalysisRepository implements CompletedAnalysisInterface
                     }
     
                 })
-                ->whereHas('customer', function ($query) use ($searchString)
-                {
-                    if($searchString != "")
-                    {
-                        $query->where('short_name', 'like', '%' . $searchString . '%');
-                    }
-                })
+                // ->whereHas('customer', function ($query) use ($searchString)
+                // {
+                //     if($searchString != "")
+                //     {
+                //         $query->where('short_name', 'like', '%' . $searchString . '%');
+                //     }
+                // })
                 ->with('location')
                 ->orderBy('created_at','desc')
                 ->get();
@@ -245,13 +245,13 @@ class CompletedAnalysisRepository implements CompletedAnalysisInterface
                     }
     
                 })
-                ->whereHas('customer', function ($query) use ($searchString)
-                {
-                    if($searchString != "")
-                    {
-                        $query->where('short_name', 'like', '%' . $searchString . '%');
-                    }
-                })
+                // ->whereHas('customer', function ($query) use ($searchString)
+                // {
+                //     if($searchString != "")
+                //     {
+                //         $query->where('short_name', 'like', '%' . $searchString . '%');
+                //     }
+                // })
                 ->with('location')
                 ->orderBy('created_at','desc')
                 ->get();
@@ -376,7 +376,7 @@ class CompletedAnalysisRepository implements CompletedAnalysisInterface
     public function getAnalysisFilterToExcel($all,$searchString,$tech,$client,$typeReport,$work,$ordenation,$dateBegin,$dateEnd): Collection
     {
 
-        if($client != 0)
+        if($client != "")
         {
             $tasks = Pedidos::whereHas('tech', function ($query) use ($tech)
             {
@@ -402,14 +402,14 @@ class CompletedAnalysisRepository implements CompletedAnalysisInterface
 
               
               
-            })
-            ->whereHas('customer', function ($query) use ($searchString)
-            {
-                if($searchString != "")
-                {
-                    $query->where('short_name', 'like', '%' . $searchString . '%');
-                }
             });
+            // ->whereHas('customer', function ($query) use ($searchString)
+            // {
+            //     if($searchString != "")
+            //     {
+            //         $query->where('short_name', 'like', '%' . $searchString . '%');
+            //     }
+            // });
             
          
                 $tasks = $tasks
@@ -471,13 +471,13 @@ class CompletedAnalysisRepository implements CompletedAnalysisInterface
                    $query->where('id',$tech);
                }
             })
-            ->whereHas('customer', function ($query) use ($searchString)
-            {
-                if($searchString != "")
-                {
-                    $query->where('short_name', 'like', '%' . $searchString . '%');
-                }
-            })
+            // ->whereHas('customer', function ($query) use ($searchString)
+            // {
+            //     if($searchString != "")
+            //     {
+            //         $query->where('short_name', 'like', '%' . $searchString . '%');
+            //     }
+            // })
             ->whereHas('servicesToDo', function ($query) use ($work, $searchString)
             {
                

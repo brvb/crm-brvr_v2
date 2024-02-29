@@ -2,17 +2,18 @@
 
 namespace App\Http\Livewire\Tenant\Customerlocations;
 
+use Livewire\Component;
 use App\Models\Counties;
 use App\Models\Districts;
-use App\Models\Tenant\CustomerLocations;
-use Livewire\Component;
 use Livewire\WithPagination;
-use Illuminate\Contracts\View\View;
-use Illuminate\Support\Facades\Validator;
-
-use App\Models\Tenant\CustomerServices;
 use App\Models\Tenant\Services;
 use App\Models\Tenant\Customers;
+use Illuminate\Contracts\View\View;
+
+use App\Models\Tenant\CustomerServices;
+use App\Models\Tenant\CustomerLocations;
+use Illuminate\Support\Facades\Validator;
+use App\Interfaces\Tenant\CustomerLocation\CustomerLocationsInterface;
 
 class AddCustomerlocations extends Component
 {
@@ -22,7 +23,7 @@ class AddCustomerlocations extends Component
     public int $perPage;
     public string $searchString = '';
 
-    public object $customerList;
+    private object $customerList;
     public object $serviceList;
     public string $selectedCustomer = '';
     public string $selectedService = '';
@@ -59,16 +60,18 @@ class AddCustomerlocations extends Component
         'selectedService' => 'required|min:1',
     ];
 
+    protected object $customersLocationRepository;
+
+    public function boot(CustomerLocationsInterface $interfaceCustomersLocation)
+    {
+        $this->customersLocationRepository = $interfaceCustomersLocation;
+    }
+
     public function mount($customerList): void
     {
-        $this->customerList = $customerList;
-        // $this->districts = tenancy()->central(function () {
-        //     return Districts::all();
-        // });
-        // $this->counties = tenancy()->central(function () {
-        //     return Counties::all();
-        // });
-        // $this->serviceList = $serviceList;
+        //$this->customerList = $customerList;
+       
+        $this->customerList = $this->customersLocationRepository->getAllCostumerLocationsCollection();
 
           
         if(old('description')) {

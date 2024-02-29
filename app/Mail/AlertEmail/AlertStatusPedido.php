@@ -18,15 +18,19 @@ class AlertStatusPedido extends Mailable
     use Queueable, SerializesModels;
 
     public $pedido;
+    public $cliente;
+    public $mensagem;
 
     /**
      * Create a new message instance.
      *
      * @return void
      */
-    public function __construct($pedido)
+    public function __construct($pedido,$cliente,$mensagem)
     {
         $this->pedido = $pedido;
+        $this->cliente = $cliente;
+        $this->mensagem = $mensagem;
     }
 
     /**
@@ -38,7 +42,7 @@ class AlertStatusPedido extends Mailable
     {
           //env('MAIL_USERNAME')
 
-        $subject = 'AGENDAMENTO do pedido #' . $this->pedido->reference . '';
+        $subject = 'INFORMAÇÕES do pedido #' . $this->pedido->reference . ' - '.$this->pedido->tipoEstado->nome_estado;
         return new Envelope(
             subject: $subject,
             from: new Address("fsdfss@gmail.com", session('sender_name')),
@@ -71,14 +75,12 @@ class AlertStatusPedido extends Mailable
 
     public function build()
     {
-        $subject = 'AGENDAMENTO do pedido #' . $this->pedido->reference . '';
-
-
+        
 
         $email = $this
             ->view('tenant.mail.alertemail.alertstatuspedido',[
-                "subject" => $subject,
                 "task" => $this->pedido,
+                "mensagem" => $this->mensagem,
                 "company_name" => session('company_name'),
                 "vat" => session('vat'),
                 "contact" => session('contact'),

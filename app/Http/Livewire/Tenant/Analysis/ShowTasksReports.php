@@ -17,6 +17,7 @@ use App\Interfaces\Tenant\TeamMember\TeamMemberInterface;
 use App\Interfaces\Tenant\Setup\Services\ServicesInterface;
 use App\Interfaces\Tenant\TasksReports\TasksReportsInterface;
 use App\Interfaces\Tenant\Analysis\CompletedAnalysisInterface;
+use App\Interfaces\Tenant\CustomerLocation\CustomerLocationsInterface;
 
 class ShowTasksReports extends Component
 {
@@ -38,6 +39,7 @@ class ShowTasksReports extends Component
     protected object $teamMembersRepository;
     protected object $customersRepository;
     protected object $serviceRepository;
+    protected object $locationRepository;
 
 
     private ?object $analysis = NULL;
@@ -48,7 +50,7 @@ class ShowTasksReports extends Component
     private ?object $estadosPedido =  NULL;
 
     public int $technical = 0;
-    public int $client = 0;
+    public string $client = "";
     public int $work = 0;
     public int $typeTask = 0;
     public string $ordenation = '';
@@ -65,10 +67,11 @@ class ShowTasksReports extends Component
      * @param TasksInterface $tasksInterface
      * @return Void
      */
-    public function boot(CompletedAnalysisInterface $interfaceAnalysis,TasksInterface $tasksInterface, TasksReportsInterface $tasksReportsInterface, TeamMemberInterface $interfaceTeamMember, CustomersInterface $interfaceCustomers, ServicesInterface $interfaceService): Void
+    public function boot(CompletedAnalysisInterface $interfaceAnalysis,TasksInterface $tasksInterface, TasksReportsInterface $tasksReportsInterface, TeamMemberInterface $interfaceTeamMember, CustomersInterface $interfaceCustomers, ServicesInterface $interfaceService,CustomerLocationsInterface $locationInterface): Void
     {
         $this->tasksInterface = $tasksInterface;
         $this->tasksReportsInterface = $tasksReportsInterface;
+        $this->locationRepository = $locationInterface;
 
         /** Inicio Filtro */
         $this->teamMembersRepository = $interfaceTeamMember;
@@ -184,7 +187,7 @@ class ShowTasksReports extends Component
 
 
         $this->technical = 0;
-        $this->client = 0;
+        $this->client = "";
         $this->work = 0;
         $this->typeTask = 0;
         $this->dateBegin = '';
@@ -198,8 +201,11 @@ class ShowTasksReports extends Component
 
     public function exportExcel($analysis)
     {
-        //$this->analysis = $this->analysisRepository->getAllAnalysis($this->perPage);
-        return Excel::download(new ExportTasksExcel($analysis), 'export-'.date('Y-m-d').'.xlsx');
+       if(!empty($analysis))
+       {
+            return Excel::download(new ExportTasksExcel($analysis,$this->customersRepository), 'export-'.date('Y-m-d').'.xlsx');
+       }
+       
     }
 
    
@@ -247,7 +253,9 @@ class ShowTasksReports extends Component
             'members' => $this->members,
             'customers' => $this->customers,
             'services' => $this->service,
-            'estadosPedido' => $this->estadosPedido
+            'estadosPedido' => $this->estadosPedido,
+            'customersRepository' => $this->customersRepository,
+            'locationRepository' => $this->locationRepository
         ]);
 
         /** Fim do Filtro */

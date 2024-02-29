@@ -3,17 +3,18 @@
 namespace App\Http\Livewire\Tenant\Customerlocations;
 
 use Livewire\Component;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Contracts\View\View;
-use App\Models\Tenant\CustomerLocations;
 use App\Models\Counties;
 use App\Models\Districts;
+use Illuminate\Contracts\View\View;
+use App\Models\Tenant\CustomerLocations;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Validator as ValidationValidator;
+use App\Interfaces\Tenant\CustomerLocation\CustomerLocationsInterface;
 
 class EditCustomerlocations extends Component
 {
-    public object $customerList;
-    public object $customerLocation;
+    private object $customerList;
+    private object $customerLocation;
     public int $selectedCustomer;
 
     public object $districts;
@@ -26,11 +27,23 @@ class EditCustomerlocations extends Component
     public string $address = '';
     public string $zipcode = '';
     public string $main = '';
+    public string $district = '';
+    public string $county = '';
     public bool $changed;
     private bool $doRender = true;
     private string $function = '';
 
+    public $latitude;
+    public $longitude;
+
     protected $listeners = ['resetChanges' => 'resetChanges'];
+
+    protected object $customersLocationRepository;
+
+    public function boot(CustomerLocationsInterface $interfaceCustomersLocation)
+    {
+        $this->customersLocationRepository = $interfaceCustomersLocation;
+    }
 
     public function mount($customerList, $customerLocation): void
     {
@@ -115,36 +128,29 @@ class EditCustomerlocations extends Component
     public function render(): View
     {
         $id_customerLocation = $this->customerLocation;
-        return view('tenant.livewire.customerlocations.edit',compact('id_customerLocation'));
+        $customerList = $this->customerList;
+        return view('tenant.livewire.customerlocations.edit',compact('id_customerLocation','customerList'));
     }
 
     private function initProperties($customerList, $customerLocation): void
     {
-        
-        $this->customerList = $customerList;
+        $this->customerList = $this->customersLocationRepository->getAllCostumerLocationsCollection();
         $this->customerLocation = $customerLocation;
-        $this->selectedCustomer = $customerLocation->customer_id;
+        // $this->selectedCustomer = $customerLocation->customer_id;
 
 
-
-        $this->description = $customerLocation->description;
-        $this->contact = $customerLocation->contact;
-        $this->main = $customerLocation->main;
-        $this->manager_name = $customerLocation->manager_name;
-        $this->manager_contact = $customerLocation->manager_contact;
+        $this->description = $customerLocation->name;
+        $this->contact = $customerLocation->phone;
+        $this->main = $customerLocation->locationmainornot;
+        $this->manager_name = $customerLocation->managername;
+        $this->manager_contact = $customerLocation->phonemanager;
         $this->address = $customerLocation->address;
         $this->zipcode = $customerLocation->zipcode;
-        $this->district = $customerLocation->district_id;
-        $this->county = $customerLocation->county_id;
+        $this->district = $customerLocation->state;
+        $this->county = $customerLocation->city;
 
-        // $this->districts = tenancy()->central(function () {
-        //     return Districts::all();
-        // });
-        $this->districts = Districts::all();
-
-        $this->counties = tenancy()->central(function () use($customerLocation) {
-            return Counties::where('district_id', $customerLocation->district_id)->get();
-        });
+        $this->latitude = $customerLocation->latitude;
+        $this->longitude = $customerLocation->longitude;
 
         if (isset($this->perPage)) {
             session()->put('perPage', $this->perPage);

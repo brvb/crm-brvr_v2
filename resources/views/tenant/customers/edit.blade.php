@@ -1,10 +1,11 @@
-<x-tenant-layout title="Atualizar Cliente '{!! $customer->name !!}'" :themeAction="$themeAction">
+
+<x-tenant-layout title="Atualizar Cliente '{!! $customerInfo->customers->name !!}'" :themeAction="$themeAction">
     <div class="container-fluid">
         <div class="page-titles">
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="javascript:void(0)">{{ __('Customer') }}</a></li>
                 <li class="breadcrumb-item"><a href="javascript:void(0)">{{ __('Update') }}</a></li>
-                <li class="breadcrumb-item active"><a href="javascript:void(0)">{{ $customer->name }}</a></li>
+                <li class="breadcrumb-item active"><a href="javascript:void(0)">{{ $customerInfo->customers->name }}</a></li>
             </ol>
         </div>
         <div class="default-tab">
@@ -28,28 +29,31 @@
                         <a class="nav-link" data-toggle="tab" href="#servicesPanel"><i class="flaticon-381-notepad mr-2"></i> {{ __('Services') }}</a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link" data-toggle="tab" href="#mapPanel"><i class="flaticon-381-location-2 mr-2"></i> Mapa</a>
+                    </li>
+                    {{-- <li class="nav-item">
                         <a class="nav-link" data-toggle="tab" href="#contactsPanel"><i class="flaticon-381-smartphone-1 mr-2"></i> {{ __('Contacts') }}</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" data-toggle="tab" href="#reportsPanel"><i class="flaticon-381-file-1 mr-2"></i> {{ __('Reports') }}</a>
-                    </li>
+                    </li> --}}
+    
                 </ul>
                 <div class="tab-content">
                     <div class="tab-pane fade show active" id="homePanel" role="tabpanel">
-                        @livewire('tenant.customers.edit-customer', ['customer' => $customer,'districts' => $districts, 'counties' => $counties, 'account_manager' => $account_manager])
+                        @livewire('tenant.customers.edit-customer', ['customer' => $customerInfo->customers])
                     </div>
-                    <div class="tab-pane fade" id="locationPanel" role="tabpanel">
-                        @livewire('tenant.customers.show-customerlocations', ['customer' => $customer])
+                     <div class="tab-pane fade" id="locationPanel" role="tabpanel">
+                        @livewire('tenant.customers.show-customerlocations', ['customer' => $customerInfo->customers])
                     </div>
+                    <div class="tab-pane fade" id="mapPanel" role="tabpanel">
+                        @livewire('tenant.customers.show-map', ['customer' => $customerInfo->customers])
+                    </div>
+        
                     <div class="tab-pane fade" id="servicesPanel" role="tabpanel">
-                        @livewire('tenant.customers.show-customerservices', ['customer' => $customer])
-                    </div>
-                    <div class="tab-pane fade" id="contactsPanel" role="tabpanel">
+                        @livewire('tenant.customers.show-customerservices', ['customer' => $customerInfo->customers])
+                    </div> 
+                    {{-- <div class="tab-pane fade" id="contactsPanel" role="tabpanel">
                         @livewire('tenant.customers.show-customercontacts', ['customer' => $customer])
-                    </div>
-                    <div class="tab-pane fade" id="reportsPanel" role="tabpanel">
-                        @livewire('tenant.customers.show-reports-panel', ['customer' => $customer])
-                    </div>
+                    </div> --}}
+
                 </div>
         </div>
     </div>

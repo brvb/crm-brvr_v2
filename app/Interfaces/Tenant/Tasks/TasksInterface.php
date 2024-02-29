@@ -67,4 +67,25 @@ interface TasksInterface
 
     public function getTasksFilterCompleted($all,string $searchString,int $tech,int $client,int $typeReport,int $work,string $ordenation,string $dateBegin,string $dateEnd,$perPage): LengthAwarePaginator;
 
+    /*** EQUIPAMENTOS ***/
+    public function getEquipments($id_client): object;
+
+    public function getEquipmentBySerial($serialNumber): object;
+    /**************** */
+
+    /***** PRODUTOS *******/
+    public function getProducts(): object;
+
+    public function getProductByReference($reference): object;
+
+    /************** */
+
+    /**** EQUIPAMENTO *****/
+
+    public function adicionarEquipamento($array): object;
+
+    public function atualizarEquipamento($array): object;
+
+    /******************* */
+
 }

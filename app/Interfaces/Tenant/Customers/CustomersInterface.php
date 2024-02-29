@@ -18,15 +18,25 @@ interface CustomersInterface
 {
     public function getAllCustomers($perPage): LengthAwarePaginator;
 
-    public function getSearchedCustomer($searchString,$perPage): LengthAwarePaginator;
+    public function getAllCustomersCollection(): object;
+
+    public function getSearchedCustomer($nomecostomer,$nifcustomer,$contactocustomer,$perPage): LengthAwarePaginator;
+
+    public function getSpecificCustomerInfo($idCustomer): object;
+
+    public function getSearchedCustomerByNo($no): object;
+
+    public function getSearchedCustomerCollection($searchString): object;
 
     public function getCustomersAnalysis(): Collection;
 
-    public function getLocationsFromCustomer($customer_id,$searchString,$perPage): LengthAwarePaginator;
+    public function getLocationsFromCustomer($customer_id,$perPage): LengthAwarePaginator;
+
+    public function getLocationsFromCustomerCollection($customer_id): object;
 
     public function add(CustomersFormRequest $request): Customers;
 
-    public function update(Customers $customer,CustomersFormRequest $request): Customers;
+    public function update($noClient,CustomersFormRequest $request): Customers;
 
     public function destroy(Customers $customer) : Customers;
 

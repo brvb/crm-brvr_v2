@@ -38,10 +38,13 @@
                             <div class="col-12 col-sm-6 col-md-3">
                                 <div class="form-group">
                                     <label>{{__("Select Customer")}}</label>
+                                    @php
+                                        $customers = $customersRepository->getAllCustomersCollection();
+                                    @endphp
                                     <select class="form-control" name="selectCustomer" id="selectCustomer" wire:model="client">
                                         <option value="0">{{__("All")}}</option>
-                                            @foreach ($customers as $customer)
-                                                <option value={{$customer->id}}>{{$customer->short_name}}</option> 
+                                            @foreach ($customers->customers as $customer)
+                                                <option value={{$customer->id}}>{{$customer->name}}</option> 
                                             @endforeach
                                     </select>
                                 </div>
@@ -135,10 +138,10 @@
                         </select>
                         {{ __('entries') }}</label>
                 </div>
-                <div id="dataTables_search_filter" class="dataTables_filter">
+                {{-- <div id="dataTables_search_filter" class="dataTables_filter">
                     <label>{{ __('Search') }}:
                         <input type="search" name="searchString" wire:model="searchString"></label>
-                </div>
+                </div> --}}
             </div>
             <!-- display dataTable no-footer -->
             <div class="table-responsive w-100">
@@ -174,7 +177,12 @@
                                     </div>
                                 </td>
                                 <td>{{ $item->reference }}</td>
-                                <td>{{ $item->customer->short_name }}</td>
+                                <td>
+                                    @php
+                                        $customer = $customersRepository->getSpecificCustomerInfo($item->customer_id);
+                                    @endphp
+                                    {{ $customer->customers->name }}
+                                </td>
                                 <td>{{ $item->servicesToDo->name}}</td>
                                 <td>{{ $item->tech->name }}</td>
                                 <td>
@@ -187,7 +195,12 @@
                                     <i class="fa fa-clock-o" aria-hidden="true"></i> {{ date('H:i',strtotime($item->created_at)) }}
                                     @endif
                                 </td>
-                                <td>{{ $item->location->locationCounty->name }}</td>
+                                <td>
+                                    @php
+                                        $locations = $locationRepository->getSpecificLocationInfo($item->location_id); 
+                                    @endphp
+                                    {{ $locations->locations->address }}
+                                </td>
 
                                 <td>{{ $item->tipoEstado->nome_estado }}</td>
 
@@ -216,8 +229,12 @@
                                                         $user = \App\Models\Tenant\TeamMember::where('id',$item->tech_id)->first();
                                                     @endphp
                                                     
-                                                
-                                                    <a class="dropdown-item" href="{{ route('tenant.tasks-reports.edit', $item->id) }}">Adicionar Intervenção</a>
+                                                    @if($item->estado == 2)
+                                                        <a class="dropdown-item" href="{{ route('tenant.tasks.edit', $item->id) }}">Verificar Pedido</a>
+                                                    @else
+                                                        <a class="dropdown-item" href="{{ route('tenant.tasks-reports.edit', $item->id) }}">Adicionar Intervenção</a>
+                                                    @endif
+                                                    
                                                     
                 
 

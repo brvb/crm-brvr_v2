@@ -18,8 +18,8 @@ class ShowCustomerlocations extends Component
 
     private object $districts;
     private object $counties;
-    public object $customer;
-    public int $customer_id;
+    private object $customer;
+    public string $customer_id;
 
     protected object $customersRepository;
 
@@ -30,12 +30,7 @@ class ShowCustomerlocations extends Component
 
     public function mount($customer): void
     {
-        if(!is_integer($customer)) {
-            $this->customer_id = $customer->id;
-        } else {
-            $this->customer_id = $this->customer;
-        }
-        $this->getDistricts();
+        $this->customer_id = $customer->no;
 
         if (isset($this->perPage)) {
             session()->put('perPage', $this->perPage);
@@ -66,11 +61,10 @@ class ShowCustomerlocations extends Component
 
     public function render(): View
     {
-        $customerLocations = $this->customersRepository->getLocationsFromCustomer($this->customer_id, $this->searchString,$this->perPage);
+        $customerLocations = $this->customersRepository->getLocationsFromCustomer($this->customer_id,$this->perPage);
+
 
         return view('tenant.livewire.customers.show-customerlocations', [
-            'customer' => $this->customer,
-            'districts' => $this->districts,
             'customerLocations' => $customerLocations,
         ]);
     }

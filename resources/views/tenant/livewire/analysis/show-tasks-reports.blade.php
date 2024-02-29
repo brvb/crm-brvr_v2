@@ -43,10 +43,13 @@
                             <div class="col-12 col-sm-6 col-md-3">
                                 <div class="form-group">
                                     <label>{{__("Select Customer")}}</label>
+                                    @php
+                                        $customers = $customersRepository->getAllCustomersCollection();
+                                    @endphp
                                     <select class="form-control" name="selectCustomer" id="selectCustomer" wire:model="client">
                                         <option value="0">{{__("All")}}</option>
-                                            @foreach ($customers as $customer)
-                                                <option value={{$customer->id}}>{{$customer->short_name}}</option> 
+                                            @foreach ($customers->customers as $customer)
+                                                <option value={{$customer->id}}>{{$customer->name}}</option> 
                                             @endforeach
                                     </select>
                                 </div>
@@ -178,7 +181,12 @@
                                 </div>
                             </td>
                             <td>{{ $item->reference }}</td>
-                            <td>{{ $item->customer->short_name }}</td>
+                            <td>
+                                @php
+                                     $customer = $customersRepository->getSpecificCustomerInfo($item->customer_id);
+                                @endphp
+                                {{ $customer->customers->name }}
+                            </td>
                             <td>{{ $item->servicesToDo->name}}</td>
                             <td>{{ $item->tech->name }}</td>
                             <td>
@@ -191,7 +199,12 @@
                                 <i class="fa fa-clock-o" aria-hidden="true"></i> {{ date('H:i',strtotime($item->created_at)) }}
                                 @endif
                             </td>
-                            <td>{{ $item->location->locationCounty->name }}</td>
+                            <td>
+                                @php
+                                   $locations = $locationRepository->getSpecificLocationInfo($item->location_id); 
+                                @endphp
+                                {{ $locations->locations->address }}
+                            </td>
                             
                             <td>{{ $item->tipoEstado->nome_estado }}</td>
 
@@ -201,32 +214,93 @@
                                     
                                     $somaDiferencasSegundos = 0;
 
-                                
+                                    $arrHours= [];
+                                    $horas = 0;
+                                    $novoValor = 0;
 
                                     foreach($intervencoes as $hora)
                                     {
-                                        $data1 = Carbon\Carbon::parse($hora->hora_inicio);
-                                        $data2 = Carbon\Carbon::parse($hora->hora_final);
-                                        $result = $data1->diff($data2);
-                                    
-                                        $data = Carbon\Carbon::createFromTime($result->h, $result->i, $result->s);
+            
+                                        // $data1 = Carbon\Carbon::parse($hora->hora_inicio);
+                                        // $data2 = Carbon\Carbon::parse($hora->hora_final);
+                                        // $result = $data1->diff($data2)->format("%h.%i");
+                                        // $hours = date("H:i",strtotime($result));
 
-                                        $somaDiferencasSegundos += $data->diffInSeconds(Carbon\Carbon::createFromTime(0, 0, 0));
+                                        // array_push($arrHours,$hours);
+
+                                        $somaDiferencasSegundos = 0;
+                                        $horaFormatada = "";
+
+                                        $dia_inicial = $hora->data_inicio.' '.$hora->hora_inicio;
+                                        $dia_final = $hora->data_final.' '.$hora->hora_final;
+
+                                        $data1 = Carbon\Carbon::parse($dia_inicial);
+                                        $data2 = Carbon\Carbon::parse($dia_final);
+
+                           
+                                        $result = $data1->diff($data2);
+
+                                        $hours = $result->days * 24 + $result->h;
+                                        $minutes = $result->i;
+                        
+  
+                                        $hoursMinutesDifference = sprintf('%d:%02d', $hours, $minutes);
+
+
+                                        $arrHours[$hora->id] = [
+                                            "valor" => $hoursMinutesDifference,
+                                            "descontos" => $hora->descontos
+                                        ];
+                                        // array_push($arrHours,$hoursMinutesDifference);
+
+
                                     }
 
+                                    $arrDescontado = [];
 
-                                    //Converter segundos e horas e minutos
-                                    //$horas = floor($somaDiferencasSegundos / 3600);
-                                    //$minutos = floor(($somaDiferencasSegundos % 3600) / 60);
+                                    foreach($arrHours as $hora)
+                                    {
+                                        if($hora["descontos"] == null)
+                                        {
+                                            $hora["descontos"] = "+0";
+                                        }
+
+                                        $valorOriginal = $hora["valor"]; // Exemplo de valor original em horas
+
+                                       
+                                        list($horas, $minutos) = explode(':', $valorOriginal);
 
                                   
-                                    //$horaFormatada = Carbon\Carbon::createFromTime($horas, $minutos, 0);
+                                        $valorEmHorasDecimais = $horas + ($minutos / 60);
 
+                                        if($hora["descontos"][0] == "+"){
+                                            $novoValorEmHorasDecimais = $valorEmHorasDecimais + substr($hora["descontos"], 1);
+                                        }
+                                        else {
+                                            $novoValorEmHorasDecimais = $valorEmHorasDecimais - substr($hora["descontos"], 1);
+                                        }
+                                       
+                                    
+                                        $novoValorEmHorasDecimais = max(0, $novoValorEmHorasDecimais);
+
+                                    
+                                        $novoHoras = floor($novoValorEmHorasDecimais);
+                                        $novoMinutos = ($novoValorEmHorasDecimais - $novoHoras) * 60;
+
+                                    
+                                        $novoValor = sprintf('%d:%02d', $novoHoras, $novoMinutos);
+
+                                        array_push($arrDescontado,$novoValor);
+
+                                    }
+
+                                    $horas = global_hours_sum_individual($arrDescontado);
+                               
                                
 
                                 @endphp
-
-                                    {{gmdate('H:i', $somaDiferencasSegundos)}}
+                                    {{-- {{json_encode($arrDescontado)}} --}}
+                                    {{$horas}}
                             </td>
                            
                             <td>

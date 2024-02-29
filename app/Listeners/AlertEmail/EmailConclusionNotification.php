@@ -21,17 +21,19 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use App\Models\Tenant\CustomerNotifications;
 use App\Mail\AlertEmail\AlertEmailConclusionDay;
 use App\Models\Tenant\TeamMember as TenantTeamMember;
+use App\Interfaces\Tenant\Customers\CustomersInterface;
 
 class EmailConclusionNotification
 {
+    protected object $customersRepository;
     /**
      * Create the event listener.
      *
      * @return void
      */
-    public function __construct()
+    public function __construct(CustomersInterface $interfaceCustomers)
     {
-        //
+        $this->customersRepository = $interfaceCustomers;
     }
 
    
@@ -124,7 +126,7 @@ class EmailConclusionNotification
                         "quarto_quadro" => $finishedTimesToday
                     ];
 
-                    Mail::to($email)->queue(new AlertEmailConclusionDay(($infoSendEmail)));
+                    Mail::to($email)->queue(new AlertEmailConclusionDay($infoSendEmail,$this->customersRepository));
 
                }
 
@@ -213,7 +215,7 @@ class EmailConclusionNotification
                         "quarto_quadro" => $finishedTimesToday
                     ];
 
-                    Mail::to($teamMembers->email)->queue(new AlertEmailConclusionDay(($infoSendEmail)));
+                    Mail::to($teamMembers->email)->queue(new AlertEmailConclusionDay($infoSendEmail,$this->customersRepository));
                 }
             }
             else if($usr["hierarquia"] == "3")
@@ -297,7 +299,7 @@ class EmailConclusionNotification
                      "quarto_quadro" => $finishedTimesToday
                  ];
 
-                 Mail::to($email)->queue(new AlertEmailConclusionDay(($infoSendEmail)));
+                 Mail::to($email)->queue(new AlertEmailConclusionDay($infoSendEmail,$this->customersRepository));
             }
 
         }

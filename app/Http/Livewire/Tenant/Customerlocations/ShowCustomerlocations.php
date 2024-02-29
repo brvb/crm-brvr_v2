@@ -27,6 +27,7 @@ class ShowCustomerlocations extends Component
     public function mount(): void
     {
         if (isset($this->perPage)) {
+            $this->perPage = 10;
             session()->put('perPage', $this->perPage);
         } elseif (session('perPage')) {
             $this->perPage = session('perPage');

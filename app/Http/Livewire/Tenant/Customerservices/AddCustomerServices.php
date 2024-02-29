@@ -2,16 +2,18 @@
 
 namespace App\Http\Livewire\Tenant\Customerservices;
 
-use App\Models\Tenant\CustomerLocations;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Illuminate\Contracts\View\View;
-use Illuminate\Support\Facades\Validator;
-
-use App\Models\Tenant\CustomerServices;
 use App\Models\Tenant\Services;
 use App\Models\Tenant\Customers;
 use App\Models\Tenant\TeamMember;
+
+use Illuminate\Contracts\View\View;
+use App\Models\Tenant\CustomerServices;
+use App\Models\Tenant\CustomerLocations;
+use Illuminate\Support\Facades\Validator;
+use App\Interfaces\Tenant\Customers\CustomersInterface;
+use App\Interfaces\Tenant\CustomerServices\CustomerServicesInterface;
 
 class AddCustomerServices extends Component
 {
@@ -21,11 +23,11 @@ class AddCustomerServices extends Component
     public int $perPage;
     public string $searchString = '';
 
-    public object $customerList;
+    private object $customerList;
     public object $serviceList;
     public string $selectedCustomer = '';
     public string $selectedService = '';
-    public $customer = '';
+    private $customer = '';
     public $service = '';
     public string $start_date = '';
     public string $end_date = '';
@@ -38,7 +40,7 @@ class AddCustomerServices extends Component
     public string $homePanel = 'show active';
     public string $servicesPanel = '';
     public string $profile = '';
-    public $customerLocations;
+    private $customerLocations;
     public int $selectedLocation = 0;
 
     protected $listeners = [
@@ -49,11 +51,22 @@ class AddCustomerServices extends Component
         'selectedCustomer' => 'required|min:1',
         'selectedService' => 'required|min:1',
     ];
+    
+    protected object $customersRepository;
+    private CustomerServicesInterface $customerServicesRepository;
+
+    public function boot(CustomersInterface $interfaceCustomers,CustomerServicesInterface $interfaceServicesRepository)
+    {
+        $this->customersRepository = $interfaceCustomers;
+        $this->customerServicesRepository = $interfaceServicesRepository;
+    }
 
     public function mount($customerList, $serviceList): void
     {
         $this->customerList = $customerList;
+
         $this->serviceList = $serviceList;
+
 
         if (old('selectedService')) {
             $this->selectedService = old('selectedService');
@@ -101,9 +114,14 @@ class AddCustomerServices extends Component
     //     dd($customerId);
     // }
 
-    public function updateCustomer($customerId)
+    public function updatedSelectedCustomer($customerId)
     {
-        $this->customerLocations = CustomerLocations::where('customer_id',$customerId)->get();
+        $this->customer = $this->customersRepository->getSpecificCustomerInfo($customerId);
+
+        $this->customerList = $this->customerServicesRepository->getAllCustomers();
+
+        $this->customerLocations = $this->customersRepository->getLocationsFromCustomerCollection($this->customer->customers->no);
+
     }
 
     public function updatedSelectedService()
@@ -148,24 +166,7 @@ class AddCustomerServices extends Component
 
     public function save(): Void
     {
-        // $validator = Validator::make(
-        //     [
-        //         'selectedCustomer'  => $this->selectedCustomer,
-        //         'selectedLocation' => $this->selectedLocation,
-        //         'selectedService' => $this->selectedService,
-        //     ],
-        //     [
-        //         'selectedCustomer'  => 'required|min:1',
-        //         'selectedLocation' => 'required|min:1',
-        //         'selectedService' => 'required|min:1',
-        //     ],
-        //     [
-        //         'selectedCustomer'  => __('You must select the customer!'),
-        //         'selectedService' => __('You must select the customer location!'),
-        //         'selectedService' => __('You must select the service!'),
-        //     ]
-        // );
-
+      
         if ($validator->fails()) {
             $errorMessage = '';
             foreach($validator->errors()->all() as $message) {

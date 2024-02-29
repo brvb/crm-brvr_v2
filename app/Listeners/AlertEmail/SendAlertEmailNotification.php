@@ -4,15 +4,17 @@ namespace App\Listeners\AlertEmail;
 
 use App\Models\Tenant\Config;
 use App\Events\Alerts\AlertEvent;
+use App\Mail\AlertEmail\AlertEmail;
 use App\Mail\TeamMember\TeamMember;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\Tasks\TaskReportFinished;
+use App\Models\Tenant\CustomerServices;
 use Illuminate\Queue\InteractsWithQueue;
 use App\Events\TeamMember\TeamMemberEvent;
-use App\Mail\AlertEmail\AlertEmail;
-use App\Models\Tenant\CustomerNotifications;
-use App\Models\Tenant\CustomerServices;
+use App\Interfaces\Tenant\CustomerLocation\CustomerLocationsInterface;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use App\Models\Tenant\CustomerNotifications;
+use App\Interfaces\Tenant\Customers\CustomersInterface;
 
 class SendAlertEmailNotification
 {
@@ -21,9 +23,12 @@ class SendAlertEmailNotification
      *
      * @return void
      */
-    public function __construct()
+    protected object $customerRepository;
+    protected object $customerLocationRepository;
+    public function __construct(CustomersInterface $interfaceCustomers, CustomerLocationsInterface $customerLocation)
     {
-        //
+        $this->customerRepository = $interfaceCustomers;
+        $this->customerLocationRepository = $customerLocation;
     }
 
    
@@ -40,7 +45,11 @@ class SendAlertEmailNotification
         {
             foreach(json_decode($emailConfig->alert_email) as $email)
             {
-                Mail::to($email->email)->queue(new AlertEmail(($alert)));
+                $customer = $this->customerRepository->getSpecificCustomerInfo($alert->customer_id);
+
+                $customerLocation = $this->customerLocationRepository->getSpecificLocationInfo($alert->location_id);
+
+                Mail::to($email->email)->queue(new AlertEmail($alert,$customer,$customerLocation));
 
                 if($countTimes == 0)
                 {

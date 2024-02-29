@@ -14,7 +14,7 @@ use App\Http\Requests\Tenant\CustomersServices\CustomersServicesFormRequest;
 
 interface CustomerNotificationInterface
 {
-    public function getNotificationTimes(): Array;
+    public function getNotificationTimes($customerRepository,$customerLocationRepository): Array;
 
     public function changeTreatedStatus(CustomerServices $idCustomerService): void;
 

@@ -397,8 +397,8 @@ class TasksRepository implements TasksInterface
         else 
         {
             $teammember = TeamMember::where('user_id',Auth::user()->id)->first();
-            return Pedidos::where('tech_id',$teammember->id)
-            ->where('estado','!=',5)
+            return Pedidos::
+            where('estado','!=',5)
             ->with('customer')
             ->with('tipoEstado')
             ->with('tech')
@@ -504,7 +504,7 @@ class TasksRepository implements TasksInterface
 
     public function getTasksFilter($searchString,$tech,$client,$typeReport,$work,$ordenation,$dateBegin,$dateEnd,$perPage): LengthAwarePaginator
     {          
-        if($client != 0)
+        if($client != "")
         {
             $tasks = Pedidos::where('estado','!=',5)->whereHas('tech', function ($query) use ($tech)
             {
@@ -528,14 +528,14 @@ class TasksRepository implements TasksInterface
 
               
               
-            })
-            ->whereHas('customer', function ($query) use ($searchString)
-            {
-                if($searchString != "")
-                {
-                    $query->where('short_name', 'like', '%' . $searchString . '%');
-                }
             });
+            // ->whereHas('customer', function ($query) use ($searchString)
+            // {
+            //     if($searchString != "")
+            //     {
+            //         $query->where('short_name', 'like', '%' . $searchString . '%');
+            //     }
+            // });
             
          
                 $tasks = $tasks
@@ -561,11 +561,10 @@ class TasksRepository implements TasksInterface
                 $tasks = $tasks->whereHas('tipoEstado', function ($query) use ($typeReport)
                 {
                 
-                        if($typeReport != 0)
-                        {
-                            $query->where('id',$typeReport);
-                        }
-                
+                    if($typeReport != 0)
+                    {
+                        $query->where('id',$typeReport);
+                    }
                 
                 });
     
@@ -588,13 +587,13 @@ class TasksRepository implements TasksInterface
                    $query->where('id',$tech);
                }
             })
-            ->whereHas('customer', function ($query) use ($searchString)
-            {
-                if($searchString != "")
-                {
-                    $query->where('short_name', 'like', '%' . $searchString . '%');
-                }
-            })
+            // ->whereHas('customer', function ($query) use ($searchString)
+            // {
+            //     if($searchString != "")
+            //     {
+            //         $query->where('short_name', 'like', '%' . $searchString . '%');
+            //     }
+            // })
             ->whereHas('servicesToDo', function ($query) use ($work, $searchString)
             {
                
@@ -779,7 +778,7 @@ class TasksRepository implements TasksInterface
 
     public function getIntervencaoFilter($searchString,$tech,$client,$typeReport,$work,$ordenation,$dateBegin,$dateEnd,$perPage): LengthAwarePaginator
     {          
-        if($client != 0)
+        if($client != "")
         {
             $tasks = Pedidos::where('estado','!=',5)->whereHas('tech', function ($query) use ($tech)
             {
@@ -803,14 +802,14 @@ class TasksRepository implements TasksInterface
 
               
               
-            })
-            ->whereHas('customer', function ($query) use ($searchString)
-            {
-                if($searchString != "")
-                {
-                    $query->where('short_name', 'like', '%' . $searchString . '%');
-                }
             });
+            // ->whereHas('customer', function ($query) use ($searchString)
+            // {
+            //     if($searchString != "")
+            //     {
+            //         $query->where('short_name', 'like', '%' . $searchString . '%');
+            //     }
+            // });
             
          
                 $tasks = $tasks
@@ -863,13 +862,13 @@ class TasksRepository implements TasksInterface
                    $query->where('id',$tech);
                }
             })
-            ->whereHas('customer', function ($query) use ($searchString)
-            {
-                if($searchString != "")
-                {
-                    $query->where('short_name', 'like', '%' . $searchString . '%');
-                }
-            })
+            // ->whereHas('customer', function ($query) use ($searchString)
+            // {
+            //     if($searchString != "")
+            //     {
+            //         $query->where('short_name', 'like', '%' . $searchString . '%');
+            //     }
+            // })
             ->whereHas('servicesToDo', function ($query) use ($work, $searchString)
             {
                
@@ -933,6 +932,7 @@ class TasksRepository implements TasksInterface
     {
         return DB::transaction(function () use ($object) {
 
+        
             if(!empty($object->arrayFirstUploaded)){
                 $imagesPedido = [];
                 foreach($object->arrayFirstUploaded as $img)
@@ -954,36 +954,37 @@ class TasksRepository implements TasksInterface
 
             $pedidoAtual = Pedidos::where('id',$object->task->id)->first();
 
-            if($pedidoAtual->estado != "1" && $object->selectedEstado != "1")
-            {
-                $intervencao = Intervencoes::create([
-                    "id_pedido" => $object->task->id,
-                    "material_ref_intervencao" => $object->referencia_intervencao,
-                    "material_descricao_intervencao" => $object->descricao_intervencao,
-                    "material_quantidade_intervencao" => $object->quantidade_intervencao,
-                    "estado_pedido" => $object->selectedEstado,
-                    "descricao_realizado" => $object->descricaoRealizado,
-                    "anexos" => json_encode($imagesPedido),
-                    "assinatura_tecnico" => $object->signatureTecnico,
-                    "assinatura_cliente" => $object->signatureClient,
-                    "horas_alterado" => $object->horasAlterado,
-                    "user_id" => Auth::user()->id,
-                    "data_inicio" => date('Y-m-d'),
-                    "hora_inicio" => date('H:i:s'),
-                    "hora_final" => date('H:i:s'),
-                    "data_final" => date('Y-m-d')
-                ]);
+            // if($pedidoAtual->estado != "7" && $object->selectedEstado != "7")
+            // {
+            //     $intervencao = Intervencoes::create([
+            //         "id_pedido" => $object->task->id,
+            //         "produtos_ref" => json_encode($object->array_produtos),
+            //         "produtos_desc" => json_encode($object->designacao_intervencao),
+            //         "produtos_qtd" => json_encode($object->quantidade_intervencao),
+            //         "descricao" => $object->descricao_intervencao,
+            //         "estado_pedido" => $object->selectedEstado,
+            //         "descricao_realizado" => $object->descricaoRealizado,
+            //         "anexos" => json_encode($imagesPedido),
+            //         "assinatura_tecnico" => $object->signatureTecnico,
+            //         "assinatura_cliente" => $object->signatureClient,
+            //         "horas_alterado" => $object->horasAlterado,
+            //         "user_id" => Auth::user()->id,
+            //         "data_inicio" => date('Y-m-d'),
+            //         "hora_inicio" => date('H:i:s'),
+            //         "hora_final" => date('H:i:s'),
+            //         "data_final" => date('Y-m-d')
+            //     ]);
 
-                Pedidos::where('id',$object->task->id)->update([
-                    "estado" => $object->selectedEstado
-                ]);
+            //     Pedidos::where('id',$object->task->id)->update([
+            //         "estado" => $object->selectedEstado
+            //     ]);
 
-                return $intervencao;
-            }
+            //     return $intervencao;
+            // }
            
 
 
-            if($object->selectedEstado == "1"){
+            if($object->selectedEstado == "7"){
                 $data_inicio = null;
 
                 $pedido = Pedidos::where('id',$object->task->id)->first();
@@ -1020,9 +1021,10 @@ class TasksRepository implements TasksInterface
             {
                 $intervencao = Intervencoes::create([
                     "id_pedido" => $object->task->id,
-                    "material_ref_intervencao" => $object->referencia_intervencao,
-                    "material_descricao_intervencao" => $object->descricao_intervencao,
-                    "material_quantidade_intervencao" => $object->quantidade_intervencao,
+                    "produtos_ref" => json_encode($object->array_produtos),
+                    "produtos_desc" => json_encode($object->designacao_intervencao),
+                    "produtos_qtd" => json_encode($object->quantidade_intervencao),
+                    "descricao" => $object->descricao_intervencao,
                     "estado_pedido" => $object->selectedEstado,
                     "descricao_realizado" => $object->descricaoRealizado,
                     "anexos" => json_encode($imagesPedido),
@@ -1040,9 +1042,10 @@ class TasksRepository implements TasksInterface
                 {
                     $intervencao = Intervencoes::create([
                         "id_pedido" => $object->task->id,
-                        "material_ref_intervencao" => $object->referencia_intervencao,
-                        "material_descricao_intervencao" => $object->descricao_intervencao,
-                        "material_quantidade_intervencao" => $object->quantidade_intervencao,
+                        "produtos_ref" => json_encode($object->array_produtos),
+                        "produtos_desc" => json_encode($object->designacao_intervencao),
+                        "produtos_qtd" => json_encode($object->quantidade_intervencao),
+                        "descricao" => $object->descricao_intervencao,
                         "estado_pedido" => $object->selectedEstado,
                         "descricao_realizado" => $object->descricaoRealizado,
                         "anexos" => json_encode($imagesPedido),
@@ -1061,9 +1064,10 @@ class TasksRepository implements TasksInterface
 
                     $intervencao = Intervencoes::where('id',$check->id)->update([
                         "id_pedido" => $object->task->id,
-                        "material_ref_intervencao" => $object->referencia_intervencao,
-                        "material_descricao_intervencao" => $object->descricao_intervencao,
-                        "material_quantidade_intervencao" => $object->quantidade_intervencao,
+                        "produtos_ref" => json_encode($object->array_produtos),
+                        "produtos_desc" => json_encode($object->designacao_intervencao),
+                        "produtos_qtd" => json_encode($object->quantidade_intervencao),
+                        "descricao" => $object->descricao_intervencao,
                         "estado_pedido" => $object->selectedEstado,
                         "descricao_realizado" => $object->descricaoRealizado,
                         "anexos" => json_encode($imagesPedido),
@@ -1226,9 +1230,8 @@ class TasksRepository implements TasksInterface
 
     public function getTasksFilterCompleted($all,$searchString,$tech,$client,$typeReport,$work,$ordenation,$dateBegin,$dateEnd,$perPage): LengthAwarePaginator
     {          
-        if($client != 0)
+        if($client != "")
         {
-            
            $tasks = Pedidos::whereHas('tech', function ($query) use ($tech)
             {
                if($tech != 0)
@@ -1251,14 +1254,14 @@ class TasksRepository implements TasksInterface
 
               
               
-            })
-            ->whereHas('customer', function ($query) use ($searchString)
-            {
-                if($searchString != "")
-                {
-                    $query->where('short_name', 'like', '%' . $searchString . '%');
-                }
             });
+            // ->whereHas('customer', function ($query) use ($searchString)
+            // {
+            //     if($searchString != "")
+            //     {
+            //         $query->where('short_name', 'like', '%' . $searchString . '%');
+            //     }
+            // });
             
          
                 $tasks = $tasks
@@ -1320,13 +1323,13 @@ class TasksRepository implements TasksInterface
                    $query->where('id',$tech);
                }
             })
-            ->whereHas('customer', function ($query) use ($searchString)
-            {
-                if($searchString != "")
-                {
-                    $query->where('short_name', 'like', '%' . $searchString . '%');
-                }
-            })
+            // ->whereHas('customer', function ($query) use ($searchString)
+            // {
+            //     if($searchString != "")
+            //     {
+            //         $query->where('short_name', 'like', '%' . $searchString . '%');
+            //     }
+            // })
             ->whereHas('servicesToDo', function ($query) use ($work, $searchString)
             {
                
@@ -1394,6 +1397,175 @@ class TasksRepository implements TasksInterface
         
         
         return $tasks;
+    }
+
+    public function getEquipments($id_client): object
+    {
+        $curl = curl_init();
+
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => 'http://172.19.20.4:24004/equipment/equipment?client_number='.$id_client,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'GET',
+            CURLOPT_HTTPHEADER => array(
+                'Content-Type: application/json'
+            ),
+        ));
+
+        $response = curl_exec($curl);
+
+        curl_close($curl);
+
+        $response_decoded = json_decode($response);
+
+        return $response_decoded; 
+    }
+
+    public function getEquipmentBySerial($serialNumber): object
+    {
+        $curl = curl_init();
+
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => 'http://172.19.20.4:24004/equipment/equipment?id='.$serialNumber,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'GET',
+            CURLOPT_HTTPHEADER => array(
+                'Content-Type: application/json'
+            ),
+        ));
+
+        $response = curl_exec($curl);
+
+        curl_close($curl);
+
+        $response_decoded = json_decode($response);
+
+        return $response_decoded; 
+    }
+
+    public function getProducts(): object
+    {
+        $curl = curl_init();
+
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => 'http://172.19.20.4:24004/products/products',
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'GET',
+            CURLOPT_HTTPHEADER => array(
+                'Content-Type: application/json'
+            ),
+        ));
+
+        $response = curl_exec($curl);
+
+        curl_close($curl);
+
+        $response_decoded = json_decode($response);
+
+        return $response_decoded; 
+    }
+
+    public function getProductByReference($reference): object
+    {
+        $curl = curl_init();
+
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => 'http://172.19.20.4:24004/products/products?id='.$reference,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'GET',
+            CURLOPT_HTTPHEADER => array(
+                'Content-Type: application/json'
+            ),
+        ));
+
+        $response = curl_exec($curl);
+
+        curl_close($curl);
+
+        $response_decoded = json_decode($response);
+
+        return $response_decoded; 
+    }
+
+    public function adicionarEquipamento($array): object
+    {
+        $encoded = json_encode($array);
+
+        $curl = curl_init();
+
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => 'http://172.19.20.4:24004/equipment/equipment',
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'POST',
+            CURLOPT_POSTFIELDS => $encoded,
+            CURLOPT_HTTPHEADER => array(
+                'Content-Type: application/json'
+            ),
+        ));
+
+        $response = curl_exec($curl);
+
+        curl_close($curl);
+
+        $decoded = json_decode($response);
+
+        return $decoded;
+    }
+
+    public function atualizarEquipamento($array): object
+    {
+        $encoded = json_encode($array);
+
+        $curl = curl_init();
+
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => 'http://172.19.20.4:24004/equipment/equipment',
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'PUT',
+            CURLOPT_POSTFIELDS => $encoded,
+            CURLOPT_HTTPHEADER => array(
+                'Content-Type: application/json'
+            ),
+        ));
+
+        $response = curl_exec($curl);
+
+        curl_close($curl);
+
+        $decoded = json_decode($response);
+
+        return $decoded;
+
     }
 
 }

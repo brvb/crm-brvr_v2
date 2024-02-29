@@ -52,13 +52,13 @@
                                             <hr>
                                         
                                             <div class="table" style="font-family: Avenir, Helvetica, sans-serif; box-sizing: border-box;">
-                                                <p>O seu pedido #{{$pedido->reference}} foi registado com sucesso em {{ $pedido->created_at->format('d/m/Y H:i') }}</p>
+                                                <p style="font-weight: bold;">O seu pedido {{strtolower($pedido->tipoPedido->name)}} #{{$pedido->reference}} foi registado com sucesso em {{ $pedido->created_at->format('d/m/Y H:i') }}</p>
                                                 
-                                                <p>Cliente:{{$pedido->customer->name}}</p>
-                                                <p>Telefone:{{$pedido->customer->contact}}</p>
-                                                <p>Email:{{$pedido->customer->email}}</p>
-                                                <p>Técnico designado:{{$pedido->tech->name}}</p>
-                                                <p>Assunto:{{$pedido->descricao}}</p>
+                                                <span>Cliente: {{$customer->customers->name}}</span><br>
+                                                <span>Telefone: {{$customer->customers->phone}}</span><br>
+                                                <span>Email: {{$customer->customers->email}}</span><br>
+                                                <span>Técnico designado:{{$pedido->tech->name}}</span><br>
+                                                <span>Assunto:{{$pedido->descricao}}</span>
                                                 
                                                 
                                             </div>
@@ -71,7 +71,7 @@
                                             </p>
                                             <p>
                                                 <small>
-                                                    Não responda a este email. <br>
+                                                    <label style="font-size: 1.5em;font-weight: bold;text-decoration: underline;">Não responda a este email. </label><br>
                                                     Para qualquer esclarecimento use os contactos habituais:<br>
                                                     Telefone: 252646260 Email: suporte@brvr.pt <br>
                                                     Identifique sempre o número de pedido.

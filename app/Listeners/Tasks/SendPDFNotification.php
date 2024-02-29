@@ -2,6 +2,7 @@
 
 namespace App\Listeners\Tasks;
 
+use Exception;
 use App\Models\User;
 use App\Mail\Tasks\PDFEmail;
 use App\Models\Tenant\Tasks;
@@ -18,6 +19,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use App\Events\Tasks\DispatchTasksToUser;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Support\Facades\Notification;
+use App\Interfaces\Tenant\Customers\CustomersInterface;
 use App\Notifications\Tasks\TasksDispatchedNotification;
 
 class SendPDFNotification
@@ -29,17 +31,34 @@ class SendPDFNotification
      *
      * @return void
      */
-    public function __construct()
+    protected object $customerRepository;
+    public function __construct(CustomersInterface $interfaceCustomers)
     {
-        //
+        $this->customerRepository = $interfaceCustomers;
     }
 
      
     public function handle(SendPDF $valuesInfo)
     {   
+        $customer = $this->customerRepository->getSpecificCustomerInfo($valuesInfo->valuesInfo->customer_id);
+        
+        try {
+            if($customer->customers->email != "")
+            {
+                $array = explode(";",$customer->customers->email);
+        
+                foreach($array as $email)
+                {
+                    //CLIENTE
+                    Mail::to($email)->queue(new PDFEmail($valuesInfo->valuesInfo,$valuesInfo->pdf));
+                }
+            }
+            
+        }
+        catch (Exception $e) {
+            echo $e;
+        }
       
-        Mail::to($valuesInfo->valuesInfo->customer->email)->queue(new PDFEmail($valuesInfo->valuesInfo,$valuesInfo->pdf));
-
         $tm = TeamMember::where('id',$valuesInfo->valuesInfo->tech_id)->first();
         Mail::to($tm->email)->queue(new PDFEmail($valuesInfo->valuesInfo,$valuesInfo->pdf));
 

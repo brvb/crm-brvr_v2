@@ -12,11 +12,14 @@ use SebastianBergmann\Type\VoidType;
 use App\Models\Tenant\CustomerServices;
 use App\Models\Tenant\CustomerLocations;
 use Illuminate\Support\Facades\Validator;
+use App\Interfaces\Tenant\Customers\CustomersInterface;
+use App\Interfaces\Tenant\CustomerServices\CustomerServicesInterface;
+use App\Interfaces\Tenant\CustomerLocation\CustomerLocationsInterface;
 
 class EditCustomerServices extends Component
 {
     public object $service;
-    public object $customer;
+    protected object $customer;
     public string $start_date = '';
     public string $end_date = '';
     public string $new_date = '';
@@ -26,7 +29,7 @@ class EditCustomerServices extends Component
     public $selectedCustomer = NULL;
     public object $serviceList;
     public string $selectedService = '';
-    public $customerLocations;
+    protected $customerLocations;
     public string $selectedLocation = '';
     private bool $updatedFields = false;
 
@@ -38,6 +41,17 @@ class EditCustomerServices extends Component
     public int $allMails = 0;
 
     protected $listeners = ['resetChanges' => 'resetChanges', 'keepChanges' => 'keepChanges'];
+
+    protected object $customerServicesRepository;
+    protected object $customersRepository;
+    protected object $customerLocationRepository;
+
+    public function boot(CustomerServicesInterface $customerService,CustomersInterface $customerInterface,CustomerLocationsInterface $customerLocationInterface)
+    {
+        $this->customerServicesRepository = $customerService;
+        $this->customersRepository = $customerInterface;
+        $this->customerLocationRepository =  $customerLocationInterface;
+    }
 
     public function mount($service): void
     {
@@ -145,17 +159,17 @@ class EditCustomerServices extends Component
 
     public function render(): View
     {
-        return view('tenant.livewire.customerservices.edit');
+        return view('tenant.livewire.customerservices.edit',["customer" => $this->customer,"customerLocations" => $this->customerLocations]);
     }
 
     private function initProperties($service): void
     {
         $this->service = $service;
         if($service)
-        $this->customer = Customers::where('id', $service->customer_id)->with('customerCounty')->with('customerDistrict')->first();
+        $this->customer = $this->customersRepository->getSpecificCustomerInfo($service->customer_id);
         $this->serviceList = Services::get();
         $this->customerList = Customers::get();
-        $this->customerLocations = CustomerLocations::where('customer_id', $service->customer_id)->get();
+        $this->customerLocations = $this->customersRepository->getLocationsFromCustomerCollection($this->customer->customers->no);
         $this->selectedCustomer = $service->customer_id;
         if($service->service_id) {
             $this->selectedService = $service->service_id;

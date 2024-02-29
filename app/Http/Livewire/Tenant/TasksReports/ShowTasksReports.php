@@ -5,6 +5,7 @@ namespace App\Http\Livewire\Tenant\TasksReports;
 use Livewire\Component;
 use App\Models\Tenant\Tasks;
 use Livewire\WithPagination;
+use App\Models\Tenant\EstadoPedido;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\File;
 use App\Events\Tasks\DispatchTasksToUser;
@@ -13,7 +14,7 @@ use App\Interfaces\Tenant\Customers\CustomersInterface;
 use App\Interfaces\Tenant\TeamMember\TeamMemberInterface;
 use App\Interfaces\Tenant\Setup\Services\ServicesInterface;
 use App\Interfaces\Tenant\TasksReports\TasksReportsInterface;
-use App\Models\Tenant\EstadoPedido;
+use App\Interfaces\Tenant\CustomerLocation\CustomerLocationsInterface;
 
 class ShowTasksReports extends Component
 {
@@ -37,6 +38,7 @@ class ShowTasksReports extends Component
     protected object $teamMembersRepository;
     protected object $customersRepository;
     protected object $serviceRepository;
+    protected object $locationRepository;
 
     private ?object $analysis = NULL;
     private ?object $members = NULL;
@@ -46,7 +48,7 @@ class ShowTasksReports extends Component
     private ?object $estadosPedido =  NULL;
 
     public int $technical = 0;
-    public int $client = 0;
+    public string $client = "";
     public int $work = 0;
     public int $typeTask = 0;
     public string $ordenation = '';
@@ -63,10 +65,11 @@ class ShowTasksReports extends Component
      * @param TasksInterface $tasksInterface
      * @return Void
      */
-    public function boot(TasksInterface $tasksInterface, TasksReportsInterface $tasksReportsInterface, TeamMemberInterface $interfaceTeamMember, CustomersInterface $interfaceCustomers, ServicesInterface $interfaceService): Void
+    public function boot(TasksInterface $tasksInterface, TasksReportsInterface $tasksReportsInterface, TeamMemberInterface $interfaceTeamMember, CustomersInterface $interfaceCustomers, ServicesInterface $interfaceService,CustomerLocationsInterface $locationInterface): Void
     {
         $this->tasksInterface = $tasksInterface;
         $this->tasksReportsInterface = $tasksReportsInterface;
+        $this->locationRepository = $locationInterface;
 
         /** Inicio Filtro */
         $this->teamMembersRepository = $interfaceTeamMember;
@@ -279,6 +282,8 @@ class ShowTasksReports extends Component
 
     /****FIM DO FILTRO ****/
 
+    
+
    
     /**
      * Livewire render list tasks view
@@ -331,7 +336,9 @@ class ShowTasksReports extends Component
             'members' => $this->members,
             'customers' => $this->customers,
             'services' => $this->service,
-            'estadosPedido' => $this->estadosPedido
+            'estadosPedido' => $this->estadosPedido,
+            'customersRepository' => $this->customersRepository,
+            'locationRepository' => $this->locationRepository
         ]);
 
         /** Fim do Filtro */

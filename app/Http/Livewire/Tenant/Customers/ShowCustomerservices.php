@@ -6,7 +6,9 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use Illuminate\Contracts\View\View;
 use App\Models\Tenant\CustomerServices;
+use App\Interfaces\Tenant\Customers\CustomersInterface;
 use App\Interfaces\Tenant\CustomerServices\CustomerServicesInterface;
+use App\Interfaces\Tenant\CustomerLocation\CustomerLocationsInterface;
 
 class ShowCustomerservices extends Component
 {
@@ -19,20 +21,20 @@ class ShowCustomerservices extends Component
     public int $customer_id;
 
     protected object $customerServicesRepository;
+    protected object $customersRepository;
+    protected object $customerLocationRepository;
 
-    public function boot(CustomerServicesInterface $customerService)
+    public function boot(CustomersInterface $customers,CustomerServicesInterface $customerService,CustomerLocationsInterface $customerLocationInterface)
     {
         $this->customerServicesRepository = $customerService;
+        $this->customersRepository = $customers;
+        $this->customerLocationRepository =  $customerLocationInterface;
     }
 
-    public function mount($customer): void
+    public function mount($customer)
     {
-        if(!is_integer($customer)) {
-            $this->customer_id = $customer->id;
-        } else {
-            $this->customer_id = $this->customer;
-        }
-
+        $this->customer_id = $customer->no;
+       
         if (isset($this->perPage)) {
             session()->put('perPage', $this->perPage);
         } elseif (session('perPage')) {
@@ -60,11 +62,15 @@ class ShowCustomerservices extends Component
 
     public function render(): View
     {
-        $this->customerServices = $this->customerServicesRepository->getSearchedCustomerServiceWithFilterCostumer($this->customer_id,$this->searchString,$this->perPage);
-       // $this->customerServices = CustomerServices::where('customer_id', $this->customer_id)->with('service')->paginate($this->perPage);
+        $customer = $this->customersRepository->getSearchedCustomerByNo($this->customer_id);
+        $this->customerServices = $this->customerServicesRepository->getSearchedCustomerServiceWithFilterCostumer($customer->customers[0]->id,$this->searchString,$this->perPage);
+
+     
         return view('tenant.livewire.customers.show-customerservices', [
             'customerServices' => $this->customerServices,
             'customer_id' => $this->customer_id,
+            'customersRepository' => $this->customersRepository,
+            'customerLocationRepository' => $this->customerLocationRepository
         ]);
     }
 }

@@ -59,8 +59,18 @@
                                         <label class="custom-control-label" for="customCheckBox{{ $item->id }}"></label>
                                     </div>
                                 </td>
-                                <td>{{ $item->customer->name }}</td>
-                                <td>{{ $item->customerLocation->description }}</td>
+                                <td>
+                                    @php       
+                                        $customerInfo = $customersRepository->getSpecificCustomerInfo($item->customer_id);
+                                    @endphp
+                                    {{ $customerInfo->customers->name }}
+                                </td>
+                                <td>
+                                    @php
+                                        $customerLocationInfo = $customerLocationRepository->getSpecificLocationInfo($item->location_id);
+                                    @endphp
+                                    {{ $customerLocationInfo->locations->address }}
+                                </td>
                                 <td>{{ $item->service->name }}</td>
                                 <td>{{ $item->start_date }}</td>
                                 <td>{{ $item->type }}</td>

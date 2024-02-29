@@ -41,21 +41,45 @@
                                                     <label>{{ __('Customer Name') }}</label>
                                                     <select name="selectedCustomer" id="selectedCustomer">
                                                         <option value="">{{ __('Select customer') }}</option>
-                                                        @forelse ($customerList as $item)
-                                                            <option value="{{ $item->id }}">{{ $item->vat }} | {{ $item->name }}</option>
+                                                        @forelse ($customerList->customers as $item)
+                                              
+                                                            <option value="{{ $item->id }}">{{ $item->name }}</option>
                                                         @empty
                                                         @endforelse
                                                     </select>
                                                 </section>
                                             </div>
+                                    
                                             @if(isset($selectedCustomer) && $selectedCustomer <> '')
+                                            
+                                            @php
+                                                $customer = $customerInterface->getSpecificCustomerInfo($selectedCustomer);
+                                            @endphp
+
+                                            <span style="display:block;justify-content:center;">Verificar cliente contas: <input type="checkbox" id="verificaContrato" @if(Auth::user()->type_user == 0) checked @endif></span><br>
+                                            <div id="contaROW" class="row form-group" @if(Auth::user()->type_user == 0) style="display:block;" @else style="display:none;" @endif>
+                                                <div class="row" style="margin-left:0px;margin-right:0px;">
+                                                    <section class="col-xl-4 col-xs-12">
+                                                        <label>Tipo de Contrato:</label>
+                                                        <input type="text" value="{{ $customer->customers->type}}" class="form-control" readonly>
+                                                    </section>
+                                                    <section class="col-xl-4 col-xs-12">
+                                                        <label>Horas:</label>
+                                                        <input type="text" value="{{ date('H:i',strtotime($customer->customers->hours_spent))}}" class="form-control" readonly>
+                                                    </section>
+                                                    <section class="col-xl-4 col-xs-12">
+                                                        <label>Conta Corrente:</label>
+                                                        <input type="text" value="{{ $customer->customers->current_account}}" class="form-control" readonly>
+                                                    </section>
+                                                </div>
+                                            </div>
                                             <div class="row form-group">
                                                 <section class="col-xl-4 col-xs-12">
                                                 
                                                     <label>{{ __('VAT') }}:</label>
-                                                    
-                                                    <input type="text" name="vat" id="vat" class="form-control"
-                                                                value="{{ $customer->vat }}" readonly>
+                                        
+                                                    <input type="text" name="vat" id="vat" class="form-control" wire:model.defer="vat"
+                                                                value="{{ $customer->customers->nif }}">
                                                                                                     
                                                     
                                                 </section>
@@ -63,8 +87,8 @@
                                                 
                                                     <label>{{ __('Phone number') }}</label>
                             
-                                                    <input type="text" name="phone" id="phone" class="form-control"
-                                                    value="{{ $customer->contact }}" readonly>
+                                                    <input type="text" name="phone" id="phone" class="form-control" wire:model.defer="phone"
+                                                    @isset($customer->customers->phone) value="{{ $customer->customers->phone }}" @endisset>
                                                     
                                                 
                                                 </section>
@@ -72,17 +96,23 @@
                                                 
                                                     <label>{{ __('Primary e-mail address') }}</label>
                                                 
-                                                    <input type="text" name="email" id="email" class="form-control"
-                                                    value="{{ $customer->email }}" readonly>
+                                                    <input type="text" name="email" id="email" class="form-control" wire:model.defer="email"
+                                                    @isset($customer->customers->email) value="{{ $customer->customers->email }}" @endisset>
                                                     
                                                                                                 
                                                 </section>
                                             </div>
                                             <div class="row form-group">
-                                                <section class="col-xl-12 col-xs-12">
+                                                <section class="col-xl-6 col-xs-12">
                                                     <label>Contacto adicional</label>
                                                     
                                                     <input type="text" name="contacto_adicional" id="contacto_adicional" wire:model.defer="contactoAdicional" class="form-control">
+                                                </section>
+                                                <section class="col-xl-6 col-xs-12 text-right">
+                                                    <label style="visibility:hidden;">Space</label><br>
+                                                    <a class="btn btn-primary" id="atualizarCliente" wire:click="atualizarCliente">
+                                                        <i class="fa fa-user"></i> Atualizar Cliente
+                                                    </a>
                                                 </section>
                                             </div>                                
                                             @endif
@@ -97,15 +127,19 @@
                                     </div>
                                     <div class="row">
                                         @php
+                            
                                             if($customerLocations == null)
                                             {
                                                 $contaCustomers = 0;
                                             }
                                             else {
-                                                $contaCustomers = count($customerLocations);
+                                                $contaCustomers = count($customerLocations->locations);
                                             }
+
                                            
                                         @endphp
+
+
 
                                             <div class="col-xl-12 col-xs-12" wire:key="select-field-model-version-{{ $iteration }}">
                                                 <section class="col-12" style="margin-top:20px;margin-left:0px;padding-left:0;" wire:ignore>
@@ -113,9 +147,9 @@
                                                     <select name="selectedLocation" id="selectedLocation" >
                                                         <option value="">{{ __('Please select location') }}</option>
                                                         @if($customerLocations != null)
-                                                            @forelse ($customerLocations as $item)
+                                                            @forelse ($customerLocations->locations as $item)
                                                                 <option value="{{ $item->id }}" @if($contaCustomers == 1) selected @endif>
-                                                                    {{ $item->description }} | {{ $item->locationCounty->name }}
+                                                                    {{ $item->city }} | {{ $item->addressname }}
                                                                 </option>
                                                             @empty
                                                             @endforelse
@@ -224,22 +258,40 @@
                                                     </div>
                                                 </section>
                                             </div>
-
-                                            <div class="row form-group" id="equipamentosSection" style="display:{{$stateEquipment}};">
+                                        
+                                            <div class="row form-group" id="equipamentosSection" style="display:{{$stateEquipment}};" wire:key="modelEq-{{ $iterationEquipment }}">
+                                           
                                                 <section class="col" style="margin-top:20px;" wire:ignore>
+                                                    <div class="form-group row" >
+                                                        <div class="col-12">
+                                                            <label>Equipamento</label>
+                                                            
+                                                           @if(!empty($equipamentosList->equipments))
+                                                            <select name="selectedEquipamentos" id="selectedEquipamentos" >
+                                                                <option value="">Selecione Equipamentos</option>
+                                                                {{-- @if(!empty($equipamentosList->equipments)) --}}
+                                                                    @forelse ($equipamentosList->equipments as $item)
+                                                                        <option value="{{ $item->serialnumber }}">{{ $item->description }} | {{ $item->serialnumber }}</option>
+                                                                    @empty
+                                                                    @endforelse
+                                                                {{-- @endif --}}
+                                                            </select>
+                                                            @endif
+                                                        </div>
+                                                    </div>
                                                 <div class="form-group row">
                                                     <section class="col-xl-4 col-xs-12">
                                                         <div class="row">
-                                                            <div class="col-9">
+                                                            <div class="col-12">
                                                                 <label>{{ __('Serie Number') }}</label>
                                                                 <input type="text" name="serie_number" id="serie_number" class="form-control" value="{{ $serieNumber }}" wire:model.defer="serieNumber">
                                                             </div>
-                                                            <div class="col-3" style="padding-left:0px;">
+                                                            {{-- <div class="col-3" style="padding-left:0px;">
                                                                 <label style="visibility:hidden;">Acesso</label>
                                                                 <a class="btn btn-primary" wire:click="searchSerieNumber">
                                                                     <i class="fa fa-search"></i>
                                                                 </a>
-                                                            </div>
+                                                            </div> --}}
                                                         </div>
                                                         
                                                     </section>
@@ -270,22 +322,22 @@
                                                    <div class="col-6">
                                                     <section class="col-12 mt-2">
                                                         <div class="form-check custom-checkbox checkbox-success">
-                                                            <input type="checkbox" name="riscado" class="form-check-input" id="riscado" wire:model.defer="riscado">
+                                                            <input type="checkbox" name="riscado" class="form-check-input" id="riscado" @if($riscado == true) checked @endif wire:model.defer="riscado">
                                                             <label class="form-check-label" for="customCheckBox3">{{ __('Scratched') }}</label>
                                                         </div>
         
                                                         <div class="form-check custom-checkbox checkbox-success">
-                                                            <input type="checkbox" name="partido" class="form-check-input" id="partido" wire:model.defer="partido">
+                                                            <input type="checkbox" name="partido" class="form-check-input" id="partido" @if($partido == true) checked @endif wire:model.defer="partido">
                                                             <label class="form-check-label" for="customCheckBox3">{{ __('Broken') }}</label>
                                                         </div>
         
                                                         <div class="form-check custom-checkbox checkbox-success">
-                                                            <input type="checkbox" name="bomestado" class="form-check-input" id="bomestado" wire:model.defer="bomestado">
+                                                            <input type="checkbox" name="bomestado" class="form-check-input" id="bomestado" @if($bomestado == true) checked @endif wire:model.defer="bomestado">
                                                             <label class="form-check-label" for="customCheckBox3">{{ __('Good State') }}</label>
                                                         </div>
         
                                                         <div class="form-check custom-checkbox checkbox-success">
-                                                            <input type="checkbox" name="normalestado" class="form-check-input" id="normalestado" wire:model.defer="normalestado">
+                                                            <input type="checkbox" name="normalestado" class="form-check-input" id="normalestado" @if($normalestado == true) checked @endif wire:model.defer="normalestado">
                                                             <label class="form-check-label" for="customCheckBox3">{{ __('Normal State') }}</label>
                                                         </div>
                                                     </section>
@@ -293,31 +345,33 @@
                                                    <div class="col-6">
                                                     <section class="col-12 mt-2">
                                                         <div class="form-check custom-checkbox checkbox-success">
-                                                            <input type="checkbox" name="transformador" class="form-check-input" id="transformador" wire:model.defer="transformador">
+                                                            <input type="checkbox" name="transformador" class="form-check-input" id="transformador" @if($transformador == true) checked @endif wire:model.defer="transformador">
                                                             <label class="form-check-label" for="customCheckBox3">{{ __('Transformer') }}</label>
                                                         </div>
         
                                                         <div class="form-check custom-checkbox checkbox-success">
-                                                            <input type="checkbox" name="mala" class="form-check-input" id="mala" wire:model.defer="mala">
+                                                            <input type="checkbox" name="mala" class="form-check-input" id="mala" @if($mala == true) checked @endif wire:model.defer="mala">
                                                             <label class="form-check-label" for="customCheckBox3">{{ __('Bag') }}</label>
                                                         </div>
         
                                                         <div class="form-check custom-checkbox checkbox-success">
-                                                            <input type="checkbox" name="tinteiro" class="form-check-input" id="tinteiro" wire:model.defer="tinteiro">
+                                                            <input type="checkbox" name="tinteiro" class="form-check-input" id="tinteiro" @if($tinteiro == true) checked @endif wire:model.defer="tinteiro">
                                                             <label class="form-check-label" for="customCheckBox3">{{ __('Toners') }}</label>
                                                         </div>
         
                                                         <div class="form-check custom-checkbox checkbox-success">
-                                                            <input type="checkbox" name="ac" class="form-check-input" id="ac" wire:model.defer="ac">
+                                                            <input type="checkbox" name="ac" class="form-check-input" id="ac" @if($ac == true) checked @endif wire:model.defer="ac">
                                                             <label class="form-check-label" for="customCheckBox3">{{ __('Mouse/Pen') }}</label>
                                                         </div>
                                                     </section>
                                                    </div>
                                                    <div class="col-12 mt-4">
-                                                    <label>{{ __('Description Extra') }}</label>
-                                                    <textarea name="descriptionExtra" class="form-control"
-                                                    id="descriptionExtra" wire:model.defer="descriptionExtra"
-                                                    rows="4"></textarea>
+                                                        <label>{{ __('Description Extra') }}</label>
+                                                        <textarea name="descriptionExtra" class="form-control"
+                                                        id="descriptionExtra" wire:model.defer="descriptionExtra"
+                                                        rows="4"></textarea>
+                                                      
+
                                                    </div>
                                                    
                                                 </div>
@@ -336,14 +390,41 @@
                                                             </section>
                                                         </div>
                                                         <div class="row form-group">
-                                                            <section class="col" style="margin-top:20px;" wire:ignore>
-                                                                <div id="receiveImagesEquipamento"></div>
+                                                      
+                                
+                                                            <section class="col" style="margin-top:20px;">
+                                                    
+                                                               
+                                                                    <div id="receiveImagesEquipamento" style="display:block;">
+                                                                        
+                                                                        {{-- <input type="text" name="anexosEquipamentosFromList" id="anexosEquipamentosFromList" class="form-control"> --}}
+                                                                        {{-- @if(!empty($anexosEquipamentosFromList))
+                    
+                                                                            @foreach (json_decode($anexosEquipamentosFromList) as $anexo )
+                                                                          
+                                                                                <button type='button' id='badge-click' class='btn-xs' style='border-radius:50px;border:1px;cursor:auto;pointer-events:none;'>
+                                                                                    {{$anexo}}
+                                                                                </button>
+
+                                                                            @endforeach
+                                                                        @endif --}}
+                                                                    </div>
+                                                                
                                                             </section>
                                                         </div>
                                                         
                                                     </div>
                                             
                                                   
+                                                </div>
+
+                                                <div class="form-group row" style="margin-left:10px;">
+                                                  
+                                                    <a wire:click="atualizar_equipment" class="btn btn-primary">
+                                                        <i class="las la-check mr-2"></i>@if($this->selectedEquipamentos != "") Atualizar Equipamento @else Guardar Equipamento @endif
+                                                    </a>
+                                                  
+                                                    
                                                 </div>
 
                                                 </section>
@@ -637,13 +718,44 @@
     @push('custom-scripts')
     <script>
         var services = [];
+
+        jQuery("body").on('click','#verificaContrato', function(){
+            if(jQuery(this).is(":checked"))
+            {
+                jQuery("#contaROW").css("display","block")
+            }
+            else {
+                jQuery("#contaROW").css("display","none")
+            }
+            
+        });
+
         document.addEventListener('livewire:load', function () {
 
              restartObjects();
 
              jQuery("#selectedLocation").on("select2:select", function (e) {
                @this.set('selectedLocation', jQuery('#selectedLocation').find(':selected').val());
+            }); 
+
+            jQuery('#selectedEquipamentos').select2();
+            jQuery("#selectedEquipamentos").on("select2:select", function (e) {
+                @this.set('selectedEquipamentos', jQuery('#selectedEquipamentos').find(':selected').val());
             });
+
+
+            // @this.upload('uploadFileEquipamento', file, (uploadedFilename) => {
+                        
+            //             //se isto ja for maior que 25 nao deixa colocar
+            //         });
+                    
+            //         message = "<button type='button' id='badge-click' class='btn-xs' style='border-radius:50px;border:1px;cursor:auto;pointer-events:none;'>";
+            //         message += fileName;
+            //         message += "</button>";    
+                    
+
+            //         jQuery("section #receiveImagesEquipamento").append(message);
+
 
         });
 
@@ -713,6 +825,27 @@
                 @this.set('homePanel', "");
             }
         });
+
+        window.addEventListener("swalEquip", function (e){
+            swal.fire({
+                title: e.detail.title,
+                html: e.detail.message,
+                type: e.detail.status,
+                showCancelButton: false,
+                showconfirmButton: false,
+
+            }).then((result) => {
+                    if(result.value) {
+
+                        jQuery('#selectedEquipamentos').select2();
+                        jQuery("#selectedEquipamentos").on("select2:select", function (e) {
+                            @this.set('selectedEquipamentos', jQuery('#selectedEquipamentos').find(':selected').val());
+                        });
+
+                        Livewire.emit("atualiza_equipments");
+                    }
+            });
+        })
 
 
 
@@ -924,6 +1057,10 @@
                 @this.set('selectedLocation', jQuery('#selectedLocation').find(':selected').val());
             });
 
+            jQuery('#selectedEquipamentos').select2();
+            jQuery("#selectedEquipamentos").on("select2:select", function (e) {
+                @this.set('selectedEquipamentos', jQuery('#selectedEquipamentos').find(':selected').val());
+            });
 
 
             //***AGENDAMENTOS*//
@@ -1031,6 +1168,7 @@
 
             restartObjects();    
             jQuery('#selectedLocation').select2();      
+            jQuery('#selectedEquipamentos').select2(); 
 
         })
 

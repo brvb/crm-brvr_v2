@@ -12,16 +12,18 @@ use App\Events\ChatMessage;
 use App\Events\Tasks\SendPDF;
 use App\Models\Tenant\Config;
 use Livewire\WithFileUploads;
+use App\Models\Tenant\Pedidos;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\Tenant\EstadoPedido;
 use App\Models\Tenant\Intervencoes;
+use App\Models\Tenant\PivotEstados;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use App\Interfaces\Tenant\Tasks\TasksInterface;
+use App\Interfaces\Tenant\Customers\CustomersInterface;
 use App\Interfaces\Tenant\TasksTimes\TasksTimesInterface;
 use App\Interfaces\Tenant\TasksReports\TasksReportsInterface;
-use App\Models\Tenant\Pedidos;
 
 class EditTasksReports extends Component
 {
@@ -29,6 +31,7 @@ class EditTasksReports extends Component
     use WithFileUploads;
 
     private TasksInterface $tasksInterface;
+    private CustomersInterface $customersInterface;
 
 
     public string $searchString = '';
@@ -43,9 +46,10 @@ class EditTasksReports extends Component
     public string $signaturePad = 'none';
     public string $selectedEstado = '';
     public string $horasAlterado = '';
-    public string $referencia_intervencao = '';
+    public array $designacao_intervencao = [];
     public string $descricao_intervencao = '';
-    public int $quantidade_intervencao = 0;
+    public string $selectedProdutos = '';
+    public array $quantidade_intervencao = [];
     public string $descricaoRealizado = '';
     public $uploadFile;
     public int $countFirstUpload = 0;
@@ -64,6 +68,8 @@ class EditTasksReports extends Component
     public array $arrayReport = [];
     public bool $changed = false;
 
+    public array $array_produtos = [];
+
     protected $listeners = ['resetChanges' => 'resetChanges', 'signaturePads' => 'signaturePads','signaturePadsClear' => 'signaturePadsClear','teste' => 'teste'];
 
      /**
@@ -72,9 +78,10 @@ class EditTasksReports extends Component
      * @param TasksInterface $tasksInterface
      * @return Void
      */
-    public function boot(TasksInterface $tasksInterface): Void
+    public function boot(TasksInterface $tasksInterface,CustomersInterface $customersInterface): Void
     {
         $this->tasksInterface = $tasksInterface;
+        $this->customersInterface = $customersInterface;
     }
 
     /**
@@ -86,7 +93,19 @@ class EditTasksReports extends Component
     {
         $this->task == $task;
 
-        $this->statesPedido = EstadoPedido::all();
+
+        $this->statesPedido  = PivotEstados::with('estadoPedido')->with('tipoPedido')->whereHas('tipoPedido', function ($query) {
+            $query->where('id',$this->task->tipo_pedido);
+        })->get();
+
+
+
+
+        // $this->statesPedido = EstadoPedido::all();
+
+
+
+
 
         //CONTAR O TEMPO PARA COLOCAR NO CABEÇALHO
         $horas = Intervencoes::where('id_pedido',$this->task->id)->where('hora_final','!=',null)->get();
@@ -97,32 +116,69 @@ class EditTasksReports extends Component
 
         foreach($horas as $hora)
         {
-            // $data1 = Carbon::parse($hora->hora_inicio);
-            // $data2 = Carbon::parse($hora->hora_final);
-            // $result = $data1->diff($data2);
+            
+            $dia_inicial = $hora->data_inicio.' '.$hora->hora_inicio;
+            $dia_final = $hora->data_final.' '.$hora->hora_final;
 
-            // $data = Carbon::createFromTime($result->h, $result->i, $result->s);
+            $data1 = Carbon::parse($dia_inicial);
+            $data2 = Carbon::parse($dia_final);
 
-            // $somaDiferencasSegundos += $data->diffInSeconds(Carbon::createFromTime(0, 0, 0));
+            $result = $data1->diff($data2);
 
-            $data1 = Carbon::parse($hora->hora_inicio);
-            $data2 = Carbon::parse($hora->hora_final);
-            $result = $data1->diff($data2)->format("%h.%i");
-            $hours = date("H:i",strtotime($result));
+            $hours = $result->days * 24 + $result->h;
+            $minutes = $result->i;
 
-            array_push($arrHours[$this->task->id],$hours);
+            $hoursMinutesDifference = sprintf('%d:%02d', $hours, $minutes);
+
+           
+
+            //*****PARTE A DESCONTAR********/
+
+            $valorOriginal = $hoursMinutesDifference;
+
+            list($horas, $minutos) = explode(':', $valorOriginal);
+
+            $valorEmHorasDecimais = $horas + ($minutos / 60);
+
+            if(!isset($hora->descontos[0]))
+            {
+                $sinal = "+";
+            }
+            else {
+                $sinal = $hora->descontos[0];
+            }
+
+            if($hora->descontos == "")
+            {
+                $hora->descontos = "+0";  
+            }
+
+
+
+            if($sinal == "+"){
+                $novoValorEmHorasDecimais = $valorEmHorasDecimais + substr($hora->descontos, 1);
+            }
+            else {
+                $novoValorEmHorasDecimais = $valorEmHorasDecimais - substr($hora->descontos, 1);
+            }
+        
+            $novoValorEmHorasDecimais = max(0, $novoValorEmHorasDecimais);
+
+            $novoHoras = floor($novoValorEmHorasDecimais);
+            $novoMinutos = ($novoValorEmHorasDecimais - $novoHoras) * 60;
+
+            $novoValor = sprintf('%d:%02d', $novoHoras, $novoMinutos);
+
+            /*********************** */
+
+            array_push($arrHours[$this->task->id],$novoValor);
+
         }
 
 
-        //Converter segundos e horas e minutos
-        // $horas = floor($somaDiferencasSegundos / 3600);
-        // $minutos = floor(($somaDiferencasSegundos % 3600) / 60);
-
-        // $horaFormatada = Carbon::createFromTime($horas, $minutos, 0)->format('H:i');
-
-        // $this->horasAtuais = $horaFormatada;
 
         $this->horasAtuais = global_hours_sum($arrHours);
+
 
 
         $horaAlterado = Pedidos::where('id',$this->task->id)->first();
@@ -134,12 +190,75 @@ class EditTasksReports extends Component
      
     }
 
+    public function removeProduto($i)
+    {
+        unset($this->array_produtos[$i]);
+        unset($this->designacao_intervencao[$i]);
+        unset($this->quantidade_intervencao[$i]);
+        $this->dispatchBrowserEvent("reloadProdutos");
+        $this->render();
+    }
+
+    public function updatedSelectedProdutos()
+    {
+        $infoProdutos = $this->tasksInterface->getProductByReference($this->selectedProdutos);
+
+        $conta = count($this->array_produtos);
+
+        if($conta == 0)
+         {
+            $cnt = 0;
+         } else {
+            $cnt = $conta + 1;
+         }
+
+        $this->array_produtos[$cnt] = [
+            "referencia" => $infoProdutos->products->reference
+        ];
+
+        $this->designacao_intervencao[$cnt] = [
+            "description" => $infoProdutos->products->description
+        ];
+        // array_push($this->array_produtos,$infoProdutos->products->description);
+
+        $this->dispatchBrowserEvent("reloadProdutos");
+
+    }
+
+    public function adicionaProduto()
+    {
+        // array_push($this->array_produtos,"");
+
+        $conta = count($this->array_produtos);
+
+        if($conta == 0)
+         {
+            $cnt = 0;
+         } else {
+            $cnt = $conta + 1;
+         }
+
+        $this->array_produtos[$cnt] = [
+            "referencia" => ""
+        ];
+
+        $this->designacao_intervencao[$cnt] = [
+            "description" => ""
+        ];
+
+        $this->dispatchBrowserEvent("reloadProdutos");
+    }
+
     public function updatedSelectedEstado()
     {
-        if($this->selectedEstado != "1")
+        if($this->selectedEstado != "7")
         {
             $this->descricaoPanel="block";
+        } else {
+            $this->descricaoPanel="none";
         }
+
+        $this->dispatchBrowserEvent("reloadProdutos");
         
     }
 
@@ -147,6 +266,8 @@ class EditTasksReports extends Component
     {
         $this->countFirstUpload++;
         $this->arrayFirstUploaded[$this->countFirstUpload] = [$this->uploadFile];
+
+        $this->dispatchBrowserEvent("reloadProdutos");
     }
    
    public function signaturePads($images,$pessoa)
@@ -180,6 +301,7 @@ class EditTasksReports extends Component
       $this->addIntervention();
    }
 
+
     /**
      * Saves the task report
      *
@@ -187,6 +309,7 @@ class EditTasksReports extends Component
      */
     public function addIntervention()
     {
+
         $config = Config::first();
 
         if($this->horasAlterado != "")
@@ -196,15 +319,19 @@ class EditTasksReports extends Component
             ]);
         }
 
-        if($this->selectedEstado == "1")
+
+        //VALIDAÇÕES VOU TER DE FAZER AQUI
+
+
+        if($this->selectedEstado == "7")
         {
             $intervencao = Intervencoes::with('pedido')->where('id_pedido',$this->task->id)->where('user_id',Auth::user()->id)->latest()->first();
 
             if(isset($intervencao->estado_pedido))
             {
-                if($intervencao->estado_pedido == "1" && $intervencao->hora_final == "")
+                if($intervencao->estado_pedido == "7" && $intervencao->hora_final == "")
                 {
-                    $this->dispatchBrowserEvent('swal', ['title' => "Intervenção", 'message' => "O seu utilizador já tem uma intervençao em aberto para este pedido!", 'status'=>'error']);
+                    $this->dispatchBrowserEvent('swal', ['title' => "Intervenção", 'message' => "O seu utilizador já tem uma intervençao em curso!", 'status'=>'error']);
                     return false;
                 }
             }
@@ -359,38 +486,80 @@ class EditTasksReports extends Component
 
         foreach($horas as $hora)
         {
+            
+            $dia_inicial = $hora->data_inicio.' '.$hora->hora_inicio;
+            $dia_final = $hora->data_final.' '.$hora->hora_final;
 
-            $data1 = Carbon::parse($hora->hora_inicio);
-            $data2 = Carbon::parse($hora->hora_final);
-            $result = $data1->diff($data2)->format("%h.%i");
-            $hours = date("H:i",strtotime($result));
+            $data1 = Carbon::parse($dia_inicial);
+            $data2 = Carbon::parse($dia_final);
 
-            array_push($arrHours[$this->task->id],$hours);
+            $result = $data1->diff($data2);
+
+            $hours = $result->days * 24 + $result->h;
+            $minutes = $result->i;
+
+            $hoursMinutesDifference = sprintf('%d:%02d', $hours, $minutes);
+
+           
+
+            //*****PARTE A DESCONTAR********/
+
+            $valorOriginal = $hoursMinutesDifference;
+
+            list($horas, $minutos) = explode(':', $valorOriginal);
+
+            $valorEmHorasDecimais = $horas + ($minutos / 60);
 
 
-            // $data1 = Carbon::parse($hora->hora_inicio);
-            // $data2 = Carbon::parse($hora->hora_final);
-            // $result = $data1->diff($data2);
+            if(!isset($hora->descontos[0]))
+            {
+                $sinal = "+";
+            }
+            else {
+                $sinal = $hora->descontos[0];
+            }
 
-            // $data = Carbon::createFromTime($result->h, $result->i, $result->s);
+            if($hora->descontos == "")
+            {
+                $hora->descontos = "+0";  
+            }
 
-            // $somaDiferencasSegundos += $data->diffInSeconds(Carbon::createFromTime(0, 0, 0));
+            if($sinal == "+"){
+                $novoValorEmHorasDecimais = $valorEmHorasDecimais + substr($hora->descontos, 1);
+            }
+            else {
+                $novoValorEmHorasDecimais = $valorEmHorasDecimais - substr($hora->descontos, 1);
+            }
+        
+            $novoValorEmHorasDecimais = max(0, $novoValorEmHorasDecimais);
+
+            $novoHoras = floor($novoValorEmHorasDecimais);
+            $novoMinutos = ($novoValorEmHorasDecimais - $novoHoras) * 60;
+
+            $novoValor = sprintf('%d:%02d', $novoHoras, $novoMinutos);
+
+            /*********************** */
+
+            array_push($arrHours[$this->task->id],$novoValor);
+
         }
+
 
 
         $this->horasAtuais = global_hours_sum($arrHours);
 
-         
-        $pdf = PDF::loadView('tenant.tasks.invoicepdf',["impressao" => $this,'config' => $config])
-        ->setPaper('a4')
-        ->setOptions(['isHtml5ParserEnabled' => true, 'isPhpEnabled' => true]);
-
-        $content = $pdf->download()->getOriginalContent();
-
-        Storage::put(tenant('id') . '/app/public/pedidos/pdfs_conclusao/'.$this->task->reference.'/'.$this->task->reference.'.pdf',$content);
 
         if($this->selectedEstado == "2")
         {
+       
+         
+            $pdf = PDF::loadView('tenant.tasks.invoicepdf',["horasGastasTotal" => $this->horasAtuais,"impressao" => $this,'customerRepository' => $this->customersInterface,'config' => $config])
+            ->setPaper('a4')
+            ->setOptions(['isHtml5ParserEnabled' => true, 'isPhpEnabled' => true]);
+
+            $content = $pdf->download()->getOriginalContent();
+
+            Storage::put(tenant('id') . '/app/public/pedidos/pdfs_conclusao/'.$this->task->reference.'/'.$this->task->reference.'.pdf',$content);
 
             $pedido = Pedidos::where('id',$this->task->id)->with('tech')->with('intervencoes')->with('customer')->first();
             event(new SendPDF($pedido, $this->email_pdf));
@@ -468,8 +637,10 @@ class EditTasksReports extends Component
             ->with('status', 'info');
     }
 
+   
     public function render()
     {
+        $produtos = $this->tasksInterface->getProducts();
 
         $horas = Intervencoes::where('id_pedido',$this->task->id)->where('hora_final','!=',null)->get();
 
@@ -479,32 +650,71 @@ class EditTasksReports extends Component
 
         foreach($horas as $hora)
         {
-            // $data1 = Carbon::parse($hora->hora_inicio);
-            // $data2 = Carbon::parse($hora->hora_final);
-            // $result = $data1->diff($data2);
+            
+            $dia_inicial = $hora->data_inicio.' '.$hora->hora_inicio;
+            $dia_final = $hora->data_final.' '.$hora->hora_final;
 
-            // $data = Carbon::createFromTime($result->h, $result->i, $result->s);
+            $data1 = Carbon::parse($dia_inicial);
+            $data2 = Carbon::parse($dia_final);
 
-            // $somaDiferencasSegundos += $data->diffInSeconds(Carbon::createFromTime(0, 0, 0));
-            $data1 = Carbon::parse($hora->hora_inicio);
-            $data2 = Carbon::parse($hora->hora_final);
-            $result = $data1->diff($data2)->format("%h.%i");
-            $hours = date("H:i",strtotime($result));
+            $result = $data1->diff($data2);
 
-            array_push($arrHours[$this->task->id],$hours);
+            $hours = $result->days * 24 + $result->h;
+            $minutes = $result->i;
+
+            $hoursMinutesDifference = sprintf('%d:%02d', $hours, $minutes);
+
+           
+
+            //*****PARTE A DESCONTAR********/
+
+            $valorOriginal = $hoursMinutesDifference;
+
+            list($horas, $minutos) = explode(':', $valorOriginal);
+
+            $valorEmHorasDecimais = $horas + ($minutos / 60);
+
+            if(!isset($hora->descontos[0]))
+            {
+                $sinal = "+";
+            }
+            else {
+                $sinal = $hora->descontos[0];
+            }
+
+            if($hora->descontos == "")
+            {
+                $hora->descontos = "+0";  
+            }
+
+
+            if($sinal == "+"){
+                $novoValorEmHorasDecimais = $valorEmHorasDecimais + substr($hora->descontos, 1);
+            }
+            else {
+                $novoValorEmHorasDecimais = $valorEmHorasDecimais - substr($hora->descontos, 1);
+            }
+        
+            $novoValorEmHorasDecimais = max(0, $novoValorEmHorasDecimais);
+
+            $novoHoras = floor($novoValorEmHorasDecimais);
+            $novoMinutos = ($novoValorEmHorasDecimais - $novoHoras) * 60;
+
+            $novoValor = sprintf('%d:%02d', $novoHoras, $novoMinutos);
+
+            /*********************** */
+
+            array_push($arrHours[$this->task->id],$novoValor);
+
         }
 
 
-        //Converter segundos e horas e minutos
-        // $horas = floor($somaDiferencasSegundos / 3600);
-        // $minutos = floor(($somaDiferencasSegundos % 3600) / 60);
-        // $horaFormatada = Carbon::createFromTime($horas, $minutos, 0)->format('H:i');
-    
-        // $this->horasAtuais = $horaFormatada;
 
         $this->horasAtuais = global_hours_sum($arrHours);
 
-        return view('tenant.livewire.tasksreports.edit');
+
+
+        return view('tenant.livewire.tasksreports.edit',["produtos" => $produtos, "arrayProdutos" => $this->array_produtos, "arrayDesignacoes" => $this->designacao_intervencao]);
 
 
     }

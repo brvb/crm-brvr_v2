@@ -11,7 +11,11 @@ interface CustomerLocationsInterface
 {
     public function getAllCostumerLocations($perPage): LengthAwarePaginator;
 
+    public function getAllCostumerLocationsCollection(): object;
+
     public function getSearchedCostumerLocations($searchString,$perPage): LengthAwarePaginator;
+
+    public function getSpecificLocationInfo($idLocation): object;
 
     public function add(CustomerLocationsFormRequest $request): CustomerLocations;
 

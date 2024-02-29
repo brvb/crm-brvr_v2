@@ -22,13 +22,17 @@
                                             @if(null !== old('name'))value="{{ old('name') }}"@endisset
                                             placeholder="{{ __('Customer Name') }}">
                                     </section>
-                                    <section class="col-xl-2 col-xs-12">
-                                        <label>{{ __('Slug') }}</label>
-                                        <input type="text" name="slug" id="slug" class="form-control"
-                                            @isset($slug)value="{{ $slug }}" @endisset
-                                            @if(null !== old('slug'))value="{{ old('slug') }}"@endisset
-                                            placeholder="{{ __('slug') }}">
-                                    </section>
+                                    @if(isset($slug))
+                                      @if($slug != "")
+                                        <section class="col-xl-2 col-xs-12">
+                                            <label>{{ __('Slug') }}</label>
+                                            <input type="text" name="slug" id="slug" class="form-control"
+                                                @isset($slug)value="{{ $slug }}" @endisset
+                                                @if(null !== old('slug'))value="{{ old('slug') }}"@endisset
+                                                placeholder="{{ __('slug') }}">
+                                        </section>
+                                        @endif
+                                    @endif
                                     <section class="col-xl-2 col-xs-12">
                                         <label>{{ __('VAT') }}</label>
                                         <input type="text" name="vat" id="vat" class="form-control"
@@ -41,7 +45,7 @@
                                     <section class="col-xl-3 col-xs-12">
                                         <label>{{ __('Short Name') }}</label>
                                         <input type="text" name="short_name" id="short_name" class="form-control"
-                                            @isset($shortName)value="{{ $shortName }}" @endisset
+                                            @isset($surname)value="{{ $surname }}" @endisset
                                             @if(null !== old('short_name'))value="{{ old('short_name') }}"@endisset
                                             placeholder="{{ __('Short Name') }}">
                                     </section>
@@ -87,7 +91,7 @@
 
                                     @livewire('tenant.common.location',  ['districts' => $districts, 'counties' => $counties, 'district' => $district, 'county' => $county])
                                 </div>
-                                <div class="form-group row">
+                                {{-- <div class="form-group row">
                                     <section class="col">
                                         <label>{{ __('Account manager') }}</label>
                                         @if(Auth::user()->type_user == "2")  
@@ -96,15 +100,15 @@
                                         <select name="account_manager" id="account_manager" class="form-control"  @if(Auth::user()->type_user == "2") disabled @endif>
                                             <option value="">{{ __('Select account manager') }}</option>
 
-                                            {{-- @if (isset($accountmanager) && $accountmanager != '') --}}
+                                           
                                                 @forelse ($allAccountManagers as $item)
                                                     <option value="{{ $item->id }}" @if(isset($accountmanager) && $item->id == $accountmanager) selected @endif>{{ $item->name }}</option>
                                                 @empty
                                                 @endforelse
-                                            {{-- @endif --}}
+                                        
                                         </select>
                                     </section>
-                                </div>
+                                </div> --}}
                             </div>
                         </div>
                         {{-- <div class="form-group row">

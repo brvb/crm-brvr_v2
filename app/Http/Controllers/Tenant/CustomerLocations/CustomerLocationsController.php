@@ -14,6 +14,8 @@ use App\Http\Requests\Tenant\CustomerLocations\CustomerLocationsFormRequest;
 class CustomerLocationsController extends Controller
 {
 
+    private $customerLocation;
+
     private CustomerLocationsInterface $customersLocationRepository;
 
     public function __construct(CustomerLocationsInterface $customersLocationRepository)
@@ -57,13 +59,8 @@ class CustomerLocationsController extends Controller
         ]);
     }
 
-    /**
-     * Edit customer location form
-     *
-     * @param CustomerLocations $customerLocation
-     * @return View
-     */
-    public function edit(CustomerLocations $customerLocation): View
+   
+    public function edit($customerLocation): View
     {
         if (Auth::user()->type_user == '2')
         {
@@ -73,8 +70,11 @@ class CustomerLocationsController extends Controller
             $customerList = Customers::all();
         }
 
+        $this->customerLocation = $this->customersLocationRepository->getSpecificLocationInfo($customerLocation);
+
+
         return view('tenant.customerlocations.edit', [
-            'customerLocation' => $customerLocation,
+            'customerLocation' => $this->customerLocation->locations,
             'themeAction' => 'form_element',
             'customerList' => $customerList,
         ]);
@@ -110,7 +110,7 @@ class CustomerLocationsController extends Controller
      * @param CustomerLocationsFormRequest $request
      * @return RedirectResponse
      */
-    public function update(CustomerLocations $customerLocation, CustomerLocationsFormRequest $request): RedirectResponse
+    public function update($customerLocation, CustomerLocationsFormRequest $request): RedirectResponse
     {
         $this->customersLocationRepository->update($customerLocation,$request);
 

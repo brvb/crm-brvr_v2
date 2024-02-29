@@ -38,11 +38,13 @@
                             <label class="custom-control-label" for="checkAll"></label>
                         </div>
                     </th>
-                    <th>{{ __('Name') }}</th>
-                    <th>{{ __('Customer') }}</th>
-                    <th>{{ __('Contact') }}</th>
-                    <th>{{ __('Manager') }}</th>
+                    <th>Nome</th>
+                    <th>Telemóvel</th>
+                    <th>Gerente</th>
+                    <th>Telefone Gerente</th>
+                    <th>Rua</th>
                     <th>{{ __('District') }}</th>
+                    <th>Localização principal</th>
                     <th>{{ __('Action') }}</th>
                 </tr>
             </thead>
@@ -56,22 +58,24 @@
                                 <label class="custom-control-label" for="customCheckBox{{ $item->id }}"></label>
                             </div>
                         </td>
-                        <td>{{ $item->description }}</td>
-                        @php
+                        <td>{{ $item->name }}</td>
+                        {{-- @php
                             $customer = \App\Models\Tenant\Customers::where('id',$item->customer_id)->first();
-                        @endphp
+                        @endphp --}}
 
-                        <td>{{$customer->name}}</td>
-                        <td>{{ $item->contact }}</td>
-                        <td>{{ $item->manager_name }}</td>
-                        <td>
-                            @forelse ($districts as $dItem)
-                                @if($dItem->id == $item->district_id)
-                                    {{ $dItem->name }}
-                                @endif
-                            @empty
+                        <td>{{ $item->phone }}</td>
+                        <td>{{ $item->managername }}</td>
+                        <td>{{ $item->phonemanager }}</td>
+                        <td>{{ $item->address }}</td>
 
-                            @endforelse
+                        <td>{{ $item->state }}</td>
+                        <td> 
+                            @if($item->locationmainornot == true) 
+                                Sim 
+                             @else 
+                                Não 
+                             @endif
+                        </td>
                         <td>
                             <div class="dropdown">
                             <button class="btn btn-primary tp-btn-light sharp" type="button" data-toggle="dropdown">
@@ -89,7 +93,7 @@
                                 <div class="dropdown-menu dropdown-menu-right">
                                     <a class="dropdown-item"
                                         href="{{ route('tenant.customer-locations.edit', $item->id) }}">{{ __('Edit Customer Location') }}</a>
-                                        @if($item->main != 1)
+                                        {{-- @if($item->main != 1)
                                             <button class="dropdown-item btn-sweet-alert" data-type="form"
                                                 data-route="{{ route('tenant.customer-locations.destroy', $item->id) }}"
                                                 data-style="warning" data-csrf="csrf"
@@ -99,7 +103,7 @@
                                                 data-btn-ok="{{ __('Yes, delete it!!') }}" data-method="DELETE">
                                                 {{ __('Delete Customer Location') }}
                                             </button>
-                                        @endif
+                                        @endif --}}
                                 </div>
                             </div>
                         </td>

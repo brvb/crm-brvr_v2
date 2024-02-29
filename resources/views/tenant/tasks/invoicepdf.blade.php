@@ -364,7 +364,10 @@
                       <td >
                         <p style="color:#326c91;font-weight:bold;">{{$impressao->task->reference}}</p>
                         <p>Data: {{date('Y-m-d')}}</p>
-                        <p>Cliente: {{$impressao->task->customer->name}}</p>
+                        @php
+                          $cst = $customerRepository->getSpecificCustomerInfo($impressao->task->customer_id);
+                        @endphp
+                        <p>Cliente: {{$cst->customers->name}}</p>
                       </td>
                     
                       <td class="right">
@@ -414,11 +417,7 @@
           <tr>
             <td>{{$impressao->descricaoRealizado}}</td>
             <td style="background: white;border-color:white;border:none;border-bottom:none;">
-            @if($impressao->horasAlterado != 0 && $impressao->horasAlterado != null)
-               <td>{{$impressao->horasAlterado}}</td>
-            @else
-                <td>{{$impressao->horasAtuais}}</td>
-            @endif
+            <td>{{$horasGastasTotal}}</td>
           </tr>
         </tbody>
       </table>

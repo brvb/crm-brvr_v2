@@ -42,10 +42,13 @@
                                         <label class="custom-control-label" for="checkAll"></label>
                                     </div>
                                 </th>
-                                <th>{{ __('Name') }}</th>
-                                <th>{{ __('Contact') }}</th>
-                                <th>{{ __('Manager') }}</th>
+                                <th>Nome</th>
+                                <th>Telemóvel</th>
+                                <th>Gerente</th>
+                                <th>Telefone Gerente</th>
+                                <th>Rua</th>
                                 <th>{{ __('District') }}</th>
+                                <th>Localização principal</th>
                                 <th>{{ __('Action') }}</th>
                             </tr>
                         </thead>
@@ -59,17 +62,24 @@
                                         <label class="custom-control-label" for="customCheckBox{{ $item->id }}"></label>
                                     </div>
                                 </td>
-                                <td>{{ $item->description }}</td>
-                                <td>{{ $item->contact }}</td>
-                                <td>{{ $item->manager_name }}</td>
-                                <td>
-                                    @forelse ($districts as $dItem)
-                                    @if($dItem->id == $item->district_id)
-                                    {{ $dItem->name }}
-                                    @endif
-                                    @empty
+                                <td>{{ $item->name }}</td>
+                                {{-- @php
+                                    $customer = \App\Models\Tenant\Customers::where('id',$item->customer_id)->first();
+                                @endphp --}}
 
-                                    @endforelse
+                                <td>{{ $item->phone }}</td>
+                                <td>{{ $item->managername }}</td>
+                                <td>{{ $item->phonemanager }}</td>
+                                <td>{{ $item->address }}</td>
+
+                                <td>{{ $item->state }}</td>
+                                <td> 
+                                    @if($item->locationmainornot == true) 
+                                        Sim 
+                                    @else 
+                                        Não 
+                                    @endif
+                                </td>
                                 <td>
                                     <div class="dropdown">
                                         {{-- <div class="btn-link" data-toggle="dropdown">
@@ -97,17 +107,7 @@
                                         <div class="dropdown-menu dropdown-menu-right">
                                             <a class="dropdown-item"
                                                 href="{{ route('tenant.customer-locations.edit', $item->id) }}">Editar Localização de Cliente</a>
-                                            @if($item->main != 1)
-                                                <button class="dropdown-item btn-sweet-alert" data-type="form"
-                                                    data-route="{{ route('tenant.customer-locations.destroy', $item->id) }}"
-                                                    data-style="warning" data-csrf="csrf"
-                                                    data-text="{{ __('Do you want to delete this customer location?') }}"
-                                                    data-title="{{ __('Are you sure?') }}"
-                                                    data-btn-cancel="{{ __('No, cancel it!!') }}"
-                                                    data-btn-ok="{{ __('Yes, delete it!!') }}" data-method="DELETE">
-                                                    {{ __('Delete Customer Location') }}
-                                                </button>
-                                            @endif
+                                           
                                         </div>
                                     </div>
                                 </td>

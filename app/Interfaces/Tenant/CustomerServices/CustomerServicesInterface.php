@@ -13,6 +13,9 @@ use Illuminate\Pagination\LengthAwarePaginator;
 
 interface CustomerServicesInterface
 {
+
+    public function getAllCustomers(): object;
+    
     public function getAllCustomerServices($perPage): LengthAwarePaginator;
 
     public function getSearchedCustomerService($searchString,$perPage): LengthAwarePaginator;

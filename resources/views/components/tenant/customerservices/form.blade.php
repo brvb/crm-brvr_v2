@@ -33,13 +33,15 @@
                                 <div class="row">
                                     <div class="col">
                                         <div class="form-group row">
-                                            <section class="col">
+                                            <span id="updateStatus" style="display:none;">{{ $update }}</span>
+                                            <section class="col" wire:ignore>
                                                 @php
+                        
                                                 if(!isset($service->customer_id)) {
                                                     echo '<label>' . __('Customer Name') . '</label>';
-                                                    echo '<select name="selectedCustomer" id="selectedCustomer" class="form-control" wire:change="updateCustomer($event.target.value)" wire:model="selectedCustomer">';
+                                                    echo '<select name="selectedCustomer" id="selectedCustomer" class="form-control">';
                                                     echo '<option value="">' . __('Select Customer') . '</option>';
-                                                    foreach ($customerList as $item) {
+                                                    foreach ($customerList->customers as $item) {
                                                         echo '<option value="' . $item->id . '">' . $item->name . '</option>';
                                                     }
                                                     echo '</select>';
@@ -54,48 +56,48 @@
                                             <section class="col-xl-9 col-xs-12">
                                                 <label>{{ __('Customer Name') }}</label>
                                                 <input type="text" name="name" id="name" class="form-control"
-                                                    value="{{ $customer->name }}" readonly>
+                                                    value="{{ $customer->customers->name }}" readonly>
                                             </section>
                                             <section class="col-xl-3 col-xs-12">
                                                 <label>{{ __('VAT') }}</label>
                                                 <input type="text" name="vat" id="vat" class="form-control"
-                                                    value="{{ $customer->vat }}" readonly>
+                                                    value="{{ $customer->customers->nif }}" readonly>
                                             </section>
                                         </div>
                                         <div class="form-group row">
                                             <section class="col-xl-3 col-xs-12">
                                                 <label>{{ __('Phone number') }}</label>
                                                 <input type="text" name="phone" id="phone" class="form-control"
-                                                    value="{{ $customer->contact }}" readonly>
+                                                    value="{{ $customer->customers->phone }}" readonly>
                                             </section>
                                             <section class="col-xl-9 col-xs-12">
                                                 <label>{{ __('Primary e-mail address') }}</label>
                                                 <input type="text" name="email" id="email" class="form-control"
-                                                    value="{{ $customer->email }}" readonly>
+                                                    value="{{ $customer->customers->email }}" readonly>
                                             </section>
                                         </div>
                                         <div class="form-group row">
                                             <section class="col-12">
                                                 <label>{{ __('Customer Address') }}</label>
                                                 <input type="text" name="address" id="address" class="form-control"
-                                                    value="{{ $customer->address }}" readonly>
+                                                    value="{{ $customer->customers->address }}" readonly>
                                             </section>
                                         </div>
                                         <div class="form-group row">
                                             <section class="col-xl-2 col-xs-12">
                                                 <label>{{ __('Zip Code') }}</label>
                                                 <input type="text" name="zipcode" id="zipcode" class="form-control"
-                                                    value="{{ $customer->zipcode }}" readonly>
+                                                    value="{{ $customer->customers->zipcode }}" readonly>
                                             </section>
                                             <section class="col-xl-5 col-xs-12">
                                                 <label>{{ __('District') }}</label>
                                                 <input type="text" name="district" id="district" class="form-control"
-                                                    value="{{ $customer->customerDistrict->name }}" readonly>
+                                                    value="{{ $customer->customers->state }}" readonly>
                                             </section>
                                             <section class="col-xl-5 col-xs-12">
                                                 <label>{{ __('County') }}</label>
-                                                <input type="text" name="zipcode" id="zipcode" class="form-control"
-                                                    value="{{ $customer->customerCounty->name }}" readonly>
+                                                <input type="text" name="county" id="county" class="form-control"
+                                                    value="{{ $customer->customers->city }}" readonly>
                                             </section>
                                         </div>
                                         @endisset
@@ -153,12 +155,15 @@
                                 <div class="form-group row">
                                     <section class="col">
                                         <label>{{ __('Customer Location') }}</label>
+            
                                         <select name="selectedLocation" id="selectedLocation" class="form-control" wire:model.defer = "selectedLocation">
                                             <option value="" selected>{{ __('Select Customer Location') }}</option>
-                                            @if(isset($customerLocations) && $customerLocations != '')
-                                                @forelse ($customerLocations as $item)
+                                            @if(!empty($customerLocations->locations) && $customerLocations != '')
+                                                @forelse ($customerLocations->locations as $item)
+                                            
                                                     <option value="{{ $item->id }}" @if($service != "") @if($item->id == $service->location_id) selected @endif @endif>
-                                                        {{ $item->description }}
+                                                        {{ $item->address }}
+
                                                     </option>
                                                 @empty
                                                 @endforelse
@@ -254,12 +259,12 @@
         <div class="card-footer justify-content-between">
             <div class="row">
             <div class="col text-right" style="padding: 0 5px 0 0;">
-                    <a href="{{ route('tenant.services.index') }}" class="btn btn-secondary" style="padding: 9px;font-size: 10px;">{{
+                    <a href="{{ route('tenant.services.index') }}" class="btn btn-secondary">{{
                         __('Back') }}
                         <span class="btn-icon-right"><i class="las la-angle-double-left"></i></span>
                     </a>
                     <button type="submit" style="border:none;background:none;">
-                    <a type="submit" class="btn btn-primary" style="padding: 9px;font-size: 10px;" role="button">
+                    <a type="submit" class="btn btn-primary" role="button">
                             {{ $buttonAction }}
                             <span class="btn-icon-right"><i class="las la-check mr-2"></i></span>
                         </a>
@@ -272,8 +277,14 @@
 
     @push('custom-scripts')
     <script>
-        // document.addEventListener('livewire:load', function () {
-           // restartObjects();
+        document.addEventListener('livewire:load', function () {
+        
+            if(jQuery("#updateStatus").text() != 1)
+            {
+                jQuery('#selectedCustomer').select2();
+                jQuery("#selectedCustomer").on("select2:select", function (e) { @this.selectedCustomer = jQuery('#selectedCustomer').find(':selected').val(); });
+            }
+           
             // if(jQuery('.selectedCustomerHidden').lenght == 0) {
             //     jQuery('#selectedCustomer').select2();
             //     jQuery("#selectedCustomer").on("select2:select", function (e) { @this.selectedCustomer = jQuery('#selectedCustomer').find(':selected').val(); });
@@ -286,7 +297,7 @@
             // jQuery("#selectedService").on("select2:select", function (e) {
             //     @this.set('selectedService', jQuery('#selectedService').find(':selected').val(), true)
             // });
-        // });
+        });
 
         window.addEventListener('swal',function(e){
             if(e.detail.confirm) {

@@ -53,14 +53,14 @@
                                             
                                             <div class="table" style="font-family: Avenir, Helvetica, sans-serif; box-sizing: border-box;">
                                                 <p style="font-family:Arial, Helvetica, sans-serif; color: #74787e;">
-                                                    <b>O pedido #{{$task->reference}} sofreu uma RECLAMAÇÃO! {{date('Y-m-d H:i:s')}}</b>
+                                                    <b>O pedido #{{$task->reference}} <span style="text-decoration: underline;color:red;">sofreu uma RECLAMAÇÃO</span> {{date('Y-m-d H:i:s')}}</b>
                                                 </p>
                                         
                                                 <p>
-                                                    <span>Cliente: {{$task->customer->name}}</span><br>
-                                                    <span>Telefone: {{$task->customer->contact}}</span><br>
-                                                    <span>Email: {{$task->customer->email}}</span><br>
-                                                    <span>Técnico: {{$task->tech->name}}</span><br>
+                                                    <span>Cliente: {{$cliente->customers->name}}</span><br>
+                                                    <span>Telefone: {{$cliente->customers->phone}}</span><br>
+                                                    <span>Email: {{$cliente->customers->email}}</span><br>
+                                                    <span>Técnico designado: {{$task->tech->name}}</span><br>
                                                     <span>Assunto: {{$task->descricao}}</span><br>
                                                 </p>
                                                 <p>A sua reclamação será tratada com a maior brevidade possível.</p>
@@ -72,7 +72,7 @@
                                                 </p>
                                                 <p>
                                                     <small>
-                                                    Não responda a este email. <br>
+                                                        <label style="font-size: 1.5em;font-weight: bold;text-decoration: underline;">Não responda a este email. </label><br>
                                                     Para qualquer esclarecimento use os contactos habituais:<br>
                                                             Telefone: 252646260 Email: suporte@brvr.pt <br>
                                                             Identifique sempre o número de pedido.

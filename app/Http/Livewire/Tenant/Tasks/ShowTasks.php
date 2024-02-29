@@ -2,21 +2,25 @@
 
 namespace App\Http\Livewire\Tenant\Tasks;
 
-use App\Events\Alerts\ReaberturaPedidoEvent;
-use App\Events\Alerts\SendStatusEvent;
+use Exception;
 use Livewire\Component;
 use App\Models\Tenant\Tasks;
 use Livewire\WithPagination;
 use App\Models\Tenant\Pedidos;
 use App\Models\Tenant\EstadoPedido;
+use App\Models\Tenant\Intervencoes;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\File;
+use App\Events\Alerts\SendStatusEvent;
 use App\Events\Tasks\DispatchTasksToUser;
+use App\Events\Alerts\CheckFinalizadosEvent;
+use App\Events\Alerts\ReaberturaPedidoEvent;
 use App\Interfaces\Tenant\Tasks\TasksInterface;
 use App\Interfaces\Tenant\Customers\CustomersInterface;
 use App\Interfaces\Tenant\TeamMember\TeamMemberInterface;
 use App\Interfaces\Tenant\Setup\Services\ServicesInterface;
 use App\Interfaces\Tenant\TasksReports\TasksReportsInterface;
+use App\Interfaces\Tenant\CustomerLocation\CustomerLocationsInterface;
 
 class ShowTasks extends Component
 {
@@ -28,7 +32,7 @@ class ShowTasks extends Component
     private ?object $counties = NULL;
 
 
-    protected $listeners = ['dispatchTask' => 'dispatchTask'];
+    protected $listeners = ['dispatchTask' => 'dispatchTask','enviaStatus' => 'enviaStatus'];
 
     private TasksInterface $tasksInterface;
     private TasksReportsInterface $tasksReportsInterface;
@@ -40,6 +44,7 @@ class ShowTasks extends Component
     protected object $teamMembersRepository;
     protected object $customersRepository;
     protected object $serviceRepository;
+    protected object $locationRepository;
 
     private ?object $analysis = NULL;
     private ?object $members = NULL;
@@ -49,7 +54,7 @@ class ShowTasks extends Component
     private ?object $estadosPedido =  NULL;
 
     public int $technical = 0;
-    public int $client = 0;
+    public string $client = "";
     public int $work = 0;
     public int $typeTask = 0;
     public string $ordenation = '';
@@ -66,10 +71,11 @@ class ShowTasks extends Component
      * @param TasksInterface $tasksInterface
      * @return Void
      */
-    public function boot(TasksInterface $tasksInterface, TasksReportsInterface $tasksReportsInterface, TeamMemberInterface $interfaceTeamMember, CustomersInterface $interfaceCustomers, ServicesInterface $interfaceService): Void
+    public function boot(TasksInterface $tasksInterface, TasksReportsInterface $tasksReportsInterface, TeamMemberInterface $interfaceTeamMember, CustomersInterface $interfaceCustomers, ServicesInterface $interfaceService, CustomerLocationsInterface $locationInterface): Void
     {
         $this->tasksInterface = $tasksInterface;
         $this->tasksReportsInterface = $tasksReportsInterface;
+        $this->locationRepository = $locationInterface;
 
         /** Inicio Filtro */
         $this->teamMembersRepository = $interfaceTeamMember;
@@ -207,6 +213,8 @@ class ShowTasks extends Component
      */
     public function updatedSearchString(): void
     {
+        $customer = $this->customersRepository->getSearchedCustomerCollection($this->searchString);
+
         $this->resetPage();
     }
 
@@ -282,13 +290,24 @@ class ShowTasks extends Component
 
     /****FIM DO FILTRO ****/
 
-    public function enviaStatus($id)
+    public function enviaStatus($id,$mensagem)
     {
-        $pedido = Pedidos::where('id',$id)->with('tipoEstado')->with('customer')->with('tech')->first();
+        $pedido = Pedidos::where('id',$id)->with('tipoEstado')->with('customer')->with('tech')->with('tipoPedido')->first();
 
-        event(new SendStatusEvent($pedido));
+        $emailCheck = event(new SendStatusEvent($pedido,$mensagem));
 
-        $this->dispatchBrowserEvent('fireSwal', ['title' => "Estado", 'message' => "Enviado email para cliente", 'status'=>'success']);
+
+
+        if($emailCheck[0] == null)
+        {
+            $this->dispatchBrowserEvent('fireSwal', ['title' => "Estado", 'message' => "Enviado email para cliente", 'status'=>'success']);
+        }
+        else {
+            $this->dispatchBrowserEvent('fireSwal', ['title' => "Estado", 'message' => "Esse cliente não tem email", 'status'=>'error']);
+        }
+
+
+        
     }
 
     public function reabrirPedido($id)
@@ -302,6 +321,32 @@ class ShowTasks extends Component
         event(new ReaberturaPedidoEvent($pedido));
 
         return redirect()->route('tenant.tasks.edit', $pedido->id);
+    }
+
+    public function finalizarPedido($id)
+    {
+        $getIntervencao = Intervencoes::where('id_pedido',$id)->orderBy('id','desc')->first();
+
+        event(new CheckFinalizadosEvent($getIntervencao));
+
+        $this->dispatchBrowserEvent('fireSwal', ['title' => "Estado", 'message' => "Pedido finalizado com sucesso", 'status'=>'success']);
+    }
+
+    public function abrirPopUp($id)
+    {
+        $message = "<div class='swalBox'>";
+        $title = "<h3 style='color: #595959; font-size:1.8rem; font-weight: 600;'>Tem a certeza?</h3>";
+        $message .= "<p style='color: #595959; font-size:1rem; font-weight: 400;'>Adicione uma descrição</p>";
+        $message .= "<textarea id='qtdrececionada' style='font-size:1rem;border: 0.1px solid black; border-radius: 0.2rem; padding:0.4rem; width: 100%; color: #495057;background-color: #fff;background-clip: padding-box;border: 1px solid #f0f1f5;border-radius: 0.75rem;'></textarea>";
+        $message .= "<input type='hidden' id='itemId' value=" . $id . ">";
+        $message .= "</label>";
+
+        $this->dispatchBrowserEvent('abrirPopUp', [
+            'title' => $title,
+            'message' => $message,
+            'status' => 'info',
+            'itemId' => $id,
+        ]);
     }
 
    
@@ -356,7 +401,9 @@ class ShowTasks extends Component
             'members' => $this->members,
             'customers' => $this->customers,
             'services' => $this->service,
-            'estadosPedido' => $this->estadosPedido
+            'estadosPedido' => $this->estadosPedido,
+            'customersRepository' => $this->customersRepository,
+            'locationRepository' => $this->locationRepository
         ]);
 
         /** Fim do Filtro */

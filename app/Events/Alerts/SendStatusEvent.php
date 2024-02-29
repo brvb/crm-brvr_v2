@@ -19,15 +19,17 @@ class SendStatusEvent
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public $pedido;
+    public $mensagem;
 
     /**
      * Create a new event instance.
      *
      * @return void
      */
-    public function __construct(object $intervencao)
+    public function __construct(object $intervencao,string $mensagem)
     {
         $this->pedido = $intervencao;
+        $this->mensagem = $mensagem;
     }
 
 }
