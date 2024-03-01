@@ -71,7 +71,6 @@ class Show extends Component
     public function mount()
     {
 
-
         $this->servicesNotifications = $this->customerNotification->getNotificationTimes($this->customersRepository,$this->customerLocationInterface);
 
         //PARTE EM TEMPO REAL
