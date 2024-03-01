@@ -74,7 +74,6 @@ class Show extends Component
         $this->servicesNotifications = $this->customerNotification->getNotificationTimes($this->customersRepository,$this->customerLocationInterface);
 
         //PARTE EM TEMPO REAL
-       
       
         $users = User::where('type_user','!=','2')->get();
         $arrayUser = [];
