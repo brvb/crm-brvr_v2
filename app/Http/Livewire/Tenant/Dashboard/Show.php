@@ -22,6 +22,7 @@ use App\Interfaces\Tenant\Customers\CustomersInterface;
 use App\Interfaces\Tenant\TeamMember\TeamMemberInterface;
 use App\Interfaces\Tenant\CustomerServices\CustomerServicesInterface;
 use App\Interfaces\Tenant\CustomerNotification\CustomerNotificationInterface;
+use App\Models\Tenant\StampsClientes;
 
 class Show extends Component
 {
@@ -69,6 +70,7 @@ class Show extends Component
     }
     public function mount()
     {
+
 
         $this->servicesNotifications = $this->customerNotification->getNotificationTimes($this->customersRepository,$this->customerLocationInterface);
 
@@ -221,10 +223,10 @@ class Show extends Component
         if($pedido->estado != "7")
         {
          
-            if($checkIntervencaoUser != null)
-            {
-                return redirect()->route('tenant.tasks-reports.edit',["tasks_report" => $idPedido]);
-            }
+            // if($checkIntervencaoUser != null)
+            // {
+            //     return redirect()->route('tenant.tasks-reports.edit',["tasks_report" => $idPedido]);
+            // }
 
             $data_agendamento = $pedido->data_agendamento;
             $hora_agendamento = $pedido->hora_agendamento;

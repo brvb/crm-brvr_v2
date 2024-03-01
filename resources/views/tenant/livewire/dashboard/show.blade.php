@@ -62,7 +62,7 @@ style="background:rgba(255, 255, 255, 0.8);z-index:999;position:fixed;top:0;left
               
                         <td>{{ $item->reference }}</td>
                         <td>{{ $cust->customers->name }}</td>
-                        <td>{{ $item->servicesToDo->name}}</td>
+                        <td>{{ $item->descricao }}</td>
                         <td>{{ $item->tech->name }}</td>
                         <td>
                             @if($item->data_agendamento != "")

@@ -6,11 +6,14 @@ use stdClass;
 use App\Models\User;
 use Illuminate\Support\Str;
 use App\Models\Tenant\Files;
+use App\Models\Tenant\Counties;
 use App\Models\Tenant\Customers;
+use App\Models\Tenant\Districts;
 use App\Models\Tenant\TeamMember;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use App\Models\Tenant\StampsClientes;
 use App\Models\Tenant\CustomerServices;
 use App\Models\Tenant\ContactsCustomers;
 use App\Models\Tenant\CustomerLocations;
@@ -19,8 +22,6 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use App\Interfaces\Tenant\Customers\CustomersInterface;
 use App\Http\Requests\Tenant\Customers\CustomersFormRequest;
 use App\Http\Requests\Tenant\CustomerContacts\CustomerContactsFormRequest;
-use App\Models\Tenant\Counties;
-use App\Models\Tenant\Districts;
 
 class CustomersRepository implements CustomersInterface
 {
@@ -450,6 +451,9 @@ class CustomersRepository implements CustomersInterface
 
             // $cidade = Counties::where('id',$request->county)->where('district_id',$request->district)->first();
 
+
+           
+         
             $arrayPHC = [
                 "name" => $request->name,
                 "nif" => $request->vat,
@@ -489,6 +493,13 @@ class CustomersRepository implements CustomersInterface
             curl_close($curl);
 
             $getClient = json_decode($response);
+
+            
+            StampsClientes::create([
+                "stamp" => $getClient->id,
+                "nome_cliente" => $request->name
+            ]);
+            
 
             /******* LOCALIZAÇÕES ****/
 

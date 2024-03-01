@@ -183,7 +183,7 @@
                                     @endphp
                                     {{ $customer->customers->name }}
                                 </td>
-                                <td>{{ $item->servicesToDo->name}}</td>
+                                <td>{{ $item->descricao}}</td>
                                 <td>{{ $item->tech->name }}</td>
                                 <td>
                                     @if($item->data_agendamento != "")
