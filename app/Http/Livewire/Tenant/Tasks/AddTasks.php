@@ -422,7 +422,9 @@ class AddTasks extends Component
 
         if(!Storage::exists(tenant('id') . '/app/public/pedidos/equipamentos_pedidos/'.$this->taskReference))
         {
-            File::makeDirectory(tenant('id') . '/app/public/pedidos/equipamentos_pedidos/'.$this->taskReference, 0755, true, true);
+            $caminhoImagess = storage_path('/app/public/pedidos/equipamentos_pedidos/'.$this->taskReference.'/');
+            mkdir($caminhoImagess, 0755, true);
+            // File::makeDirectory(tenant('id') . '/app/public/pedidos/equipamentos_pedidos/'.$this->taskReference, 0755, true, true);
         }
         
         if(!empty($this->arrayEquipamentoUploaded)){
@@ -651,7 +653,9 @@ class AddTasks extends Component
 
             if(!Storage::exists(tenant('id') . '/app/public/pedidos/etiquetas/'.$this->taskReference))
             {
-                File::makeDirectory(tenant('id') . '/app/public/pedidos/etiquetas/'.$this->taskReference, 0755, true, true);
+                // File::makeDirectory(tenant('id') . '/app/public/pedidos/etiquetas/'.$this->taskReference, 0755, true, true);
+                $caminhoImagesEt = storage_path('/app/public/pedidos/etiquetas/'.$this->taskReference.'/');
+                mkdir($caminhoImagesEt, 0755, true);
             }
     
             Storage::put(tenant('id') . '/app/public/pedidos/etiquetas/'.$this->taskReference.'/etiqueta'.$this->taskReference.'.pdf',$content);
@@ -667,11 +671,15 @@ class AddTasks extends Component
 
         if(!Storage::exists(tenant('id') . '/app/public/pedidos/imagens_pedidos/'.$this->taskReference))
         {
-            File::makeDirectory(tenant('id') . '/app/public/pedidos/imagens_pedidos/'.$this->taskReference, 0755, true, true);
+            // File::makeDirectory(tenant('id') . '/app/public/pedidos/imagens_pedidos/'.$this->taskReference, 0755, true, true);
+            $caminhoImages = storage_path('/app/public/pedidos/imagens_pedidos/'.$this->taskReference.'/');
+            mkdir($caminhoImages, 0755, true);
         }
         if(!Storage::exists(tenant('id') . '/app/public/pedidos/equipamentos_pedidos/'.$this->taskReference))
         {
-            File::makeDirectory(tenant('id') . '/app/public/pedidos/equipamentos_pedidos/'.$this->taskReference, 0755, true, true);
+            $caminhoEquipamentos = storage_path('/app/public/pedidos/equipamentos_pedidos/'.$this->taskReference.'/');
+            mkdir($caminhoEquipamentos, 0755, true);
+            // File::makeDirectory(tenant('id') . '/app/public/pedidos/equipamentos_pedidos/'.$this->taskReference, 0755, true, true);
         }
         
         if(!empty($this->arrayFirstUploaded)){
@@ -692,10 +700,10 @@ class AddTasks extends Component
        
         
         //Checka o Nao enviar email de alerta se devo enviar email ou nao
-        if($this->alert_email == 0)
-        {
-            event(new TaskCustomer($this->pedido_id));
-        }
+        // if($this->alert_email == 0)
+        // {
+        //     event(new TaskCustomer($this->pedido_id));
+        // }
 
 
         //TENTAR VER ESTA SITUAÇÃO PARA ENVIAR PARA O DASHBOARD

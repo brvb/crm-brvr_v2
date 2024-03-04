@@ -413,7 +413,9 @@ class EditTasksReports extends Component
 
         if(!Storage::exists(tenant('id') . '/app/public/pedidos/intervencoes_anexos/'.$this->task->id))
         {
-            File::makeDirectory(tenant('id') . '/app/public/pedidos/intervencoes_anexos/'.$this->task->id, 0755, true, true);
+            $caminhoImagesss = storage_path('/app/public/pedidos/intervencoes_anexos/'.$this->task->id.'/');
+            mkdir($caminhoImagesss, 0755, true);
+            // File::makeDirectory(tenant('id') . '/app/public/pedidos/intervencoes_anexos/'.$this->task->id, 0755, true, true);
         }
 
 
@@ -567,7 +569,9 @@ class EditTasksReports extends Component
 
             if(!Storage::exists(tenant('id') . '/app/public/pedidos/pdfs_conclusao/'.$this->task->reference))
             {
-                File::makeDirectory(tenant('id') . '/app/public/pedidos/pdfs_conclusao/'.$this->task->reference, 0755, true, true);
+                $caminhoImagess = storage_path('/app/public/pedidos/pdfs_conclusao/'.$this->task->reference.'/');
+                mkdir($caminhoImagess, 0755, true);
+                // File::makeDirectory(tenant('id') . '/app/public/pedidos/pdfs_conclusao/'.$this->task->reference, 0755, true, true);
             }
 
             Storage::put(tenant('id') . '/app/public/pedidos/pdfs_conclusao/'.$this->task->reference.'/'.$this->task->reference.'.pdf',$content);
