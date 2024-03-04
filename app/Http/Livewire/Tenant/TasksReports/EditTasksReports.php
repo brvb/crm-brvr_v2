@@ -18,6 +18,7 @@ use App\Models\Tenant\EstadoPedido;
 use App\Models\Tenant\Intervencoes;
 use App\Models\Tenant\PivotEstados;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use App\Interfaces\Tenant\Tasks\TasksInterface;
@@ -410,6 +411,11 @@ class EditTasksReports extends Component
             return;
         }
 
+        if(!Storage::exists(tenant('id') . '/app/public/pedidos/intervencoes_anexos/'.$this->task->id))
+        {
+            File::makeDirectory(tenant('id') . '/app/public/pedidos/intervencoes_anexos/'.$this->task->id, 0755, true, true);
+        }
+
 
         if(!empty($this->arrayFirstUploaded)){
             foreach($this->arrayFirstUploaded as $img)
@@ -558,6 +564,11 @@ class EditTasksReports extends Component
             ->setOptions(['isHtml5ParserEnabled' => true, 'isPhpEnabled' => true]);
 
             $content = $pdf->download()->getOriginalContent();
+
+            if(!Storage::exists(tenant('id') . '/app/public/pedidos/pdfs_conclusao/'.$this->task->reference))
+            {
+                File::makeDirectory(tenant('id') . '/app/public/pedidos/pdfs_conclusao/'.$this->task->reference, 0755, true, true);
+            }
 
             Storage::put(tenant('id') . '/app/public/pedidos/pdfs_conclusao/'.$this->task->reference.'/'.$this->task->reference.'.pdf',$content);
 

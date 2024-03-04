@@ -419,6 +419,12 @@ class AddTasks extends Component
     public function atualizar_equipment()
     {
         $anexosEquipamento = [];
+
+        if(!Storage::exists(tenant('id') . '/app/public/pedidos/equipamentos_pedidos/'.$this->taskReference))
+        {
+            File::makeDirectory(tenant('id') . '/app/public/pedidos/equipamentos_pedidos/'.$this->taskReference, 0755, true, true);
+        }
+        
         if(!empty($this->arrayEquipamentoUploaded)){
             foreach($this->arrayEquipamentoUploaded as $img)
             {
@@ -642,6 +648,11 @@ class AddTasks extends Component
 
             $this->imagem = 'impressao'.$this->taskReference.'.pdf';
 
+
+            if(!Storage::exists(tenant('id') . '/app/public/pedidos/etiquetas/'.$this->taskReference))
+            {
+                File::makeDirectory(tenant('id') . '/app/public/pedidos/etiquetas/'.$this->taskReference, 0755, true, true);
+            }
     
             Storage::put(tenant('id') . '/app/public/pedidos/etiquetas/'.$this->taskReference.'/etiqueta'.$this->taskReference.'.pdf',$content);
         }
@@ -653,6 +664,15 @@ class AddTasks extends Component
         $this->pedido_id = $this->tasksInterface->createPedido($this);
 
         //GRAVA AS IMAGENS
+
+        if(!Storage::exists(tenant('id') . '/app/public/pedidos/imagens_pedidos/'.$this->taskReference))
+        {
+            File::makeDirectory(tenant('id') . '/app/public/pedidos/imagens_pedidos/'.$this->taskReference, 0755, true, true);
+        }
+        if(!Storage::exists(tenant('id') . '/app/public/pedidos/equipamentos_pedidos/'.$this->taskReference))
+        {
+            File::makeDirectory(tenant('id') . '/app/public/pedidos/equipamentos_pedidos/'.$this->taskReference, 0755, true, true);
+        }
         
         if(!empty($this->arrayFirstUploaded)){
             foreach($this->arrayFirstUploaded as $img)

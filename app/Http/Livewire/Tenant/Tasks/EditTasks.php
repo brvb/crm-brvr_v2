@@ -388,6 +388,11 @@ class EditTasks extends Component
             $this->imagem = 'impressao'.$this->taskReference.'.pdf';
 
     
+            if(!Storage::exists(tenant('id') . '/app/public/pedidos/etiquetas/'.$this->taskReference))
+            {
+                File::makeDirectory(tenant('id') . '/app/public/pedidos/etiquetas/'.$this->taskReference, 0755, true, true);
+            }
+
             Storage::put(tenant('id') . '/app/public/pedidos/etiquetas/'.$this->taskReference.'/etiqueta'.$this->taskReference.'.pdf',$content);
         }
 
@@ -398,6 +403,15 @@ class EditTasks extends Component
         $pedido = $this->tasksInterface->updatePedido($this);
 
         //GRAVA AS IMAGENS
+
+        if(!Storage::exists(tenant('id') . '/app/public/pedidos/imagens_pedidos/'.$this->taskReference))
+        {
+            File::makeDirectory(tenant('id') . '/app/public/pedidos/imagens_pedidos/'.$this->taskReference, 0755, true, true);
+        }
+        if(!Storage::exists(tenant('id') . '/app/public/pedidos/equipamentos_pedidos/'.$this->taskReference))
+        {
+            File::makeDirectory(tenant('id') . '/app/public/pedidos/equipamentos_pedidos/'.$this->taskReference, 0755, true, true);
+        }
         
        
         if(!empty($this->arrayFirstUploaded)){
