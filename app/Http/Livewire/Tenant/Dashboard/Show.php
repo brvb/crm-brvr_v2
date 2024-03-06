@@ -45,6 +45,7 @@ class Show extends Component
     //Parte da segunda tabela
 
     private ?object $secondTable = NULL;
+    private ?object $thirdTable = NULL;
 
     //Parte do filtro
 
@@ -118,6 +119,17 @@ class Show extends Component
         if(Auth::user()->type_user == "0")
         {
             $this->secondTable = Pedidos::where('estado','!=','5')
+            ->where('estado','!=','2')
+            ->with('prioridadeStat')
+            ->with('customer')
+            ->with('tipoEstado')
+            ->with('tech')
+            ->with('servicesToDo')
+            ->with('location')
+            ->orderBy('prioridade','asc')
+            ->get();
+
+            $this->thirdTable = Pedidos::where('estado','2')
             ->with('prioridadeStat')
             ->with('customer')
             ->with('tipoEstado')
@@ -130,6 +142,18 @@ class Show extends Component
         else {
             $this->secondTable = Pedidos::where('tech_id',$teammember->id)
             ->where('estado','!=','5')
+            ->where('estado','!=','2')
+            ->with('prioridadeStat')
+            ->with('customer')
+            ->with('tipoEstado')
+            ->with('tech')
+            ->with('servicesToDo')
+            ->with('location')
+            ->orderBy('prioridade','asc')
+            ->get();
+
+            $this->thirdTable = Pedidos::where('tech_id',$teammember->id)
+            ->where('estado','2')
             ->with('prioridadeStat')
             ->with('customer')
             ->with('tipoEstado')
@@ -187,6 +211,17 @@ class Show extends Component
         if(Auth::user()->type_user == "0")
         {
             $this->secondTable = Pedidos::where('estado','!=','5')
+            ->where('estado','!=','2')
+            ->with('prioridadeStat')
+            ->with('customer')
+            ->with('tipoEstado')
+            ->with('tech')
+            ->with('servicesToDo')
+            ->with('location')
+            ->orderBy('prioridade','asc')
+            ->get();
+
+            $this->thirdTable = Pedidos::where('estado','2')
             ->with('prioridadeStat')
             ->with('customer')
             ->with('tipoEstado')
@@ -199,6 +234,7 @@ class Show extends Component
         else {
             $this->secondTable = Pedidos::where('tech_id',$teammember->id)
             ->where('estado','!=','5')
+            ->where('estado','!=','2')
             ->with('prioridadeStat')
             ->with('customer')
             ->with('tipoEstado')
@@ -207,6 +243,18 @@ class Show extends Component
             ->with('location')
             ->orderBy('prioridade','asc')
             ->get();
+
+            $this->thirdTable = Pedidos::where('tech_id',$teammember->id)
+            ->where('estado','2')
+            ->with('prioridadeStat')
+            ->with('customer')
+            ->with('tipoEstado')
+            ->with('tech')
+            ->with('servicesToDo')
+            ->with('location')
+            ->orderBy('prioridade','asc')
+            ->get();
+    
     
         }
     }
@@ -386,6 +434,17 @@ class Show extends Component
         if(Auth::user()->type_user == "0")
         {
             $this->secondTable = Pedidos::where('estado','!=','5')
+            ->where('estado','!=',"2")
+            ->with('prioridadeStat')
+            ->with('customer')
+            ->with('tipoEstado')
+            ->with('tech')
+            ->with('servicesToDo')
+            ->with('location')
+            ->orderBy('prioridade','asc')
+            ->get();
+
+            $this->thirdTable = Pedidos::where('estado','2')
             ->with('prioridadeStat')
             ->with('customer')
             ->with('tipoEstado')
@@ -398,6 +457,7 @@ class Show extends Component
         else {
             $this->secondTable = Pedidos::where('tech_id',$teammember->id)
             ->where('estado','!=','5')
+            ->where('estado','!=','2')
             ->with('prioridadeStat')
             ->with('customer')
             ->with('tipoEstado')
@@ -406,6 +466,18 @@ class Show extends Component
             ->with('location')
             ->orderBy('prioridade','asc')
             ->get();
+
+            $this->thirdTable = Pedidos::where('tech_id',$teammember->id)
+            ->where('estado','2')
+            ->with('prioridadeStat')
+            ->with('customer')
+            ->with('tipoEstado')
+            ->with('tech')
+            ->with('servicesToDo')
+            ->with('location')
+            ->orderBy('prioridade','asc')
+            ->get();
+    
     
         }
       
@@ -508,6 +580,17 @@ class Show extends Component
         if(Auth::user()->type_user == "0")
         {
             $this->secondTable = Pedidos::where('estado','!=','5')
+            ->where('estado','!=',"2")
+            ->with('prioridadeStat')
+            ->with('customer')
+            ->with('tipoEstado')
+            ->with('tech')
+            ->with('servicesToDo')
+            ->with('location')
+            ->orderBy('prioridade','asc')
+            ->get();
+
+            $this->thirdTable = Pedidos::where('estado','2')
             ->with('prioridadeStat')
             ->with('customer')
             ->with('tipoEstado')
@@ -520,6 +603,18 @@ class Show extends Component
         else {
             $this->secondTable = Pedidos::where('tech_id',$teammember->id)
             ->where('estado','!=','5')
+            ->where('estado','!=','2')
+            ->with('prioridadeStat')
+            ->with('customer')
+            ->with('tipoEstado')
+            ->with('tech')
+            ->with('servicesToDo')
+            ->with('location')
+            ->orderBy('prioridade','asc')
+            ->get();
+
+            $this->thirdTable = Pedidos::where('tech_id',$teammember->id)
+            ->where('estado','2')
             ->with('prioridadeStat')
             ->with('customer')
             ->with('tipoEstado')
@@ -529,6 +624,7 @@ class Show extends Component
             ->orderBy('prioridade','asc')
             ->get();
     
+    
         }
       
        
@@ -537,6 +633,6 @@ class Show extends Component
     public function render()
     {
 
-        return view('tenant.livewire.dashboard.show',['servicesNotifications' => $this->servicesNotifications, 'openTimes' => $this->openTimes, 'pedidos' => $this->secondTable, 'customersRepository' => $this->customersRepository, 'customerLocationInterface' => $this->customerLocationInterface]);
+        return view('tenant.livewire.dashboard.show',['servicesNotifications' => $this->servicesNotifications, 'openTimes' => $this->openTimes, 'pedidos' => $this->secondTable, 'pedidosconcluidos' => $this->thirdTable,'customersRepository' => $this->customersRepository, 'customerLocationInterface' => $this->customerLocationInterface]);
     }
 }
