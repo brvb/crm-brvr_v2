@@ -155,11 +155,25 @@
                                             @if($selectedEstado != "7")
 
                                             <div class="container-fluid" style="display:{{$descricaoPanel}};position: relative;border:1px solid #49748fec;padding: 10px;border-radius:6px;margin-top:20px;">
+                                                
+                                                <section class="col-xl-12 col-xs-12" wire:ignore>
+                                                    <label>{{ __('Nível de prioridade') }}</label>
+                                                    <select name="prioridadeColors" id="prioridadeColors" wire:model.defer="selectPrioridade" class="form-control">
+                                                            <option value="0">Não mudar</option>
+                                                        @foreach ($coresObject as $cor)
+                                                            <option style="background:{{$cor->cor}};" value="{{$cor->id}}">
+                                                                
+                                                                {{ $cor->nivel}}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                </section>
+
                                                 <div class="inner-text" style="position: absolute;top: 0%;left: 50%;transform: translate(-50%, -50%);background:white;">
                                                     <h4>Descrição da Intervenção</h4>
                                                 </div>
 
-                                                <section class="col-xl-12 col-xs-12 form-group">
+                                                <section class="col-xl-12 col-xs-12 form-group mt-2">
                                                     <label>Descrição</label>
                                                     <textarea class="form-control" rows="4" cols="50" name="descricaoRealizado" id="descricaoRealizado" wire:model.defer="descricaoRealizado"></textarea>
                                                 </section>
@@ -378,6 +392,36 @@
                     @this.set('signaturePad','none'); 
                 }
                 
+            });
+
+            function formatState (state) {
+
+                var base_url = "https://suporte.brvr.pt/cl/brv2-7f3a1b73-d8ae-464f-b91e-2a3f8163bdfb/app/public/tasks_colors";
+
+                if (!state.id) {
+                    return state.text;
+                }
+
+                var $state = $(
+                    '<span><img src="' + base_url + '/' + state.id + '.png" class="img-flag" style="width:30px;" /> ' + state.text + '</span>'
+                );
+
+
+                return $state;
+            };
+
+
+
+            @this.set('selectPrioridade',0,true);
+
+            jQuery('#prioridadeColors').select2({
+                templateResult: formatState,
+                templateSelection: formatState
+            });
+
+
+            jQuery("#prioridadeColors").on("select2:select", function (e) {
+                @this.set('selectPrioridade', jQuery('#prioridadeColors').find(':selected').val(), true)
             });
         });
 

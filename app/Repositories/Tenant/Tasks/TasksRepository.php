@@ -1038,24 +1038,48 @@ class TasksRepository implements TasksInterface
             } 
             else 
             {
+
                 if($checkIntervencoes->hora_final != "")
                 {
-                    $intervencao = Intervencoes::create([
-                        "id_pedido" => $object->task->id,
-                        "produtos_ref" => json_encode($object->array_produtos),
-                        "produtos_desc" => json_encode($object->designacao_intervencao),
-                        "produtos_qtd" => json_encode($object->quantidade_intervencao),
-                        "descricao" => $object->descricao_intervencao,
-                        "estado_pedido" => $object->selectedEstado,
-                        "descricao_realizado" => $object->descricaoRealizado,
-                        "anexos" => json_encode($imagesPedido),
-                        "assinatura_tecnico" => $object->signatureTecnico,
-                        "assinatura_cliente" => $object->signatureClient,
-                        "horas_alterado" => $object->horasAlterado,
-                        "user_id" => Auth::user()->id,
-                        "data_inicio" => date('Y-m-d'),
-                        "hora_inicio" => date('H:i:s')
-                    ]);
+                    if($object->selectedEstado != "4" && $object->selectedEstado != "7")
+                    {
+                        $intervencao = Intervencoes::create([
+                            "id_pedido" => $object->task->id,
+                            "produtos_ref" => json_encode($object->array_produtos),
+                            "produtos_desc" => json_encode($object->designacao_intervencao),
+                            "produtos_qtd" => json_encode($object->quantidade_intervencao),
+                            "descricao" => $object->descricao_intervencao,
+                            "estado_pedido" => $object->selectedEstado,
+                            "descricao_realizado" => $object->descricaoRealizado,
+                            "anexos" => json_encode($imagesPedido),
+                            "assinatura_tecnico" => $object->signatureTecnico,
+                            "assinatura_cliente" => $object->signatureClient,
+                            "horas_alterado" => $object->horasAlterado,
+                            "user_id" => Auth::user()->id,
+                            "data_inicio" => date('Y-m-d'),
+                            "hora_inicio" => date('H:i:s'),
+                            "hora_final" => date('H:i:s'),
+                            "data_final" => date('Y-m-d')
+                        ]);
+                    } else {
+                        $intervencao = Intervencoes::create([
+                            "id_pedido" => $object->task->id,
+                            "produtos_ref" => json_encode($object->array_produtos),
+                            "produtos_desc" => json_encode($object->designacao_intervencao),
+                            "produtos_qtd" => json_encode($object->quantidade_intervencao),
+                            "descricao" => $object->descricao_intervencao,
+                            "estado_pedido" => $object->selectedEstado,
+                            "descricao_realizado" => $object->descricaoRealizado,
+                            "anexos" => json_encode($imagesPedido),
+                            "assinatura_tecnico" => $object->signatureTecnico,
+                            "assinatura_cliente" => $object->signatureClient,
+                            "horas_alterado" => $object->horasAlterado,
+                            "user_id" => Auth::user()->id,
+                            "data_inicio" => date('Y-m-d'),
+                            "hora_inicio" => date('H:i:s')
+                        ]);
+                    }
+                    
                 }
                 else if($checkIntervencoes->hora_final == null)
                 {

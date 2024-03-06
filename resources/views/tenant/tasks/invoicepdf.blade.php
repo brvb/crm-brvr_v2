@@ -410,7 +410,7 @@
           <tr>
             <th>Resolução</th>
             <th style="background: white;border:none;"></th>
-            <th>Horas Gastas</th>
+            <th>Minutos Gastos</th>
           </tr>
         </thead>
         <tbody>

@@ -700,10 +700,10 @@ class AddTasks extends Component
        
         
         //Checka o Nao enviar email de alerta se devo enviar email ou nao
-        // if($this->alert_email == 0)
-        // {
-        //     event(new TaskCustomer($this->pedido_id));
-        // }
+        if($this->alert_email == 0)
+        {
+            event(new TaskCustomer($this->pedido_id));
+        }
 
 
         //TENTAR VER ESTA SITUAÇÃO PARA ENVIAR PARA O DASHBOARD
@@ -874,7 +874,11 @@ class AddTasks extends Component
 
         $getClient = $this->customersInterface->getSpecificCustomerInfo($this->selectedCustomer);
         // dd($getClient);
-        $this->equipamentosList = $this->tasksInterface->getEquipments($getClient->customers->no);
+
+        if(isset($getClient->customers->no))
+        {
+            $this->equipamentosList = $this->tasksInterface->getEquipments($getClient->customers->no);
+        } 
 
 
         return view('tenant.livewire.tasks.add',["customerList" => $this->customerList, "customer" => $this->customer, "customerLocations" => $this->customerLocations, "customerInterface" => $this->customersInterface, "equipamentosList" => $this->equipamentosList]);

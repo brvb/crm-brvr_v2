@@ -25,6 +25,8 @@ use App\Interfaces\Tenant\Tasks\TasksInterface;
 use App\Interfaces\Tenant\Customers\CustomersInterface;
 use App\Interfaces\Tenant\TasksTimes\TasksTimesInterface;
 use App\Interfaces\Tenant\TasksReports\TasksReportsInterface;
+use App\Models\Tenant\TeamMember;
+use App\Models\Tenant\Prioridades;
 
 class EditTasksReports extends Component
 {
@@ -63,6 +65,8 @@ class EditTasksReports extends Component
     
     public ?object $taskTimes =  NULL;
 
+    public ?object $coresObject = NULL;
+
     public int $reportInfo  = 1;
 
     public ?object $taskReportCollection = NULL;
@@ -70,6 +74,8 @@ class EditTasksReports extends Component
     public bool $changed = false;
 
     public array $array_produtos = [];
+
+    public ?int $selectPrioridade;
 
     protected $listeners = ['resetChanges' => 'resetChanges', 'signaturePads' => 'signaturePads','signaturePadsClear' => 'signaturePadsClear','teste' => 'teste'];
 
@@ -255,9 +261,11 @@ class EditTasksReports extends Component
         if($this->selectedEstado != "7")
         {
             $this->descricaoPanel="block";
+
         } else {
             $this->descricaoPanel="none";
         }
+
 
         $this->dispatchBrowserEvent("reloadProdutos");
         
@@ -320,6 +328,13 @@ class EditTasksReports extends Component
             ]);
         }
 
+        if($this->selectPrioridade != 0)
+        {
+            Pedidos::where('id',$this->task->id)->update([
+                "prioridade" => $this->selectPrioridade
+            ]);
+        }
+
 
         //VALIDAÇÕES VOU TER DE FAZER AQUI
 
@@ -362,6 +377,16 @@ class EditTasksReports extends Component
             }
             else {
                 $this->dispatchBrowserEvent('swal', ['title' => "Intervenção", 'message' => "Tem de abrir intervenção antes poder fechar", 'status'=>'error']);
+                return false;
+            }
+
+            $pedidoSpec = Pedidos::where('id',$this->task->id)->first();
+
+            $memberSpec = TeamMember::where('id',$pedidoSpec->tech_id)->first();
+
+            if($memberSpec->user_id != Auth::user()->id)
+            {
+                $this->dispatchBrowserEvent('swal', ['title' => "Intervenção", 'message' => "Não pode concluir um pedido que não lhe pertence", 'status'=>'error']);
                 return false;
             }
            
@@ -491,70 +516,54 @@ class EditTasksReports extends Component
 
         $arrHours[$this->task->id] = [];
 
+        $minutosSomados = 0;
+
 
         foreach($horas as $hora)
         {
             
             $dia_inicial = $hora->data_inicio.' '.$hora->hora_inicio;
-            $dia_final = $hora->data_final.' '.$hora->hora_final;
+            $dia_final = $hora->data_inicio.' '.$hora->hora_final;
 
             $data1 = Carbon::parse($dia_inicial);
             $data2 = Carbon::parse($dia_final);
 
-            $result = $data1->diff($data2);
-
-            $hours = $result->days * 24 + $result->h;
-            $minutes = $result->i;
-
-            $hoursMinutesDifference = sprintf('%d:%02d', $hours, $minutes);
+            $result = $data1->diffInMinutes($data2);
 
            
 
             //*****PARTE A DESCONTAR********/
 
-            $valorOriginal = $hoursMinutesDifference;
-
-            list($horas, $minutos) = explode(':', $valorOriginal);
-
-            $valorEmHorasDecimais = $horas + ($minutos / 60);
-
-
-            if(!isset($hora->descontos[0]))
+            
+            if($hora->descontos == null)
             {
-                $sinal = "+";
-            }
-            else {
-                $sinal = $hora->descontos[0];
+                $hora->descontos = "+0";
             }
 
-            if($hora->descontos == "")
-            {
-                $hora->descontos = "+0";  
+          
+            $minutosSomados += $result;
+
+            if($hora["descontos"][0] == "+"){ 
+                $minutosSomados += substr($hora->descontos, 1);
+            } 
+            else { 
+                $minutosSomados -= substr($hora->descontos, 1);
             }
-
-            if($sinal == "+"){
-                $novoValorEmHorasDecimais = $valorEmHorasDecimais + substr($hora->descontos, 1);
-            }
-            else {
-                $novoValorEmHorasDecimais = $valorEmHorasDecimais - substr($hora->descontos, 1);
-            }
-        
-            $novoValorEmHorasDecimais = max(0, $novoValorEmHorasDecimais);
-
-            $novoHoras = floor($novoValorEmHorasDecimais);
-            $novoMinutos = ($novoValorEmHorasDecimais - $novoHoras) * 60;
-
-            $novoValor = sprintf('%d:%02d', $novoHoras, $novoMinutos);
-
-            /*********************** */
-
-            array_push($arrHours[$this->task->id],$novoValor);
+          
+            /*********************** */           
 
         }
 
 
+        $resultDivisao = $minutosSomados / 15;
+        $resultBlocos = ceil($resultDivisao) * 15;
+            
 
-        $this->horasAtuais = global_hours_sum($arrHours);
+
+
+        $this->horasAtuais = $resultBlocos;
+
+        
 
 
         if($this->selectedEstado == "2")
@@ -728,6 +737,7 @@ class EditTasksReports extends Component
         $this->horasAtuais = global_hours_sum($arrHours);
 
 
+        $this->coresObject = Prioridades::all();
 
         return view('tenant.livewire.tasksreports.edit',["produtos" => $produtos, "arrayProdutos" => $this->array_produtos, "arrayDesignacoes" => $this->designacao_intervencao]);
 

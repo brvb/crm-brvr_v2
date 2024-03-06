@@ -250,6 +250,8 @@
                                                     @if($item->tipoEstado->id == 2 && Auth::user()->type_user == 0)
                                                         <button class="dropdown-item" wire:click="finalizarPedido({{$item->id}})">Finalizar Pedido</button>
                                                     @endif
+
+                
                                                 
                                                     <button class="dropdown-item btn-sweet-alert" data-type="form"
                                                         data-route="{{ route('tenant.tasks.destroy', $item->id) }}"
