@@ -111,7 +111,7 @@
                                                 </div>
                                                 
                                                 <div class="form-group row">
-                                                    <section class="col-xl-12 col-xs-12 form-group">  
+                                                    <section class="col-xl-12 col-xs-12 form-group" wire:ignore>  
                                                         <label>Produtos:</label>                                 
                                                         <select name="selectedProdutos" id="selectedProdutos">
                                                             <option value="">Selecione Produto</option>
@@ -342,7 +342,7 @@
             }
             
                     
-
+            jQuery('#selectedProdutos').select2();
 
 
             Livewire.emit("teste",cliente,tecnico);

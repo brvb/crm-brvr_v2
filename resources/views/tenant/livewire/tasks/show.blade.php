@@ -252,17 +252,17 @@
                                                     @endif
 
                 
-                                                
-                                                    <button class="dropdown-item btn-sweet-alert" data-type="form"
-                                                        data-route="{{ route('tenant.tasks.destroy', $item->id) }}"
-                                                        data-style="warning" data-csrf="csrf"
-                                                        data-text="Quer eliminar este pedido?"
-                                                        data-title="{{ __('Are you sure?') }}"
-                                                        data-btn-cancel="{{ __('No, do not delete!!') }}"
-                                                        data-btn-ok="Sim, apagar pedido" data-method="DELETE">
-                                                        Apagar Pedido
-                                                    </button>
-                                                    
+                                                    @if(Auth::user()->type_user == 0 || $user->user_id == Auth::user()->id)
+                                                        <button class="dropdown-item btn-sweet-alert" data-type="form"
+                                                            data-route="{{ route('tenant.tasks.destroy', $item->id) }}"
+                                                            data-style="warning" data-csrf="csrf"
+                                                            data-text="Quer eliminar este pedido?"
+                                                            data-title="{{ __('Are you sure?') }}"
+                                                            data-btn-cancel="{{ __('No, do not delete!!') }}"
+                                                            data-btn-ok="Sim, apagar pedido" data-method="DELETE">
+                                                            Apagar Pedido
+                                                        </button>
+                                                    @endif
 
                                                 </div>
                                             </div>
