@@ -114,7 +114,7 @@
                                                 @endphp
                                                 <p>O seu pedido {{strtolower($task->tipoPedido->name)}} #{{$task->reference}} foi <b>FINALIZADO</b> dia {{ date('Y-m-d') }} às {{ date('H:i:s') }}.</p>
                                                 @if($cst->customers->type == "Faturação Normal")
-                                                <p>O pedido teve uma duração de {{ $horas }} minutos.</p><br>
+                                                <p>O pedido teve uma duração de {{ $resultBlocos }} minutos.</p><br>
                                                 @elseif($cst->customers->type == "Bolsa de Horas")
                                                     @php
                                                         $minutosBolsa = $cst->customers->balance_hours - $resultBlocos;
@@ -122,7 +122,7 @@
                                                 <p>Atualmente o seu saldo é de {{ $minutosBolsa }}.</p><!-- No caso de cliente com bolsa de horas (falta adicionar no banco de dados e verificar aqui)-->
                                                 @else
                                                     @php
-                                                        $minutosAvenca = $cst->customers->hours_spent + $minutosSomados;
+                                                        $minutosAvenca = $cst->customers->hours_spent + $resultBlocos;
                                                     @endphp
                                                 <p>Neste mês já consumiu {{ $minutosAvenca }} horas.</p><!-- No caso de cliente com avença mensal -->
                                                 @endif
