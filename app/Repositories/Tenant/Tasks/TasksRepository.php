@@ -503,7 +503,7 @@ class TasksRepository implements TasksInterface
     /**FILTRO */
 
     public function getTasksFilter($searchString,$tech,$client,$typeReport,$work,$ordenation,$dateBegin,$dateEnd,$perPage): LengthAwarePaginator
-    {          
+    {     
         if($client != "")
         {
             $tasks = Pedidos::where('estado','!=',5)->whereHas('tech', function ($query) use ($tech)
@@ -529,15 +529,8 @@ class TasksRepository implements TasksInterface
               
               
             });
-            // ->whereHas('customer', function ($query) use ($searchString)
-            // {
-            //     if($searchString != "")
-            //     {
-            //         $query->where('short_name', 'like', '%' . $searchString . '%');
-            //     }
-            // });
-            
-         
+
+                               
                 $tasks = $tasks
                 ->when($dateBegin != "" && $dateEnd != "", function($query) use($dateBegin,$dateEnd) {
                     $query->where('created_at','>=',$dateBegin)->where('created_at','<=',$dateEnd);
@@ -555,8 +548,11 @@ class TasksRepository implements TasksInterface
                    $tasks = $tasks->where('customer_id',$customer->id);
                 }
 
-
-                $tasks = $tasks->where('customer_id',$client);
+                if($client != "0")
+                {
+                    $tasks = $tasks->where('customer_id',$client);
+                }
+                
 
                 $tasks = $tasks->whereHas('tipoEstado', function ($query) use ($typeReport)
                 {
@@ -575,7 +571,6 @@ class TasksRepository implements TasksInterface
                     $tasks = $tasks->with('tech')->with('servicesToDo')->with('tipoEstado')->with('customer')->with('location')->orderBy('created_at', 'desc')->paginate($perPage);
                  }
 
-        
                      
         }
         else 
@@ -649,7 +644,6 @@ class TasksRepository implements TasksInterface
         
         }
        
-        
         return $tasks;
     }
 
