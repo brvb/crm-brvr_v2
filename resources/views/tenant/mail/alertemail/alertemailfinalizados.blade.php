@@ -124,7 +124,7 @@
                                                     @php
                                                         $minutosAvenca = $cst->customers->hours_spent + $resultBlocos;
                                                     @endphp
-                                                <p>Neste mês já consumiu {{ $minutosAvenca }} horas.</p><!-- No caso de cliente com avença mensal -->
+                                                <p>Neste mês já consumiu {{ $minutosAvenca }} minutos.</p><!-- No caso de cliente com avença mensal -->
                                                 @endif
                                             </div>
                                             <hr>

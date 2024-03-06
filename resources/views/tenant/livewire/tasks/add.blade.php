@@ -63,10 +63,35 @@
                                                         <label>Tipo de Contrato:</label>
                                                         <input type="text" value="{{ $customer->customers->type}}" class="form-control" readonly>
                                                     </section>
+                                                    @if($customer->customers->type == "Avença")
                                                     <section class="col-xl-4 col-xs-12">
-                                                        <label>Horas:</label>
-                                                        <input type="text" value="{{ date('H:i',strtotime($customer->customers->hours_spent))}}" class="form-control" readonly>
+                                                        <label>Minutos:</label>
+                                                        <input type="text" value="{{$customer->customers->balance_hours}}" class="form-control" readonly>
+                                                    
+                                                                                                               
+                                                    
                                                     </section>
+                                                    @elseif($customer->customers->type == "Bolsa de Horas")
+                                                        <section class="col-xl-2 col-xs-12">
+                                                            <label>Minutos disponiveis:</label>
+                                                        
+                                                            <input type="text" value="{{$customer->customers->balance_hours}}" class="form-control" readonly>
+                                                    
+                                                        </section>
+
+                                                        <section class="col-xl-2 col-xs-12">
+                                                            <label>Gasto no Mês:</label>
+                                                            <input type="text" value="{{ $customer->customers->hours_spent}}" class="form-control" readonly>
+                                                        </section>
+                                                    @else
+
+                                                    <section class="col-xl-4 col-xs-12">
+                                                        <label>Gasto no Mês:</label>
+                                                        <input type="text" value="{{ $customer->customers->hours_spent}}" class="form-control" readonly>
+                                                    </section>
+                                                       
+                                                    @endif
+                                                   
                                                     <section class="col-xl-4 col-xs-12">
                                                         <label>Conta Corrente:</label>
                                                         <input type="text" value="{{ $customer->customers->current_account}}" class="form-control" readonly>
