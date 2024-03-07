@@ -10,6 +10,7 @@ use App\Events\ChatMessage;
 
 use App\Models\Tenant\Tasks;
 use Livewire\WithFileUploads;
+use App\Models\Tenant\Pedidos;
 use App\Models\Tenant\Services;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\Tenant\Customers;
@@ -17,6 +18,7 @@ use App\Events\Tasks\TaskCreated;
 use App\Models\Tenant\TeamMember;
 use App\Events\Tasks\TaskCustomer;
 use App\Models\Tenant\Prioridades;
+use App\Models\Tenant\PivotEstados;
 use App\Models\Tenant\SerieNumbers;
 use App\Models\Tenant\TiposPedidos;
 use Illuminate\Contracts\View\View;
@@ -29,12 +31,11 @@ use App\Models\Tenant\CustomerLocations;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Traits\GenerateTaskReference;
-use App\Interfaces\Tenant\Customers\CustomersInterface;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use Symfony\Component\HttpFoundation\Response;
 use App\Interfaces\Tenant\Tasks\TasksInterface;
+use App\Interfaces\Tenant\Customers\CustomersInterface;
 use App\Interfaces\Tenant\CustomerServices\CustomerServicesInterface;
-use App\Models\Tenant\Pedidos;
-use App\Models\Tenant\PivotEstados;
 
 class AddTasks extends Component
 {
@@ -659,6 +660,10 @@ class AddTasks extends Component
             }
     
             Storage::put(tenant('id') . '/app/public/pedidos/etiquetas/'.$this->taskReference.'/etiqueta'.$this->taskReference.'.pdf',$content);
+
+
+            $this->dispatchBrowserEvent('downloadEvent', ['link' => "http://".$_SERVER['SERVER_NAME'].'/cl/'.tenant('id') . '/app/public/pedidos/etiquetas/'.$this->taskReference.'/etiqueta'.$this->taskReference.'.pdf']);
+        
         }
 
 

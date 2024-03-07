@@ -1187,6 +1187,14 @@
 
         })
 
+
+        window.addEventListener('downloadEvent', function(e) {
+            var url = e.detail.link;
+
+            window.open(url, '_blank');
+
+        });
+
       
 
         window.addEventListener('contentChanged', function(e) {
