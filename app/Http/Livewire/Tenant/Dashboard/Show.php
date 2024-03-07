@@ -402,32 +402,42 @@ class Show extends Component
         $resposta = "";
 
 
-        if(empty($intervencoes))
-        {
-            $resposta = "abrir";
-        } else {
 
-            if($intervencoes->hora_final == "") {
-                if($pedido->estado == 2)
-                {
-                    $resposta = "concluida";
-                }
-                else {
-                    $resposta = "fechar";
-                }
-                
+        if(Auth::user()->type_user == "0")
+        {
+            $resposta = "concluida";
+        }
+        else 
+        {
+            if(empty($intervencoes))
+            {
+                $resposta = "abrir";
             } else {
-                if($pedido->estado == 2)
-                {
-                    $resposta = "concluida";
+    
+                if($intervencoes->hora_final == "") {
+                    if($pedido->estado == 2)
+                    {
+                        $resposta = "concluida";
+                    }
+                    else {
+                        $resposta = "fechar";
+                    }
+                    
+                } else {
+                    if($pedido->estado == 2)
+                    {
+                        $resposta = "concluida";
+                    }
+                    else {
+                        $resposta = "abrir";
+                    }
+                   
                 }
-                else {
-                    $resposta = "abrir";
-                }
-               
             }
+    
         }
 
+       
       
         $teammember = TeamMember::where('user_id',Auth::user()->id)->first();
         
