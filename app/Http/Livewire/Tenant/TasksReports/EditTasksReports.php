@@ -538,7 +538,7 @@ class EditTasksReports extends Component
 
 
 
-        $this->horasAtuais = $resultBlocos;
+        $this->horasAtuais = $minutosSomados;
 
         
 

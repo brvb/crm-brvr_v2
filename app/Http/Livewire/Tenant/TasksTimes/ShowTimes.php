@@ -73,9 +73,8 @@ class ShowTimes extends Component
 
         $this->taskTimes =  Intervencoes::with('pedido')->where('estado_pedido',"!=","1")->where('id_pedido',$task->id)->paginate($this->perPage);
 
-        $horas = Intervencoes::with('pedido')->where('estado_pedido',"!=","1")->where('id_pedido',$this->task)->get();
+        $horas = Intervencoes::with('pedido')->where('estado_pedido',"!=","1")->where('id_pedido',$this->task)->where('hora_final','!=',null)->get();
 
-        $somaDiferencasSegundos = 0;
 
         $arrHours[$this->task] = [];
 
@@ -112,22 +111,22 @@ class ShowTimes extends Component
                 $minutosSomados -= substr($hora->descontos, 1);
             }
 
-            $arrHours[$this->task] = $minutosSomados;
+            // $arrHours[$this->task] = $minutosSomados;
           
             /*********************** */           
         }
-        $sum = 0;
-        foreach($arrHours as $h)
-        {
-            if(!empty($h))
-            {
-                $sum += $h;
-            }
-        }
+        // $sum = 0;
+        // foreach($arrHours as $h)
+        // {
+        //     if(!empty($h))
+        //     {
+        //         $sum += $h;
+        //     }
+        // }
 
 
 
-        $this->minutosAtuais = $sum;
+        $this->minutosAtuais = $minutosSomados;
 
     }
 
