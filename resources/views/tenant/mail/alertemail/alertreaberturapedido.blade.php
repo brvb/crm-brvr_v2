@@ -61,7 +61,7 @@
                                                     <span>Telefone: {{$cliente->customers->phone}}</span><br>
                                                     <span>Email: {{$cliente->customers->email}}</span><br>
                                                     <span>Técnico designado: {{$task->tech->name}}</span><br>
-                                                    <span>Assunto: {{$task->descricao}}</span><br>
+                                                    <span>Descrição do pedido: {{$task->descricao}}</span><br>
                                                 </p>
                                                 <p>A sua reclamação será tratada com a maior brevidade possível.</p>
                                             </div>
@@ -73,9 +73,8 @@
                                                 <p>
                                                     <small>
                                                         <label style="font-size: 1.5em;font-weight: bold;text-decoration: underline;">Não responda a este email. </label><br>
-                                                    Para qualquer esclarecimento use os contactos habituais:<br>
-                                                            Telefone: 252646260 Email: suporte@brvr.pt <br>
-                                                            Identifique sempre o número de pedido.
+                                                        Para qualquer esclarecimento use os contactos habituais.<br>
+                                                        Identifique sempre o número de pedido.
                                                     </small>
                                                 </p>
                                         </td>

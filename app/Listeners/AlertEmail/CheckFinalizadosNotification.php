@@ -46,7 +46,6 @@ class CheckFinalizadosNotification
  
         $eventIntervencoes = $checkFinalizadosEvent->intervencoes;
 
-
         Pedidos::where('id',$eventIntervencoes->id_pedido)->update([
            "estado" => 5
         ]);

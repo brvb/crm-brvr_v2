@@ -410,14 +410,14 @@
           <tr>
             <th>Resolução</th>
             <th style="background: white;border:none;"></th>
-            <th>Minutos Gastos</th>
+            <th>Tempo</th>
           </tr>
         </thead>
         <tbody>
           <tr>
             <td>{{$impressao->descricaoRealizado}}</td>
             <td style="background: white;border-color:white;border:none;border-bottom:none;">
-            <td>{{$horasGastasTotal}}</td>
+            <td>{{ sprintf('%02d',floor($horasGastasTotal / 60)) }}:{{ sprintf('%02d',fmod($horasGastasTotal, 60)) }}</td>
           </tr>
         </tbody>
       </table>
