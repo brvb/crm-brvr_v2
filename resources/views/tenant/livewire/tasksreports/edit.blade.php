@@ -39,7 +39,7 @@
                                                     @if($horasAtuais == "[]") 
                                                     0 
                                                     @else 
-                                                    {{$horasAtuais}} 
+                                                    {{$horasAtuais}} min
                                                     @endif
                                                 </h4>
                                                 

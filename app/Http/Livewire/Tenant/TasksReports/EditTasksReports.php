@@ -121,70 +121,47 @@ class EditTasksReports extends Component
 
         $arrHours[$this->task->id] = [];
 
+        $minutosSomados = 0;
+
         foreach($horas as $hora)
         {
             
             $dia_inicial = $hora->data_inicio.' '.$hora->hora_inicio;
-            $dia_final = $hora->data_final.' '.$hora->hora_final;
+            $dia_final = $hora->data_inicio.' '.$hora->hora_final;
 
             $data1 = Carbon::parse($dia_inicial);
             $data2 = Carbon::parse($dia_final);
 
-            $result = $data1->diff($data2);
-
-            $hours = $result->days * 24 + $result->h;
-            $minutes = $result->i;
-
-            $hoursMinutesDifference = sprintf('%d:%02d', $hours, $minutes);
+            $result = $data1->diffInMinutes($data2);
 
            
 
             //*****PARTE A DESCONTAR********/
 
-            $valorOriginal = $hoursMinutesDifference;
-
-            list($horas, $minutos) = explode(':', $valorOriginal);
-
-            $valorEmHorasDecimais = $horas + ($minutos / 60);
-
-            if(!isset($hora->descontos[0]))
+            
+            if($hora->descontos == null)
             {
-                $sinal = "+";
-            }
-            else {
-                $sinal = $hora->descontos[0];
+                $hora->descontos = "+0";
             }
 
-            if($hora->descontos == "")
-            {
-                $hora->descontos = "+0";  
+          
+            $minutosSomados += $result;
+
+            if($hora["descontos"][0] == "+"){ 
+                $minutosSomados += substr($hora->descontos, 1);
+            } 
+            else { 
+                $minutosSomados -= substr($hora->descontos, 1);
             }
-
-
-
-            if($sinal == "+"){
-                $novoValorEmHorasDecimais = $valorEmHorasDecimais + substr($hora->descontos, 1);
-            }
-            else {
-                $novoValorEmHorasDecimais = $valorEmHorasDecimais - substr($hora->descontos, 1);
-            }
-        
-            $novoValorEmHorasDecimais = max(0, $novoValorEmHorasDecimais);
-
-            $novoHoras = floor($novoValorEmHorasDecimais);
-            $novoMinutos = ($novoValorEmHorasDecimais - $novoHoras) * 60;
-
-            $novoValor = sprintf('%d:%02d', $novoHoras, $novoMinutos);
-
-            /*********************** */
-
-            array_push($arrHours[$this->task->id],$novoValor);
+          
+            /*********************** */           
 
         }
 
 
 
-        $this->horasAtuais = global_hours_sum($arrHours);
+
+        $this->horasAtuais = $minutosSomados;
 
 
 
@@ -670,71 +647,45 @@ class EditTasksReports extends Component
 
         $somaDiferencasSegundos = 0;
 
-        $arrHours[$this->task->id] = [];
+        $minutosSomados = 0;
 
         foreach($horas as $hora)
         {
             
             $dia_inicial = $hora->data_inicio.' '.$hora->hora_inicio;
-            $dia_final = $hora->data_final.' '.$hora->hora_final;
+            $dia_final = $hora->data_inicio.' '.$hora->hora_final;
 
             $data1 = Carbon::parse($dia_inicial);
             $data2 = Carbon::parse($dia_final);
 
-            $result = $data1->diff($data2);
-
-            $hours = $result->days * 24 + $result->h;
-            $minutes = $result->i;
-
-            $hoursMinutesDifference = sprintf('%d:%02d', $hours, $minutes);
+            $result = $data1->diffInMinutes($data2);
 
            
 
             //*****PARTE A DESCONTAR********/
 
-            $valorOriginal = $hoursMinutesDifference;
-
-            list($horas, $minutos) = explode(':', $valorOriginal);
-
-            $valorEmHorasDecimais = $horas + ($minutos / 60);
-
-            if(!isset($hora->descontos[0]))
+            
+            if($hora->descontos == null)
             {
-                $sinal = "+";
-            }
-            else {
-                $sinal = $hora->descontos[0];
+                $hora->descontos = "+0";
             }
 
-            if($hora->descontos == "")
-            {
-                $hora->descontos = "+0";  
+          
+            $minutosSomados += $result;
+
+            if($hora["descontos"][0] == "+"){ 
+                $minutosSomados += substr($hora->descontos, 1);
+            } 
+            else { 
+                $minutosSomados -= substr($hora->descontos, 1);
             }
-
-
-            if($sinal == "+"){
-                $novoValorEmHorasDecimais = $valorEmHorasDecimais + substr($hora->descontos, 1);
-            }
-            else {
-                $novoValorEmHorasDecimais = $valorEmHorasDecimais - substr($hora->descontos, 1);
-            }
-        
-            $novoValorEmHorasDecimais = max(0, $novoValorEmHorasDecimais);
-
-            $novoHoras = floor($novoValorEmHorasDecimais);
-            $novoMinutos = ($novoValorEmHorasDecimais - $novoHoras) * 60;
-
-            $novoValor = sprintf('%d:%02d', $novoHoras, $novoMinutos);
-
-            /*********************** */
-
-            array_push($arrHours[$this->task->id],$novoValor);
+          
+            /*********************** */           
 
         }
 
 
-
-        $this->horasAtuais = global_hours_sum($arrHours);
+        $this->horasAtuais = $minutosSomados;
 
 
         $this->coresObject = Prioridades::all();

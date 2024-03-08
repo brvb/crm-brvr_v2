@@ -251,6 +251,8 @@
                                                         <button class="dropdown-item" wire:click="finalizarPedido({{$item->id}})">Finalizar Pedido</button>
                                                     @endif
 
+                                                    <a class="dropdown-item" href="{{ route('tenant.tasks-reports.edit', $item->id) }}" style="pointer-events: auto">Gerir Intervenção</a>
+
                 
                                                     @if(Auth::user()->type_user == 0 || $user->user_id == Auth::user()->id)
                                                         <button class="dropdown-item btn-sweet-alert" data-type="form"

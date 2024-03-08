@@ -46,88 +46,67 @@ class ExportTasksExcel implements FromCollection, WithHeadings, WithEvents,Shoul
                                 
             $arrHours[$ana["id"]] = [];
            
-            // foreach($intervencoes as $hora)
-            // {
-            //     $data1 = Carbon::parse($hora->hora_inicio);
-            //     $data2 = Carbon::parse($hora->hora_final);
-            //     $result = $data1->diff($data2)->format("%h.%i");
-            //     $hours = date("H:i",strtotime($result));
-
-            //     array_push($arrHours[$ana["id"]],$hours);
-            //     //$somaDiferencasSegundos += $result->diffInSeconds(Carbon::createFromTime(0, 0, 0));
-            // }
-
+          
+            $minutosSomados = 0;
             foreach($intervencoes as $hora)
             {
                 
                 $dia_inicial = $hora->data_inicio.' '.$hora->hora_inicio;
-                $dia_final = $hora->data_final.' '.$hora->hora_final;
-    
+                $dia_final = $hora->data_inicio.' '.$hora->hora_final;
+
                 $data1 = Carbon::parse($dia_inicial);
                 $data2 = Carbon::parse($dia_final);
-    
-                $result = $data1->diff($data2);
-    
-                $hours = $result->days * 24 + $result->h;
-                $minutes = $result->i;
-    
-                $hoursMinutesDifference = sprintf('%d:%02d', $hours, $minutes);
-    
-               
-    
+
+                $result = $data1->diffInMinutes($data2);
+
+            
+
                 //*****PARTE A DESCONTAR********/
-    
-                $valorOriginal = $hoursMinutesDifference;
-    
-                list($horas, $minutos) = explode(':', $valorOriginal);
-    
-                $valorEmHorasDecimais = $horas + ($minutos / 60);
-    
-                if(!isset($hora->descontos[0]))
+
+                
+                if($hora->descontos == null)
                 {
-                    $sinal = "+";
+                    $hora->descontos = "+0";
                 }
-                else {
-                    $sinal = $hora->descontos[0];
-                }
-    
-                if($hora->descontos == "")
-                {
-                    $hora->descontos = "+0";  
-                }
-    
-    
-                if($sinal == "+"){
-                    $novoValorEmHorasDecimais = $valorEmHorasDecimais + substr($hora->descontos, 1);
-                }
-                else {
-                    $novoValorEmHorasDecimais = $valorEmHorasDecimais - substr($hora->descontos, 1);
+
+            
+                $minutosSomados += $result;
+
+                if($hora["descontos"][0] == "+"){ 
+                    $minutosSomados += substr($hora->descontos, 1);
+                } 
+                else { 
+                    $minutosSomados -= substr($hora->descontos, 1);
                 }
             
-                $novoValorEmHorasDecimais = max(0, $novoValorEmHorasDecimais);
-    
-                $novoHoras = floor($novoValorEmHorasDecimais);
-                $novoMinutos = ($novoValorEmHorasDecimais - $novoHoras) * 60;
-    
-                $novoValor = sprintf('%d:%02d', $novoHoras, $novoMinutos);
-    
-                /*********************** */
-    
-                array_push($arrHours[$ana["id"]],$novoValor);
-    
+                if($minutosSomados == "")
+                {
+                    $minutosSomados = 0;
+                }
+                $arrHours[$ana["id"]] = $minutosSomados;
+                /*********************** */           
+
             }
            
 
         }
 
         //FAZER AQUI A CONTINUAÇÃO DO CODIGO
-
+        $sum = 0;
+       
+        foreach($arrHours as $hour)
+        {
+           if(!empty($hour))
+           {
+                $sum += $hour;
+           }
+            
+        }
         
-        $sum = global_hours_sum($arrHours);
-
+        
          //Converter segundos e horas e minutos
         
-        $sheet->setCellValue("I{$totalRow}","SOMA DAS HORAS");
+        $sheet->setCellValue("I{$totalRow}","SOMA DE MINUTOS");
         $sheet->setCellValue("J{$totalRow}", "$sum min");
 
         $sheet->getStyle("I{$totalRow}:J{$totalRow}")->applyFromArray(
@@ -180,78 +159,51 @@ class ExportTasksExcel implements FromCollection, WithHeadings, WithEvents,Shoul
             $somaDiferencasSegundos = 0;
 
 
-            // foreach($intervencoes as $hora)
-            // {
-            //     $data1 = Carbon::parse($hora->hora_inicio);
-            //     $data2 = Carbon::parse($hora->hora_final);
-            //     $result = $data1->diff($data2)->format("%h.%i");
-            //     $hours = date("H:i",strtotime($result));
-
-            //     array_push($arrHours[$analysis["id"]],$hours);
-            // }
+            $minutosSomados = 0;
 
             foreach($intervencoes as $hora)
             {
                 
                 $dia_inicial = $hora->data_inicio.' '.$hora->hora_inicio;
-                $dia_final = $hora->data_final.' '.$hora->hora_final;
+                $dia_final = $hora->data_inicio.' '.$hora->hora_final;
     
                 $data1 = Carbon::parse($dia_inicial);
                 $data2 = Carbon::parse($dia_final);
     
-                $result = $data1->diff($data2);
-    
-                $hours = $result->days * 24 + $result->h;
-                $minutes = $result->i;
-    
-                $hoursMinutesDifference = sprintf('%d:%02d', $hours, $minutes);
+                $result = $data1->diffInMinutes($data2);
     
                
     
                 //*****PARTE A DESCONTAR********/
     
-                $valorOriginal = $hoursMinutesDifference;
-    
-                list($horas, $minutos) = explode(':', $valorOriginal);
-    
-                $valorEmHorasDecimais = $horas + ($minutos / 60);
-    
-                if(!isset($hora->descontos[0]))
+                
+                if($hora->descontos == null)
                 {
-                    $sinal = "+";
-                }
-                else {
-                    $sinal = $hora->descontos[0];
+                    $hora->descontos = "+0";
                 }
     
-                if($hora->descontos == "")
-                {
-                    $hora->descontos = "+0";  
+              
+                $minutosSomados += $result;
+    
+                if($hora["descontos"][0] == "+"){ 
+                    $minutosSomados += substr($hora->descontos, 1);
+                } 
+                else { 
+                    $minutosSomados -= substr($hora->descontos, 1);
                 }
-    
-    
-                if($sinal == "+"){
-                    $novoValorEmHorasDecimais = $valorEmHorasDecimais + substr($hora->descontos, 1);
-                }
-                else {
-                    $novoValorEmHorasDecimais = $valorEmHorasDecimais - substr($hora->descontos, 1);
-                }
-            
-                $novoValorEmHorasDecimais = max(0, $novoValorEmHorasDecimais);
-    
-                $novoHoras = floor($novoValorEmHorasDecimais);
-                $novoMinutos = ($novoValorEmHorasDecimais - $novoHoras) * 60;
-    
-                $novoValor = sprintf('%d:%02d', $novoHoras, $novoMinutos);
-    
-                /*********************** */
-    
-                array_push($arrHours[$analysis["id"]],$novoValor);
+              
+                /*********************** */           
     
             }
+            
+            if($minutosSomados == "" || empty($minutosSomados))
+            {
+                $minutosSomados = 0;
+            }
+                
+            
 
-
-            $horasAtuais = global_hours_sum($arrHours);
+            $horasAtuais = $minutosSomados;
 
             $teamMember = TeamMember::where('id',$analysis["tech_id"])->first();
 

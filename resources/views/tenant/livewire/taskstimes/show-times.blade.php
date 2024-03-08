@@ -8,9 +8,16 @@
                 <div class="sk-child sk-bounce3"></div>
             </div>
         </div>
-        <div class="card-header" style="padding:1!important;" wire:key="tenanttasksshow">
+        <div class="card-header" style="padding:1!important;display:block;" wire:key="tenanttasksshow">
+          <div class="row">
+            <div class="col-9">
+                <h4 class="card-title">Intervenções</h4>
+            </div>
+            <div class="col-3" style="text-align:end;padding-right:0;">
+                <span style="font-weight:bolder">Tempo Gasto: {{$totalMinutos}} min</span>
+            </div>
+          </div>
           
-            <h4 class="card-title">Intervenções</h4>
                         
         </div>
         <div class="card-body">
@@ -49,10 +56,11 @@
                             <th>Tecnico</th>
                             <th>Data de inicio intervenção</th>
                             <th>Hora fim</th>
-                            <th>Horas Gastas</th>
+                            <th>Minutos Gastos</th>
                             <th>Descontos</th>
                             <th>Razão do desconto</th>
-                            <th>Horas descontadas</th>
+                            <th>Minutos com descontado</th>
+                            <th>Minutos a apresentar</th>
                             <th>Anexos</th>
                             <th>Ações</th>
                         </tr>
@@ -67,15 +75,7 @@
                                         <label class="custom-control-label" for="customCheckBox{{ $item->id }}"></label>
                                     </div>
                                 </td>
-                                {{-- <td>
-                                    @php
-                                      
-                                        // $cliente = \App\Models\Tenant\Customers::where('id',$item->pedido->customer_id)->first();
-                                        $cliente  = $customersRepository->getSpecificCustomerInfo($item->pedido->customer_id);
-                                        
-                                    @endphp
-                                   {{$cliente->customers->name}}
-                                </td> --}}
+    
                                 <td>
                                     {{$item->descricao_realizado}}
                                 </td>
@@ -94,27 +94,41 @@
                                 </td>
                                 <td>
                                     @php
+                                        $minutosSomados = 0;
                                         $somaDiferencasSegundos = 0;
                                         $horaFormatada = "";
 
                                         $arrHours[$item->id] = [];
 
                                         $dia_inicial = $item->data_inicio.' '.$item->hora_inicio;
-                                        $dia_final = $item->data_final.' '.$item->hora_final;
+                                        $dia_final = $item->data_inicio.' '.$item->hora_final;
 
                                         $data1 = Carbon\Carbon::parse($dia_inicial);
                                         $data2 = Carbon\Carbon::parse($dia_final);
 
                            
-                                        $result = $data1->diff($data2);
+                                        $result = $data1->diffInMinutes($data2);
 
-                                        $hours = $result->days * 24 + $result->h;
-                                        $minutes = $result->i;
-                                        // $hours = date("H:i",strtotime($result));
-  
-                                        $hoursMinutesDifference = sprintf('%d:%02d', $hours, $minutes);
 
-                                        array_push($arrHours[$item->id],$hours);
+                                        if($item->descontos == null)
+                                        {
+                                            $item->descontos = "+0";
+                                        }
+
+                                    
+                                        $minutosSomados += $result;
+
+                                        if($item->descontos[0] == "+"){ 
+                                            $minutosSomados += substr($item->descontos, 1);
+                                        } 
+                                        else { 
+                                            $minutosSomados -= substr($item->descontos, 1);
+                                        }
+
+                                        $resultDivisao = $minutosSomados / 15;
+                                        $resultBlocos = ceil($resultDivisao) * 15;
+
+                                       
                                        
                                         
                                     @endphp
@@ -122,55 +136,26 @@
                                        00:00
                                     @else
                                        {{-- {{global_hours_sum_individual($arrHours[$item->id])}} --}}
-                                       {{$hoursMinutesDifference}}
+                                       {{$result}} min
                                     @endif
                                     
                                 </td>
                                 <td>
                                     @if($item->descontos != "")
-                                        {{$item->descontos}} horas
+                                        {{$item->descontos}} minutos
                                     @endif
                                 </td>
                                 <td>
                                     {{$item->descricao_desconto}}
                                 </td>
                                 <td>
-                                    @php
-                                    if($item->descontos == "")
-                                    {
-                                        $item->descontos = "+0";
-                                    }
-                                        $valorOriginal = $hoursMinutesDifference; // Exemplo de valor original em horas
-
-                                        // Dividindo o valor original em horas e minutos
-                                        list($horas, $minutos) = explode(':', $valorOriginal);
-
-                                        // Convertendo o valor original para horas decimais
-                                        $valorEmHorasDecimais = $horas + ($minutos / 60);
-
-                                        // Subtraindo 0.50 horas
-                                        if($item->descontos[0] == "+"){
-                                            $novoValorEmHorasDecimais = $valorEmHorasDecimais + substr($item->descontos, 1);
-                                        }
-                                        else {
-                                            $novoValorEmHorasDecimais = $valorEmHorasDecimais - substr($item->descontos, 1);
-                                        }
-                                       
-
-                                        // Certificando-se de que o novo valor não seja negativo
-                                        $novoValorEmHorasDecimais = max(0, $novoValorEmHorasDecimais);
-
-                                        // Convertendo o novo valor de volta para o formato "horas:minutos"
-                                        $novoHoras = floor($novoValorEmHorasDecimais);
-                                        $novoMinutos = ($novoValorEmHorasDecimais - $novoHoras) * 60;
-
-                                        // Formatando o novo valor
-                                        $novoValor = sprintf('%d:%02d', $novoHoras, $novoMinutos);
-                                    @endphp
                                     @if($item->hora_final != null)
-                                        {{$novoValor}}
+                                        {{$minutosSomados}} min
                                     @endif
 
+                                </td>
+                                <td>
+                                    {{$resultBlocos}} min
                                 </td>
                                <td>
                                  @if($item->anexos != "[]")

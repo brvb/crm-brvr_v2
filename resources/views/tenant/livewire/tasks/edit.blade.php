@@ -15,12 +15,12 @@
             <a class="nav-link {{ $techPanel }}" data-toggle="tab" href="#techPanel"><i
                     class="flaticon-381-calendar mr-2"></i> Agendamento</a>
         </li>
-        @if($taskToUpdate->estado == "2" || $taskToUpdate->estado == "5")
+        {{-- @if($taskToUpdate->estado == "2" || $taskToUpdate->estado == "5") --}}
             <li class="nav-item">
                 <a class="nav-link {{ $intervencoesPanel }}" data-toggle="tab" href="#intervencoesPanel"><i
                         class="la la-file mr-2"></i> Intervenções</a>
             </li>
-        @endif
+        {{-- @endif --}}
     </ul>
     <div class="tab-content">
         <div class="tab-pane fade {{ $homePanel }}" id="homePanel" role="tabpanel">
@@ -704,7 +704,7 @@
         </div>
     </div>
 
-    @if($taskToUpdate->estado == "2" || $taskToUpdate->estado == "5")
+    {{-- @if($taskToUpdate->estado == "2" || $taskToUpdate->estado == "5") --}}
     <div class="tab-pane fade {{ $intervencoesPanel }}" id="intervencoesPanel" role="tabpanel">
         <div class="row">
             <div class="col-12">
@@ -716,7 +716,7 @@
             </div>
         </div>
     </div>
-    @endif
+    {{-- @endif --}}
     </div>
    
     <div class="card" style="display: table-cell;width:100vw;">
@@ -1074,7 +1074,7 @@
            
             function formatState (state) {
 
-                var base_url = "https://suporte.brvr.pt/cl/7f3a1b73-d8ae-464f-b91e-2a3f8163bdfb/app/public/tasks_colors";
+                var base_url = "https://suporte.brvr.pt/cl/brv2-7f3a1b73-d8ae-464f-b91e-2a3f8163bdfb/app/public/tasks_colors";
     
                 if (!state.id) {
                     return state.text;
