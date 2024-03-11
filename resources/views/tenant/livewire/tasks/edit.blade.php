@@ -227,6 +227,16 @@
                                         </div>
                                     </div>
 
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <label>Informações adicionais</label>
+                                            <textarea name="informacaoAdicional"
+                                            class="form-control informacaoAdicional" id="informacaoAdicional"
+                                            wire:model.defer="informacaoAdicional"
+                                            rows="4">@if(isset($informacaoAdicional)) {{$informacaoAdicional}} @endif</textarea>
+                                        </div>
+                                    </div>
+
             
 
                                     @if($taskToUpdate->estado == "6" || $taskToUpdate->descricao_reabertura != null)

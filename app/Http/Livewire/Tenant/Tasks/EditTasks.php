@@ -55,6 +55,7 @@ class EditTasks extends Component
     public string $selectedServico = '';
     public ?object $servicosList = NULL;
     public string $serviceDescription = '';
+    public string $informacaoAdicional = '';
     public string $descriptionReabertura = '';
     public ?object $membersList = NULL;
     protected ?object $customerLocations = NULL;
@@ -165,6 +166,8 @@ class EditTasks extends Component
         $this->membersList = TeamMember::all();
 
         $this->serviceDescription = $taskToUpdate->descricao;
+
+        $this->informacaoAdicional = $taskToUpdate->informacao_adicional;
 
         if($taskToUpdate->descricao_reabertura != null)
         {

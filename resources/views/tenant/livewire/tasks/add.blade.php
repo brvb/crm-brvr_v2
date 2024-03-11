@@ -199,10 +199,10 @@
                                     <div class="row">
                                         <div class="col-6">
     
-                                            <div class="row form-group">
+                                            <div class="row form-group" wire:ignore>
                                                 <section class="col" style="margin-top:20px;" wire:ignore>
                                                     <label>Tipo Pedido</label>
-                                                    <select name="selectedPedido" id="selectedPedido">
+                                                    <select name="selectedPedido" id="selectedPedido" wire:ignore>
                                                         <option value="">Selecione Pedido</option>
                                                         @forelse ($pedidosList as $item)
                                                             <option value="{{ $item->id }}">{{ $item->name }}</option>
@@ -214,10 +214,10 @@
                                             
                                         </div>
                                         <div class="col-6">
-                                            <div class="row form-group">
+                                            <div class="row form-group" wire:ignore>
                                                 <section class="col" style="margin-top:20px;" wire:ignore>
                                                     <label>Tipo Serviço</label>
-                                                    <select name="selectedServico" id="selectedServico">
+                                                    <select name="selectedServico" id="selectedServico" wire:ignore>
                                                         <option value="">Selecione Serviço</option>
                                                         @forelse ($servicosList as $item)
                                                             <option value="{{ $item->id }}">{{ $item->name }}</option>
@@ -234,6 +234,16 @@
                                             <textarea name="serviceDescription"
                                             class="form-control serviceDesription" id="serviceDescription"
                                             wire:model.defer="serviceDescription"
+                                            rows="4"></textarea>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <label>Informações adicionais</label>
+                                            <textarea name="informacaoAdicional"
+                                            class="form-control informacaoAdicional" id="informacaoAdicional"
+                                            wire:model.defer="informacaoAdicional"
                                             rows="4"></textarea>
                                         </div>
                                     </div>
@@ -744,6 +754,7 @@
     <script>
         var services = [];
 
+    
         jQuery("body").on('click','#verificaContrato', function(){
             if(jQuery(this).is(":checked"))
             {
@@ -1069,12 +1080,12 @@
 
             jQuery('#selectedPedido').select2();
             jQuery("#selectedPedido").on("select2:select", function (e) {
-                @this.set('selectedPedido', jQuery('#selectedPedido').find(':selected').val());
+                @this.set('selectedPedido', jQuery('#selectedPedido').find(':selected').val(),true);
             });
 
             jQuery('#selectedServico').select2();
             jQuery("#selectedServico").on("select2:select", function (e) {
-                @this.set('selectedServico', jQuery('#selectedServico').find(':selected').val());
+                @this.set('selectedServico', jQuery('#selectedServico').find(':selected').val(),true);
             });
 
             jQuery('#selectedLocation').select2();

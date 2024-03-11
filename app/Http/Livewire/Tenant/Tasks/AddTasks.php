@@ -57,6 +57,7 @@ class AddTasks extends Component
     public string $selectedServico = '';
     public ?object $servicosList = NULL;
     public string $serviceDescription = '';
+    public string $informacaoAdicional = '';
     public string $selectedEquipamentos = '';
     private ?object $equipamentosList = NULL;
 
