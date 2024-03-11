@@ -167,7 +167,10 @@ class EditTasks extends Component
 
         $this->serviceDescription = $taskToUpdate->descricao;
 
-        $this->informacaoAdicional = $taskToUpdate->informacao_adicional;
+        if($taskToUpdate->informacao_adicional != null)
+        {
+             $this->informacaoAdicional = $taskToUpdate->informacao_adicional;
+        }
 
         if($taskToUpdate->descricao_reabertura != null)
         {
