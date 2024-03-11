@@ -16,7 +16,7 @@ class StampsClientes extends Model
     protected static function booted()
     {
         self::addGlobalScope('ordered', function (Builder $queryBuilder) {
-            $queryBuilder->orderBy('stamp');
+            $queryBuilder->orderBy('nome_cliente');
         });
     }
 
