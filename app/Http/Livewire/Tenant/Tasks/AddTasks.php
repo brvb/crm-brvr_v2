@@ -36,6 +36,7 @@ use Symfony\Component\HttpFoundation\Response;
 use App\Interfaces\Tenant\Tasks\TasksInterface;
 use App\Interfaces\Tenant\Customers\CustomersInterface;
 use App\Interfaces\Tenant\CustomerServices\CustomerServicesInterface;
+use App\Models\Tenant\StampsClientes;
 
 class AddTasks extends Component
 {
@@ -173,9 +174,9 @@ class AddTasks extends Component
         $this->customersInterface = $customersInterface;
     }
 
-    public function mount($customerList): void
+    public function mount(): void
     {
-        $this->customerList = $customerList;
+
         $this->pedidosList = TiposPedidos::all();
         $this->servicosList = Services::all();
 
@@ -188,6 +189,10 @@ class AddTasks extends Component
         $this->coresObject = Prioridades::all();
 
         $this->alert_email = 0;
+
+        $customerStamps = StampsClientes::all();
+
+        $this->customerList = $customerStamps;
 
         // $this->anexosEquipamentosFromList = [];
 
@@ -876,10 +881,12 @@ class AddTasks extends Component
   
     public function render(): View
     {
-        $this->customerList = $this->customerServicesInterface->getAllCustomers();
+        // $this->customerList = $this->customerServicesInterface->getAllCustomers();
+
+        $customerStamps = StampsClientes::distinct()->get();
+
 
         $getClient = $this->customersInterface->getSpecificCustomerInfo($this->selectedCustomer);
-        // dd($getClient);
 
         if(isset($getClient->customers->no))
         {
@@ -887,7 +894,7 @@ class AddTasks extends Component
         } 
 
 
-        return view('tenant.livewire.tasks.add',["customerList" => $this->customerList, "customer" => $this->customer, "customerLocations" => $this->customerLocations, "customerInterface" => $this->customersInterface, "equipamentosList" => $this->equipamentosList]);
+        return view('tenant.livewire.tasks.add',["customerList" => $customerStamps, "customer" => $this->customer, "customerLocations" => $this->customerLocations, "customerInterface" => $this->customersInterface, "equipamentosList" => $this->equipamentosList]);
     }
 
 }

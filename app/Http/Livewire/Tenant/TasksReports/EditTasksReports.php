@@ -27,6 +27,7 @@ use App\Interfaces\Tenant\TasksTimes\TasksTimesInterface;
 use App\Interfaces\Tenant\TasksReports\TasksReportsInterface;
 use App\Models\Tenant\TeamMember;
 use App\Models\Tenant\Prioridades;
+use App\Models\Tenant\ProdutosPHC;
 
 class EditTasksReports extends Component
 {
@@ -75,6 +76,8 @@ class EditTasksReports extends Component
 
     public array $array_produtos = [];
 
+    public ?object $produtos = NULL;
+
     public ?int $selectPrioridade;
 
     protected $listeners = ['resetChanges' => 'resetChanges', 'signaturePads' => 'signaturePads','signaturePadsClear' => 'signaturePadsClear','teste' => 'teste'];
@@ -106,7 +109,7 @@ class EditTasksReports extends Component
         })->get();
 
 
-
+        $this->produtos = ProdutosPHC::all();
 
         // $this->statesPedido = EstadoPedido::all();
 
@@ -641,7 +644,8 @@ class EditTasksReports extends Component
    
     public function render()
     {
-        $produtos = $this->tasksInterface->getProducts();
+        // $produtos = $this->tasksInterface->getProducts();
+        
 
         $horas = Intervencoes::where('id_pedido',$this->task->id)->where('hora_final','!=',null)->get();
 
@@ -690,7 +694,7 @@ class EditTasksReports extends Component
 
         $this->coresObject = Prioridades::all();
 
-        return view('tenant.livewire.tasksreports.edit',["produtos" => $produtos, "arrayProdutos" => $this->array_produtos, "arrayDesignacoes" => $this->designacao_intervencao]);
+        return view('tenant.livewire.tasksreports.edit',["produtos" => $this->produtos, "arrayProdutos" => $this->array_produtos, "arrayDesignacoes" => $this->designacao_intervencao]);
 
 
     }

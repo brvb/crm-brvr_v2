@@ -38,14 +38,15 @@
                                         <div class="col-12">
                                             <div class="row form-group">
                                                 @php
-                                                    $customerList = $customersInterface->getAllCustomersCollection();
+                                                    // $customerList = $customersInterface->getAllCustomersCollection();
+                                                    $customerList = \App\Models\Tenant\StampsClientes::all();
                                                 @endphp
                                                 <section class="col" style="margin-top:20px;" wire:ignore>
                                                     <label>{{ __('Customer Name') }}</label>
                                                     <select name="selectedCustomer" id="selectedCustomer">
                                                         <option value="">{{ __('Select customer') }}</option>
-                                                        @forelse ($customerList->customers as $item)
-                                                            <option @if(isset($selectedCustomer)) @if($item->id == $selectedCustomer) selected @endif @endif value="{{ $item->id }}">{{ $item->nif }} | {{ $item->name }}</option>
+                                                        @forelse ($customerList as $item)
+                                                            <option @if(isset($selectedCustomer)) @if($item->stamp == $selectedCustomer) selected @endif @endif value="{{ $item->stamp }}">{{ $item->nome_cliente }}</option>
                                                         @empty
                                                         @endforelse
                                                     </select>

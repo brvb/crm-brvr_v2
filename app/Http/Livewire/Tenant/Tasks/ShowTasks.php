@@ -93,12 +93,12 @@ class ShowTasks extends Component
     public function mount(): Void
     {
         $this->initProperties();
-        $this->tasksList = $this->tasksInterface->getTasks($this->perPage);
+        // $this->tasksList = $this->tasksInterface->getTasks($this->perPage);
 
         /**Parte do Filtro */
-        $this->members = $this->teamMembersRepository->getTeamMembersAnalysis();
-        $this->customers = $this->customersRepository->getCustomersAnalysis();
-        $this->service = $this->serviceRepository->getServicesAnalysis();
+        // $this->members = $this->teamMembersRepository->getTeamMembersAnalysis();
+        // $this->customers = $this->customersRepository->getCustomersAnalysis();
+        // $this->service = $this->serviceRepository->getServicesAnalysis();
 
         $this->estadosPedido = EstadoPedido::all();
 
@@ -357,18 +357,7 @@ class ShowTasks extends Component
      */
     public function render(): View
     {
-        // if($this->searchString != null)
-        // {
-        //     $this->tasksList = $this->tasksInterface->getTaskSearch($this->searchString,$this->perPage);
-        // }
-        // else
-        // {
-        //     $this->tasksList = $this->tasksInterface->getTasks($this->perPage);
-        // }
-
-        // return view('tenant.livewire.tasks.show', [
-        //     'tasksList' => $this->tasksList,
-        // ]);
+      
 
         /** Parte do Filtro */
         $this->members = $this->teamMembersRepository->getTeamMembersAnalysis();
@@ -395,6 +384,7 @@ class ShowTasks extends Component
                 $this->tasksList = $this->tasksInterface->getTasksFilter($this->searchString,$this->technical,$this->client,$this->typeTask,$this->work,$this->ordenation,$this->dateBegin,$this->dateEnd,$this->perPage);
             }
         }
+
 
         return view('tenant.livewire.tasks.show', [
             'tasksList' => $this->tasksList,

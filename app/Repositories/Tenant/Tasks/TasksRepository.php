@@ -1504,6 +1504,8 @@ class TasksRepository implements TasksInterface
     {
         $curl = curl_init();
 
+        $reference = str_replace(" ","%20",$reference);
+
         curl_setopt_array($curl, array(
             CURLOPT_URL => 'http://172.19.20.4:24004/products/products?id='.$reference,
             CURLOPT_RETURNTRANSFER => true,

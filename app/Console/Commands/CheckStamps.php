@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Config;
 use App\Models\Tenant\CustomerServices;
 use App\Events\Alerts\EmailConclusionEvent;
 use App\Events\Alerts\CheckFinalizadosEvent;
+use App\Models\Tenant\ProdutosPHC;
 use App\Models\Tenant\StampsClientes;
 use Stancl\Tenancy\Controllers\TenantAssetsController;
 
@@ -80,6 +81,56 @@ class CheckStamps extends Command
                     ]);
                }
             }
+
+
+            /** PRODUTOS **/
+
+            $curl = curl_init();
+
+            curl_setopt_array($curl, array(
+                CURLOPT_URL => 'http://phc.brvr.pt:443/products/products',
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_ENCODING => '',
+                CURLOPT_MAXREDIRS => 10,
+                CURLOPT_TIMEOUT => 0,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                CURLOPT_CUSTOMREQUEST => 'GET',
+                CURLOPT_HTTPHEADER => array(
+                    'Content-Type: application/json'
+                ),
+            ));
+    
+            $response = curl_exec($curl);
+    
+            curl_close($curl);
+    
+            $response_decoded_prd = json_decode($response);
+
+            foreach($response_decoded_prd->products as $decoded)
+            {
+               $produtos = ProdutosPHC::where('reference',$decoded->reference)->first();
+
+               if(empty($produtos))
+               {
+                    ProdutosPHC::create([
+                        "reference" => $decoded->reference,
+                        "description" => $decoded->description,
+                        "service" => $decoded->service,
+                        "price" => $decoded->price,
+                        "barcode" => $decoded->barcode
+                    ]);
+               }
+            }
+
+
+            /****** */
+
+
+
+
+
+
                               
         });
        

@@ -115,7 +115,7 @@
                                                         <label>Produtos:</label>                                 
                                                         <select name="selectedProdutos" id="selectedProdutos">
                                                             <option value="">Selecione Produto</option>
-                                                                @forelse ($produtos->products as $item)
+                                                                @forelse ($produtos as $item)
                                                                     <option value="{{ $item->reference }}">{{ $item->reference }} | {{ $item->description }}</option>
                                                                 @empty
                                                                 @endforelse

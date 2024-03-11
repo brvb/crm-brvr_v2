@@ -29,6 +29,7 @@ use App\Interfaces\Tenant\Tasks\TasksInterface;
 use App\Interfaces\Tenant\Customers\CustomersInterface;
 use App\Interfaces\Tenant\TasksReports\TasksReportsInterface;
 use App\Interfaces\Tenant\CustomerServices\CustomerServicesInterface;
+use App\Models\Tenant\StampsClientes;
 
 class EditTasks extends Component
 {
@@ -155,7 +156,9 @@ class EditTasks extends Component
         $this->selectedId = $taskToUpdate->id;
        
         $this->selectedCustomer = $taskToUpdate->customer_id;
-        $this->customerList = $this->customersInterface->getAllCustomersCollection();
+        // $this->customerList = $this->customersInterface->getAllCustomersCollection();
+
+        $this->customerList = StampsClientes::all();
 
         $this->selectedPedido = $taskToUpdate->tipo_pedido;
         $this->pedidosList = TiposPedidos::all();

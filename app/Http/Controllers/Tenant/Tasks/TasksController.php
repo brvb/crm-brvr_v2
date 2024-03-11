@@ -18,6 +18,7 @@ use App\Interfaces\Tenant\Tasks\TasksInterface;
 use App\Interfaces\Tenant\Customers\CustomersInterface;
 use App\Interfaces\Tenant\TasksReports\TasksReportsInterface;
 use App\Interfaces\Tenant\CustomerServices\CustomerServicesInterface;
+use App\Models\Tenant\StampsClientes;
 
 class TasksController extends Controller
 {
@@ -55,11 +56,10 @@ class TasksController extends Controller
      */
     public function create(): View
     {
-        $customerList = $this->customerServicesRepository->getAllCustomers();
-        // $customers = $this->customersRepository->getAllCustomersCollection();
+        // $customerList = $this->customerServicesRepository->getAllCustomers();
+
         return view('tenant.tasks.create', [
             'themeAction' => 'form_element_data_table',
-            'customerList' => $customerList,
         ]);
     }
 

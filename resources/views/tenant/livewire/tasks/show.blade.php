@@ -43,13 +43,16 @@
                             <div class="col-12 col-sm-6 col-md-3">
                                 <div class="form-group">
                                     <label>{{__("Select Customer")}}</label>
-                                    @php
+                                    {{-- @php
                                         $customers = $customersRepository->getAllCustomersCollection();
+                                    @endphp --}}
+                                    @php
+                                        $customers = \App\Models\Tenant\StampsClientes::all();
                                     @endphp
                                     <select class="form-control" name="selectCustomer" id="selectCustomer" wire:model="client">
                                         <option value="0">{{__("All")}}</option>
-                                            @foreach ($customers->customers as $customer)
-                                                <option value={{$customer->id}}>{{$customer->name}}</option> 
+                                            @foreach ($customers as $customer)
+                                                <option value={{$customer->stamp}}>{{$customer->nome_cliente}}</option> 
                                             @endforeach
                                     </select>
                                 </div>
