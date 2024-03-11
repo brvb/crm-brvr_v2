@@ -209,6 +209,8 @@ class CustomerLocationsRepository implements CustomerLocationsInterface
                 "address" =>$request->address,
                 "zipcode" => $request->zipcode,
                 "state" => $request->district,
+                "longitude" => $request->longitude,
+                "latitude" => $request->latitude,
                 "city" => $request->county
             ];
 
@@ -248,100 +250,6 @@ class CustomerLocationsRepository implements CustomerLocationsInterface
        
         return DB::transaction(function () use ($customerLocation,$request) {
 
-            // DD($request);
-            // $obj_merged = '';
-            // if($request->main == "1")
-            // {
-            //     $obj_merged = (object)array_merge((array)$request,(array)['main' => '1']);
-            // }
-            // else if(!isset($request->main))
-            // {
-            //     $obj_merged = (object)array_merge((array)$request,(array)['main' => '0']);
-            // }
-
-            // $customerLocationRequest[]= $request->all();
-
-            // $arrayCustomerLocation = [];
-
-            // $newCompete = [];
-                    
-            // foreach($customerLocationRequest as $req)
-            // {
-            //     if($req["selectedCustomer"] != "")
-            //     {
-            //         $newCompete["customer_id"] = $req["selectedCustomer"];
-            //         array_push($arrayCustomerLocation, $newCompete);
-                    
-            //     }
-            //     if($req["description"] != "")
-            //     {
-            //         $newCompete["description"] = $req["description"];
-            //         array_push($arrayCustomerLocation, $newCompete);
-            //     }
-            //     if($req["contact"] != "")
-            //     {
-            //         $newCompete["contact"] = $req["contact"];
-            //         array_push($arrayCustomerLocation, $newCompete);
-            //     }
-            //     if($req["manager_name"] != "")
-            //     {
-            //         $newCompete["manager_name"] = $req["manager_name"];
-            //         array_push($arrayCustomerLocation, $newCompete);
-            //     }
-            //     if($req["manager_contact"] != "")
-            //     {
-            //         $newCompete["manager_contact"] = $req["manager_contact"];
-            //         array_push($arrayCustomerLocation, $newCompete);
-            //     }
-            //     if($req["address"] != "")
-            //     {
-            //         $newCompete["address"] = $req["address"];
-            //         array_push($arrayCustomerLocation, $newCompete);
-            //     }
-            //     if($req["zipcode"] != "")
-            //     {
-            //         $newCompete["zipcode"] = $req["zipcode"];
-            //         array_push($arrayCustomerLocation, $newCompete);
-            //     }
-            //     if($req["district"] != "")
-            //     {
-            //         $newCompete["district_id"] = $req["district"];
-            //         array_push($arrayCustomerLocation, $newCompete);
-            //     }
-            //     if(isset($req["county"]))
-            //     {
-            //         if($req["county"] != "" )
-            //         {
-            //             $newCompete["county_id"] = $req["county"];
-            //             array_push($arrayCustomerLocation, $newCompete);
-            //         }
-            //     }
-            //     if(isset($obj_merged->main))
-            //     {
-            //         $newCompete["main"] = $obj_merged->main;
-            //         array_push($arrayCustomerLocation,$newCompete);
-            //     }
-               
-            // }
-
-            // $arrayCheckMain = array_pop($arrayCustomerLocation);
-    
-            // CustomerLocations::where('id',$customerLocation->id)->update(
-            //     array_pop($arrayCustomerLocation)
-            // );
-
-            // if($arrayCheckMain["main"] == 1)
-            // {
-            //     Customers::where("id",$arrayCheckMain["customer_id"])->update(
-            //     [
-            //     "contact" =>$arrayCheckMain["contact"],
-            //     "address" =>$arrayCheckMain["address"],
-            //     "zipcode" =>$arrayCheckMain["zipcode"],
-            //     "district" =>$arrayCheckMain["district_id"],
-            //     "county" =>$arrayCheckMain["county_id"]
-            //     ]);
-            // }
-
             if(!isset($request->main))
             {
                 $main = false;
@@ -368,6 +276,8 @@ class CustomerLocationsRepository implements CustomerLocationsInterface
                 "address" =>$request->address,
                 "zipcode" => $request->zipcode,
                 "state" => $request->district,
+                "longitude" => $request->longitude,
+                "latitude" => $request->latitude,
                 "city" => $request->county
             ];
 

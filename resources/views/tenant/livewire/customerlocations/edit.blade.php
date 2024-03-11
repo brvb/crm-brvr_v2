@@ -13,5 +13,3 @@
     cancelButton="{{ __('No, cancel update') }}"
     buttonAction="{{ __('Yes, update') }}"
     formTitle="Atualizar Localização de Cliente" />
-
-   

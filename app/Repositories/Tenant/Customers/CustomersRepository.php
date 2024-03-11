@@ -446,7 +446,7 @@ class CustomersRepository implements CustomersInterface
     {
         return DB::transaction(function () use ($request) {
 
-
+     
             // $distrito = Districts::where('id',$request->district)->first();
 
             // $cidade = Counties::where('id',$request->county)->where('district_id',$request->district)->first();
@@ -513,8 +513,8 @@ class CustomersRepository implements CustomersInterface
                 "address" =>$request->address,
                 "zipcode" => $request->zipcode,
                 "state" => $request->district,
-                "longitude" => "",
-                "latitude" => "",
+                "longitude" => $request->longitude,
+                "latitude" => $request->latitude,
                 "city" => $request->county
             ];
 
@@ -649,55 +649,7 @@ class CustomersRepository implements CustomersInterface
 
             curl_close($curl);
 
-            // $customer->fill($request->all());
-            // $customer->save();
-
-            // $customerLocationRequest[]= $request->all();
-
-            // $arrayCustomerLocation = [];
-
-            // $newCompete = [];
-            // foreach($customerLocationRequest as $req)
-            // {
-            //     if($req["address"] != "")
-            //     {
-            //         $newCompete["address"] = $req["address"];
-            //         array_push($arrayCustomerLocation, $newCompete);
-            //     }
-            //     if($req["zipcode"] != "")
-            //     {
-            //         $newCompete["zipcode"] = $req["zipcode"];
-            //         array_push($arrayCustomerLocation, $newCompete);
-            //     }
-            //     if($req["contact"] != "")
-            //     {
-            //         $newCompete["contact"] = $req["contact"];
-            //         array_push($arrayCustomerLocation, $newCompete);
-            //     }
-            //     if($req["district"] != "")
-            //     {
-            //         $newCompete["district_id"] = $req["district"];
-            //         array_push($arrayCustomerLocation, $newCompete);
-            //     }
-            //     if($req["county"] != "")
-            //     {
-            //         $newCompete["county_id"] = $req["county"];
-            //         array_push($arrayCustomerLocation, $newCompete);
-            //     }
-            // }
-
-            // CustomerLocations::where('customer_id',$customer->id)->where('main','1')->update(
-            //     array_pop($arrayCustomerLocation)
-            // );
-
-            // if(Auth::user()->type_user == 2)
-            // {
-            //     User::where('id',Auth::user()->id)->update([
-            //         "name" => $request->name,
-            //         "username" => $request->username,
-            //         "email" => $request->email
-            //     ]);
-            // }
+         
 
             $customer = Customers::first();
             return $customer;
