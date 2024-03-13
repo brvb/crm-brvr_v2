@@ -239,6 +239,14 @@ class CheckFinalizadosNotification
 
         curl_close($curl);
 
+        $users_admins = User::where('type_user',0)->get();
+
+        foreach($users_admins as $usrA)
+        {
+            Mail::to($usrA->email)->queue(new AlertCheckFinalizados($pedido, $intervencao,$cst));
+        }
+
+
 
         Mail::to($user->email)->queue(new AlertCheckFinalizados($pedido, $intervencao,$cst));
 
