@@ -43,8 +43,10 @@ class CheckFinalizadosNotification
    
     public function handle(CheckFinalizadosEvent $checkFinalizadosEvent)
     {
+        
  
         $eventIntervencoes = $checkFinalizadosEvent->intervencoes;
+
 
         Pedidos::where('id',$eventIntervencoes->id_pedido)->update([
            "estado" => 5
@@ -66,6 +68,7 @@ class CheckFinalizadosNotification
 
 
         $cst = $this->customerRepository->getSpecificCustomerInfo($pedido->customer_id);
+        
 
         
         //PASSAR AQUI PARA O PHC ARRAY DO PEDIDO FINALIZADO
@@ -76,25 +79,33 @@ class CheckFinalizadosNotification
 
         foreach($intervencao as $id => $int)
         {
-            if($int->produtos_ref == null){
-                $arrayProdutos = [];
-            } else {
-
+            if(!isset($int->produtos_ref))
+            {
                 $arrayProdutos[$id] = [];
-
-                $produtos_ref = json_decode($int->produtos_ref);
-                $produtos_desc = json_decode($int->produtos_desc);
-                $produtos_qtd = json_decode($int->produtos_qtd);
-
-                foreach($produtos_ref as $i => $prod)
-                {
-                    $arrayProdutos[$id - 1][$i]["reference"] = trim($prod);
-                    $arrayProdutos[$id - 1][$i]["designation"] = trim($produtos_desc[$i]);
-                    $arrayProdutos[$id - 1][$i]["amount"] = trim($produtos_qtd[$i]);
-                }
-
-
             }
+            else {
+                 if($int->produtos_ref == null){
+                     $arrayProdutos[$id] = [];
+                } else {
+    
+                    $arrayProdutos[$id] = [];
+                    
+    
+                    $produtos_ref = json_decode($int->produtos_ref);
+                    $produtos_desc = json_decode($int->produtos_desc);
+                    $produtos_qtd = json_decode($int->produtos_qtd);
+    
+                    foreach($produtos_ref as $i => $prod)
+                    {
+                        $arrayProdutos[$id - 1][$i]["reference"] = trim($prod);
+                        $arrayProdutos[$id - 1][$i]["designation"] = trim($produtos_desc[$i]);
+                        $arrayProdutos[$id - 1][$i]["amount"] = trim($produtos_qtd[$i]);
+                    }
+    
+    
+                }
+            }
+           
 
         }
 
@@ -215,13 +226,13 @@ class CheckFinalizadosNotification
 
 
         $arrayEncoded =  json_encode($arrayToSend);
-
+        
 
         //ENVIA PHC 
         $curl = curl_init();
 
         curl_setopt_array($curl, array(
-            CURLOPT_URL => 'http://172.19.20.4:24004/Requests/Requests',
+            CURLOPT_URL => 'http://phc.brvr.pt:443/Requests/Requests',
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
             CURLOPT_MAXREDIRS => 10,
@@ -239,14 +250,12 @@ class CheckFinalizadosNotification
 
         curl_close($curl);
 
-        $users_admins = User::where('type_user',0)->get();
+         $users_admins = User::where('type_user',0)->get();
 
         foreach($users_admins as $usrA)
         {
             Mail::to($usrA->email)->queue(new AlertCheckFinalizados($pedido, $intervencao,$cst));
         }
-
-
 
         Mail::to($user->email)->queue(new AlertCheckFinalizados($pedido, $intervencao,$cst));
 
