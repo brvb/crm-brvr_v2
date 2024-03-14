@@ -178,18 +178,20 @@
                                                     <textarea class="form-control" rows="4" cols="50" name="descricaoRealizado" id="descricaoRealizado" wire:model.defer="descricaoRealizado"></textarea>
                                                 </section>
 
-                                                <section class="col-xl-12 col-xs-12 form-group">
-                                                    <label>Selecione Sinal</label>
-                                                    <select name="selectSignal" id="selectSignal" wire:model.defer="selectSignal" class="form-control">
-                                                        <option value="+" selected>+</option>
-                                                        <option value="-">-</option>
-                                                    </select>
-                                                </section>
+                                                @if($selectedEstado == "2")
+                                                    <section class="col-xl-12 col-xs-12 form-group">
+                                                        <label>Selecione Sinal</label>
+                                                        <select name="selectSignal" id="selectSignal" wire:model.defer="selectSignal" class="form-control">
+                                                            <option value="+" selected>+</option>
+                                                            <option value="-">-</option>
+                                                        </select>
+                                                    </section>
 
-                                                <section class="col-xl-12 col-xs-12 form-group">
-                                                    <label>Tempo</label>
-                                                    <input type='number' id='horaFinal' wire:model.defer="horaFinal" class='form-control'>
-                                                </section>
+                                                    <section class="col-xl-12 col-xs-12 form-group">
+                                                        <label>Tempo</label>
+                                                        <input type='number' id='horaFinal' wire:model.defer="horaFinal" class='form-control'>
+                                                    </section>
+                                                @endif
 
                                                 <section class="col-xl-12 col-xs-12 form-group">
                                                     <div class="row form-group">
