@@ -179,6 +179,19 @@
                                                 </section>
 
                                                 <section class="col-xl-12 col-xs-12 form-group">
+                                                    <label>Selecione Sinal</label>
+                                                    <select name="selectSignal" id="selectSignal" wire:model.defer="selectSignal" class="form-control">
+                                                        <option value="+" selected>+</option>
+                                                        <option value="-">-</option>
+                                                    </select>
+                                                </section>
+
+                                                <section class="col-xl-12 col-xs-12 form-group">
+                                                    <label>Tempo</label>
+                                                    <input type='number' id='horaFinal' wire:model.defer="horaFinal" class='form-control'>
+                                                </section>
+
+                                                <section class="col-xl-12 col-xs-12 form-group">
                                                     <div class="row form-group">
                                                         <section class="col" style="margin-top:20px;" wire:ignore>
                                                             <label>Anexos do Equipamento</label>
@@ -227,6 +240,7 @@
                                                     </div>
                                                 </section>
 
+                                                
                                                 
                                                 <section class="col-xl-12 col-xs-12 form-group" style="display:{{$signaturePad}}">
                                                     <div class="container text-center" style="margin-top: 0">
@@ -450,11 +464,7 @@
           
         });
 
-        
-    
 
-
-      
 
     </script>
     @endpush

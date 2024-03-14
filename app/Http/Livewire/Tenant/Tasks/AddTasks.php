@@ -734,7 +734,7 @@ class AddTasks extends Component
 
        
 
-        return redirect()->route('tenant.tasks.index')
+        return redirect()->route('tenant.dashboard')
             ->with('message', "Pedido criado com sucesso!")
             ->with('status', 'info');
      

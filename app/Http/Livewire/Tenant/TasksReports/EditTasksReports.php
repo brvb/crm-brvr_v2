@@ -62,6 +62,9 @@ class EditTasksReports extends Component
     public $signatureTecnico;
     public $email_pdf;
 
+    public string $selectSignal = "+";
+    public int $horaFinal = 0;
+
     public $loading;
     
     public ?object $taskTimes =  NULL;
@@ -298,7 +301,6 @@ class EditTasksReports extends Component
      */
     public function addIntervention()
     {
-
         $config = Config::first();
 
         if($this->horasAlterado != "")
@@ -490,6 +492,16 @@ class EditTasksReports extends Component
        
         $this->tasksInterface->addIntervencao($this);
 
+        if($this->selectedEstado == "2")
+        {
+            $intervencao = Intervencoes::where('id_pedido',$this->task->id)->where("data_final","!=",null)->where('estado_pedido',2)->latest()->first();
+
+            Intervencoes::where('id',$intervencao->id)->update([
+                "descontos" => $this->selectSignal.$this->horaFinal,
+            ]);
+        }
+       
+
         $horas = Intervencoes::where('id_pedido',$this->task->id)->where("data_final","!=",null)->get();
 
         $somaDiferencasSegundos = 0;
@@ -565,32 +577,75 @@ class EditTasksReports extends Component
 
             Storage::put(tenant('id') . '/app/public/pedidos/pdfs_conclusao/'.$this->task->reference.'/'.$this->task->reference.'.pdf',$content);
 
+
             $pedido = Pedidos::where('id',$this->task->id)->with('tech')->with('intervencoes')->with('customer')->first();
             event(new SendPDF($pedido, $this->email_pdf));
+
         }
 
 
-          //TENTAR VER ESTA SITUAÇÃO PARA ENVIAR PARA O DASHBOARD
-          $usr = User::where('id',Auth::user()->id)->first();
-          $pedido = Pedidos::where('id',$this->task->id)->first();
-  
-          $usrRecebido = User::where('id',$pedido->user_id)->first();
-  
+       
+        //TENTAR VER ESTA SITUAÇÃO PARA ENVIAR PARA O DASHBOARD
+        $usr = User::where('id',Auth::user()->id)->first();
+        $pedido = Pedidos::where('id',$this->task->id)->first();
+
+        $usrRecebido = User::where('id',$pedido->user_id)->first();
+
+
+        $message = "adicionou uma intervenção";
+
+
+        event(new ChatMessage($usr->name, $message));
+
+
+        
+        return redirect()->route('tenant.dashboard')
+        ->with('message', "Intervenção adicionada com sucesso!")
+        ->with('status', 'info');
+        
+
          
-          $message = "adicionou uma intervenção";
-      
-  
-          event(new ChatMessage($usr->name, $message));
-
-
-            
-        return redirect()->route('tenant.tasks-reports.index')
-            ->with('message', "Intervenção adicionada com sucesso!")
-            ->with('status', 'info');
         
 
 
 
+    }
+
+    public function mudarHoraReport($id,$mudarHora,$selectedSinal,$desconto_descricao,$task_id,$emailPDF)
+    {
+        $intervencaoAtual = Intervencoes::where('id',$id)->first();
+
+        if($selectedSinal == "mais"){
+            $selectedSinal = "+";
+        } else {
+            $selectedSinal = "-";
+        }
+       
+        Intervencoes::where('id',$id)->update([
+               "descontos" => $selectedSinal.$mudarHora,
+               "descricao_desconto" => $desconto_descricao
+        ]);
+
+        $pedido = Pedidos::where('id',$task_id)->with('tech')->with('intervencoes')->with('customer')->first();
+        event(new SendPDF($pedido, $emailPDF));
+
+        $usr = User::where('id',Auth::user()->id)->first();
+        $pedido = Pedidos::where('id',$task_id)->first();
+
+        $usrRecebido = User::where('id',$pedido->user_id)->first();
+
+       
+        $message = "adicionou uma intervenção";
+    
+
+        event(new ChatMessage($usr->name, $message));
+
+
+          
+      return redirect()->route('tenant.dashboard')
+          ->with('message', "Intervenção adicionada com sucesso!")
+          ->with('status', 'info');
+        
     }
 
     /**
