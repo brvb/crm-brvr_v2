@@ -83,6 +83,8 @@ class EditTasksReports extends Component
 
     public ?int $selectPrioridade;
 
+    public int $verificaProdutos;
+
     protected $listeners = ['resetChanges' => 'resetChanges', 'signaturePads' => 'signaturePads','signaturePadsClear' => 'signaturePadsClear','teste' => 'teste'];
 
      /**
@@ -112,7 +114,7 @@ class EditTasksReports extends Component
         })->get();
 
 
-        $this->produtos = ProdutosPHC::all();
+        // $this->produtos = ProdutosPHC::all();
 
         // $this->statesPedido = EstadoPedido::all();
 
@@ -178,6 +180,12 @@ class EditTasksReports extends Component
         }
         
      
+    }
+
+    public function updatedVerificaProdutos()
+    {
+        $this->produtos = ProdutosPHC::all();
+        $this->dispatchBrowserEvent("reloadProdutos");
     }
 
     public function removeProduto($i)

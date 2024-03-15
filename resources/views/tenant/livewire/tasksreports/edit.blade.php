@@ -50,86 +50,96 @@
                                                 <label>Descrição do Pedido</label>
                                                 <textarea class="form-control" rows="4" cols="50" name="notes" id="notes"  disabled>@if($task->descricao != null){{$task->descricao}}@endif</textarea>
                                             </section>
+
+                                            <section class="col-xl-12 col-xs-12 mb-2">
+                                                <label>Produtos?</label>
+                                                <input type="checkbox" id="verificaProdutos" wire:model="verificaProdutos">
+                                            </section>
                                            
-                                            <section class="col-xl-12 col-xs-12 form-group">
-                                            
-                                                @if(!empty($arrayProdutos))
-                                            
-                                                    <div class="form-group row">
-                                                        <section class="col-xl-12 col-xs-12 form-group">
-                                                            <table class="table">
-                                                                <thead style="background:lightgray;">
-                                                                    <tr>
-                                                                        <th>Referência</th>
-                                                                        <th>Designação</th>
-                                                                        <th>Quantidade</th>
-                                                                        <th>Ação</th>
-                                                                    </tr>
-                                                                </thead>
-                                                                <tbody>
-                                                                    
-                                                                    @foreach ($arrayProdutos as $i => $prod )
+                                           
+                                                <section class="col-xl-12 col-xs-12 form-group">
+                                                
+                                                    @if(!empty($arrayProdutos))
+                                                
+                                                        <div class="form-group row">
+                                                            <section class="col-xl-12 col-xs-12 form-group">
+                                                                <table class="table">
+                                                                    <thead style="background:lightgray;">
                                                                         <tr>
-                                                                            <td>
-                                                                                {{ $prod["referencia"] }}
-                                                        
-                                                                            </td>
-                                                                            <td>
-                                                                               
-                                                                                @if( $prod["referencia"] == "")
-                                                                                
-                                                                                <input class="form-control" type="text" name="designacao_intervencao"  wire:model.defer="designacao_intervencao.{{$i}}.description">
-                                                                                @else
-                                                                                {{$arrayDesignacoes[$i]["description"]}}
-                                                                                {{-- {{ $arrayDesignacoes[$i] }} --}}
-                                                                                                  
-                                                                                @endif
-                                                                                
-                                                                                {{-- <textarea class="form-control" rows="4" cols="50" name="referencia_intervencao"  wire:model.defer="referencia_intervencao.{{$i}}"></textarea> --}}
-                                                                            </td>
-                                                                            <td>
-                                                                                <input class="form-control" type="number"  wire:model.defer="quantidade_intervencao.{{$i}}">
-                                                                            </td>
-                                                                            <td>
-                                                                                <button type="button" class="btn btn-primary" wire:click="removeProduto({{$i}})">Remover</button>
-                                                                            </td>
+                                                                            <th>Referência</th>
+                                                                            <th>Designação</th>
+                                                                            <th>Quantidade</th>
+                                                                            <th>Ação</th>
                                                                         </tr>
-                                                                    @endforeach
-                                                                </tbody>
-                                                            </table>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        
+                                                                        @foreach ($arrayProdutos as $i => $prod )
+                                                                            <tr>
+                                                                                <td>
+                                                                                    {{ $prod["referencia"] }}
+                                                            
+                                                                                </td>
+                                                                                <td>
+                                                                                
+                                                                                    @if( $prod["referencia"] == "")
+                                                                                    
+                                                                                    <input class="form-control" type="text" name="designacao_intervencao"  wire:model.defer="designacao_intervencao.{{$i}}.description">
+                                                                                    @else
+                                                                                    {{$arrayDesignacoes[$i]["description"]}}
+                                                                                    {{-- {{ $arrayDesignacoes[$i] }} --}}
+                                                                                                    
+                                                                                    @endif
+                                                                                    
+                                                                                    {{-- <textarea class="form-control" rows="4" cols="50" name="referencia_intervencao"  wire:model.defer="referencia_intervencao.{{$i}}"></textarea> --}}
+                                                                                </td>
+                                                                                <td>
+                                                                                    <input class="form-control" type="number"  wire:model.defer="quantidade_intervencao.{{$i}}">
+                                                                                </td>
+                                                                                <td>
+                                                                                    <button type="button" class="btn btn-primary" wire:click="removeProduto({{$i}})">Remover</button>
+                                                                                </td>
+                                                                            </tr>
+                                                                        @endforeach
+                                                                    </tbody>
+                                                                </table>
+                                                            </section>
+                                                        </div>
+                                                    @endif
+
+                                                
+                                                </section>
+
+                                                <section class="col-xl-12 col-xs-12 form-group" id="produtosDIV">
+                                                
+                                                    <div class="form-group row" style="display:flex;margin-right:0px;justify-content:end;">
+                                                        <button type="button" class="btn btn-secondary" wire:click="adicionaProduto">Adiciona Produto</button>
+                                                    </div>
+                                                    
+                                                    <div class="form-group row">
+                                                        <section class="col-xl-12 col-xs-12 form-group">  
+                                                            <label>Produtos:</label>                                 
+                                                            <select name="selectedProdutos" id="selectedProdutos">
+                                                                <option value="">Selecione Produto</option>
+                                                                 @if(isset($produtos))
+                                                                    @forelse ($produtos as $item)
+                                                                        <option value="{{ $item->reference }}">{{ $item->reference }} | {{ $item->description }}</option>
+                                                                    @empty
+                                                                    @endforelse
+                                                                 @endif
+                                                            </select>
                                                         </section>
                                                     </div>
-                                                @endif
+                                                    <div class="form-group row">
+                                                        <section class="col-xl-12 col-xs-12 form-group">
+                                                            <label>Descrição</label>
+                                                            <textarea class="form-control" rows="4" cols="50" name="descricao_intervencao" id="descricao_intervencao" wire:model.defer="descricao_intervencao"></textarea>
+                                                        </section>
+                                                        
+                                                    </div>
+                                                </section>
+                                          
 
-                                              
-                                            </section>
-
-                                            <section class="col-xl-12 col-xs-12 form-group">
-                                              
-                                                <div class="form-group row" style="display:flex;margin-right:0px;justify-content:end;">
-                                                    <button type="button" class="btn btn-secondary" wire:click="adicionaProduto">Adiciona Produto</button>
-                                                </div>
-                                                
-                                                <div class="form-group row">
-                                                    <section class="col-xl-12 col-xs-12 form-group" wire:ignore>  
-                                                        <label>Produtos:</label>                                 
-                                                        <select name="selectedProdutos" id="selectedProdutos">
-                                                            <option value="">Selecione Produto</option>
-                                                                @forelse ($produtos as $item)
-                                                                    <option value="{{ $item->reference }}">{{ $item->reference }} | {{ $item->description }}</option>
-                                                                @empty
-                                                                @endforelse
-                                                        </select>
-                                                    </section>
-                                                </div>
-                                                <div class="form-group row">
-                                                    <section class="col-xl-12 col-xs-12 form-group">
-                                                        <label>Descrição</label>
-                                                        <textarea class="form-control" rows="4" cols="50" name="descricao_intervencao" id="descricao_intervencao" wire:model.defer="descricao_intervencao"></textarea>
-                                                    </section>
-                                                    
-                                                </div>
-                                            </section>
             
                                             <section class="col-12 form-group" wire:ignore>
                                                 <label>Estado do Pedido</label>
