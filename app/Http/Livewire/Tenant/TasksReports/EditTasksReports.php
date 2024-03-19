@@ -587,7 +587,11 @@ class EditTasksReports extends Component
 
 
             $pedido = Pedidos::where('id',$this->task->id)->with('tech')->with('intervencoes')->with('customer')->first();
-            event(new SendPDF($pedido, $this->email_pdf));
+            
+            if($pedido->tipo_pedido == 1){
+                event(new SendPDF($pedido, $this->email_pdf));
+            }
+            
 
         }
 

@@ -713,7 +713,10 @@ class AddTasks extends Component
         //Checka o Nao enviar email de alerta se devo enviar email ou nao
         if($this->alert_email == 0)
         {
-            event(new TaskCustomer($this->pedido_id));
+            if($this->selectedPedido == 1 ){
+                event(new TaskCustomer($this->pedido_id));
+            }
+            
         }
 
 
