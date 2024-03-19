@@ -254,10 +254,17 @@ class CheckFinalizadosNotification
 
         foreach($users_admins as $usrA)
         {
-            Mail::to($usrA->email)->queue(new AlertCheckFinalizados($pedido, $intervencao,$cst));
+            if($pedido->tipoPedido->id == 1)
+            {
+                Mail::to($usrA->email)->queue(new AlertCheckFinalizados($pedido, $intervencao,$cst));
+            }
+            
         }
 
-        Mail::to($user->email)->queue(new AlertCheckFinalizados($pedido, $intervencao,$cst));
+        if($pedido->tipoPedido->id == 1)
+        {
+            Mail::to($user->email)->queue(new AlertCheckFinalizados($pedido, $intervencao,$cst));
+        }
 
 
         try {
@@ -267,8 +274,11 @@ class CheckFinalizadosNotification
         
                 foreach($array as $email)
                 {
-                    //CLIENTE
-                    Mail::to($email)->queue(new AlertCheckFinalizados($pedido, $intervencao,$cst));
+                    if($pedido->tipoPedido->id == 1)
+                    {
+                        //CLIENTE
+                        Mail::to($email)->queue(new AlertCheckFinalizados($pedido, $intervencao,$cst));
+                    }
                 }
             }
             
