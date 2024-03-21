@@ -193,9 +193,9 @@ class CheckFinalizadosNotification
         }
 
 
-        if($pedido->tipoPedido->id == 1)
-        {
-            
+        // if($pedido->tipoPedido->id == 1)
+        // {
+
             $arrayToSend = [
                 "id" => $pedido->id,
                 "customer_id" => $pedido->customer_id,
@@ -289,7 +289,7 @@ class CheckFinalizadosNotification
                 echo $e;
             }
 
-        }
+        //}
 
 
       
