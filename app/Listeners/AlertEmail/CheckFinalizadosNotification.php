@@ -193,99 +193,106 @@ class CheckFinalizadosNotification
         }
 
 
-
-        $arrayToSend = [
-            "id" => $pedido->id,
-            "customer_id" => $pedido->customer_id,
-            "type_order" => $pedido->tipoPedido->name,
-            "type_service" => $pedido->servicesToDo->name,
-            "location_id" => $pedido->location_id,
-            "priority" => $pedido->prioridadeStat->nivel,
-            "technician" =>$pedido->tech->name,
-            "origin_order" => $pedido->origem_pedido,
-            "type_scheduling" => $pedido->tipo_agendamento,
-            "who_asked" => $pedido->quem_pediu,
-            "create_date" => date('Y-m-d H:i:s',strtotime($pedido->created_at)),
-            "serialnumber" => $pedido->nr_serie,
-            "brand" => $pedido->marca,
-            "model" => $pedido->modelo,
-            "equipment_name" => $pedido->nome_equipamento,
-            "description" => $pedido->descricao,
-            "riscado" => $riscado,
-            "partido" => $partido,
-            "bom_estado" => $bomestado,
-            "estado_normal" => $estadonormal,
-            "transformador" => $transformador,
-            "mala"=> $mala,
-            "tinteiro_toner" => $tinteiro,
-            "ac" => $ac,
-            "extradescription" => $pedido->descricao_extra,
-            "intervention" => $arrayIntervencao
-        ];
-      
-
-
-        $arrayEncoded =  json_encode($arrayToSend);
-        
-
-        //ENVIA PHC 
-        $curl = curl_init();
-
-        curl_setopt_array($curl, array(
-            CURLOPT_URL => 'http://phc.brvr.pt:443/Requests/Requests',
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_ENCODING => '',
-            CURLOPT_MAXREDIRS => 10,
-            CURLOPT_TIMEOUT => 0,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-            CURLOPT_CUSTOMREQUEST => 'POST',
-            CURLOPT_POSTFIELDS => $arrayEncoded,
-            CURLOPT_HTTPHEADER => array(
-                'Content-Type: application/json'
-            ),
-        ));
-
-        $response = curl_exec($curl);
-
-        curl_close($curl);
-
-         $users_admins = User::where('type_user',0)->get();
-
-        foreach($users_admins as $usrA)
-        {
-            if($pedido->tipoPedido->id == 1)
-            {
-                Mail::to($usrA->email)->queue(new AlertCheckFinalizados($pedido, $intervencao,$cst));
-            }
-            
-        }
-
         if($pedido->tipoPedido->id == 1)
         {
-            Mail::to($user->email)->queue(new AlertCheckFinalizados($pedido, $intervencao,$cst));
-        }
-
-
-        try {
-            if($cst->customers->email != "")
+            
+            $arrayToSend = [
+                "id" => $pedido->id,
+                "customer_id" => $pedido->customer_id,
+                "type_order" => $pedido->tipoPedido->name,
+                "type_service" => $pedido->servicesToDo->name,
+                "location_id" => $pedido->location_id,
+                "priority" => $pedido->prioridadeStat->nivel,
+                "technician" =>$pedido->tech->name,
+                "origin_order" => $pedido->origem_pedido,
+                "type_scheduling" => $pedido->tipo_agendamento,
+                "who_asked" => $pedido->quem_pediu,
+                "create_date" => date('Y-m-d H:i:s',strtotime($pedido->created_at)),
+                "serialnumber" => $pedido->nr_serie,
+                "brand" => $pedido->marca,
+                "model" => $pedido->modelo,
+                "equipment_name" => $pedido->nome_equipamento,
+                "description" => $pedido->descricao,
+                "riscado" => $riscado,
+                "partido" => $partido,
+                "bom_estado" => $bomestado,
+                "estado_normal" => $estadonormal,
+                "transformador" => $transformador,
+                "mala"=> $mala,
+                "tinteiro_toner" => $tinteiro,
+                "ac" => $ac,
+                "extradescription" => $pedido->descricao_extra,
+                "intervention" => $arrayIntervencao
+            ];
+          
+    
+    
+            $arrayEncoded =  json_encode($arrayToSend);
+            
+    
+            //ENVIA PHC 
+            $curl = curl_init();
+    
+            curl_setopt_array($curl, array(
+                CURLOPT_URL => 'http://phc.brvr.pt:443/Requests/Requests',
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_ENCODING => '',
+                CURLOPT_MAXREDIRS => 10,
+                CURLOPT_TIMEOUT => 0,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                CURLOPT_CUSTOMREQUEST => 'POST',
+                CURLOPT_POSTFIELDS => $arrayEncoded,
+                CURLOPT_HTTPHEADER => array(
+                    'Content-Type: application/json'
+                ),
+            ));
+    
+            $response = curl_exec($curl);
+    
+            curl_close($curl);
+    
+             $users_admins = User::where('type_user',0)->get();
+    
+            foreach($users_admins as $usrA)
             {
-                $array = explode(";",$cst->customers->email);
-        
-                foreach($array as $email)
+                if($pedido->tipoPedido->id == 1)
                 {
-                    if($pedido->tipoPedido->id == 1)
+                    Mail::to($usrA->email)->queue(new AlertCheckFinalizados($pedido, $intervencao,$cst));
+                }
+                
+            }
+    
+            if($pedido->tipoPedido->id == 1)
+            {
+                Mail::to($user->email)->queue(new AlertCheckFinalizados($pedido, $intervencao,$cst));
+            }
+    
+    
+            try {
+                if($cst->customers->email != "")
+                {
+                    $array = explode(";",$cst->customers->email);
+            
+                    foreach($array as $email)
                     {
-                        //CLIENTE
-                        Mail::to($email)->queue(new AlertCheckFinalizados($pedido, $intervencao,$cst));
+                        if($pedido->tipoPedido->id == 1)
+                        {
+                            //CLIENTE
+                            Mail::to($email)->queue(new AlertCheckFinalizados($pedido, $intervencao,$cst));
+                        }
                     }
                 }
+                
             }
-            
+            catch (Exception $e) {
+                echo $e;
+            }
+
         }
-        catch (Exception $e) {
-            echo $e;
-        }
+
+
+      
         
 
     }
