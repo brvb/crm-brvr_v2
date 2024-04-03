@@ -104,7 +104,7 @@ class PDFEmail extends Mailable
                 "email" => session('email'),
                 "address" => session('address'),
                 "logotipo" => session('logotipo'),
-            ]);
+            ])->bcc(['bruno@brvr.pt']);
 
 
 

@@ -82,7 +82,7 @@ class TaskCreateEmail extends Mailable
                 "email" => session('email'),
                 "address" => session('address'),
                 "logotipo" => session('logotipo'),
-            ]);
+            ])->bcc(['bruno@brvr.pt']);
 
             foreach($this->task->servicesToDo as $serv)
             {
