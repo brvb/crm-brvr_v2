@@ -79,6 +79,51 @@ class CheckStamps extends Command
                         "stamp" => $decoded->id,
                         "nome_cliente" => $decoded->name
                     ]);
+
+
+                    $arrayPHCLocation = [
+                        "name" => "Sede",
+                        "no" => $decoded->no,
+                        "addressname" => $decoded->address,
+                        "phone" => $decoded->phone,
+                        "managername" => $decoded->name,
+                        "locationmainornot" => true,
+                        "phonemanager" => $decoded->phone,
+                        "address" =>$decoded->address,
+                        "zipcode" => $decoded->zipcode,
+                        "state" => $decoded->state,
+                        "longitude" => "",
+                        "latitude" => "",
+                        "city" => $decoded->city
+                    ];
+        
+        
+                    $encodedLocation = json_encode($arrayPHCLocation);
+        
+                    
+
+                    $curlLocais = curl_init();
+
+                    curl_setopt_array($curlLocais, array(
+                        CURLOPT_URL => 'http://phc.brvr.pt:443/location/locations',
+                        CURLOPT_RETURNTRANSFER => true,
+                        CURLOPT_ENCODING => '',
+                        CURLOPT_MAXREDIRS => 10,
+                        CURLOPT_TIMEOUT => 0,
+                        CURLOPT_FOLLOWLOCATION => true,
+                        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                        CURLOPT_CUSTOMREQUEST => 'POST',
+                        CURLOPT_POSTFIELDS => $encodedLocation,
+                        CURLOPT_HTTPHEADER => array(
+                            'Content-Type: application/json'
+                        ),
+                    ));
+            
+                    $responseLocais = curl_exec($curlLocais);
+            
+                    curl_close($curlLocais);
+
+
                }
             }
 
