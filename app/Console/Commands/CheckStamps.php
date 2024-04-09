@@ -82,7 +82,7 @@ class CheckStamps extends Command
 
 
                     $arrayPHCLocation = [
-                        "name" => "Sede",
+                        "name" =>  $decoded->name."|".$decoded->address,
                         "no" => $decoded->no,
                         "addressname" => $decoded->address,
                         "phone" => $decoded->phone,
