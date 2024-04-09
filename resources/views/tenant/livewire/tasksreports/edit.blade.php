@@ -32,7 +32,7 @@
                                     <div class="col">
                                         <div class="row form-group" style="display:flex;justify-content:end;">
                                             <section class="col-xl-2 col-xs-2 form-group text-right">
-                                                <h4 style="color:#326c91;">Tempo Gasto</h4>
+                                                <h4 style="color:#326c91;">Tempo</h4>
                                                 <h4>
                                                    
 

@@ -130,12 +130,15 @@
                                                     
                                                 @endphp
                                                 <p>O seu pedido {{strtolower($task->tipoPedido->name)}} #{{$task->reference}} foi <b>FINALIZADO</b> dia {{ date('Y-m-d') }} às {{ date('H:i:s') }}.</p>
+                                                <br>
+                                                <p> {{$cst->customers->name}}</p>
+                                                <br>
                                                 @if($cst->customers->type == "Faturação Normal")
-                                                <p>O pedido teve uma duração de {{ $horas }} minutos.</p><br>
+                                                <p>O pedido teve uma duração de {{ floor($horas / 60) }} horas e {{ fmod($horas, 60) }} minutos.</p><br>
                                                 @elseif($cst->customers->type == "Bolsa de Horas")
-                                                <p>Atualmente o seu saldo é de {{date('H:i:s',strtotime($cst->customers->balance_hours))}} horas.</p><!-- No caso de cliente com bolsa de horas (falta adicionar no banco de dados e verificar aqui)-->
+                                                <p>Atualmente dispõe de {{date('H:i:s',strtotime($cst->customers->balance_hours))}} horas.</p><!-- No caso de cliente com bolsa de horas (falta adicionar no banco de dados e verificar aqui)-->
                                                 @else
-                                                <p>Neste mês já consumiu {{date('H:i:s',strtotime($cst->customers->hours_spent))}} horas.</p><!-- No caso de cliente com avença mensal -->
+                                                <p>Neste mês já dispõs de {{date('H:i:s',strtotime($cst->customers->hours_spent))}} horas.</p><!-- No caso de cliente com avença mensal -->
                                                 @endif
                                             </div>
                                             <hr>

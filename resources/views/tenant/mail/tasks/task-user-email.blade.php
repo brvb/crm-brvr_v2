@@ -57,8 +57,8 @@
                                                 <span>Cliente: {{$customer->customers->name}}</span><br>
                                                 <span>Telefone: {{$customer->customers->phone}}</span><br>
                                                 <span>Email: {{$customer->customers->email}}</span><br>
-                                                <span>Técnico designado:{{$pedido->tech->name}}</span><br>
-                                                <span>Assunto:{{$pedido->descricao}}</span>
+                                                <span>Técnico designado: {{$pedido->tech->name}}</span><br>
+                                                <span>Assunto: {{$pedido->descricao}}</span>
                                                 
                                                 
                                             </div>
