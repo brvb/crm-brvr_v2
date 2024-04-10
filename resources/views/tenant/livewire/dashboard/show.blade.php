@@ -334,6 +334,10 @@ style="background:rgba(255, 255, 255, 0.8);z-index:999;position:fixed;top:0;left
         
     });
 
+    window.addEventListener('refreshserviceTable', function(e) {
+     
+      Livewire.emit("refreshserviceTable");
+    });
 
 
   });

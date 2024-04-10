@@ -27,7 +27,8 @@ use App\Models\Tenant\StampsClientes;
 class Show extends Component
 {
     
-    protected $listeners = ["checkStatePedido" => 'checkStatePedido','intervencaoCheck' => 'intervencaoCheck'];
+    // protected $listeners = ["checkStatePedido" => 'checkStatePedido','intervencaoCheck' => 'intervencaoCheck'];
+    protected $listeners = ["checkStatePedido"=>'checkStatePedido','intervencaoCheck'=>'intervencaoCheck','tableservice'=>'tableservice'];
     public string $month = '';
 
     public string $nextMonth = "";
@@ -165,6 +166,10 @@ class Show extends Component
     
         }
       
+    }
+
+    public function tableservice(){
+        $this->mount();
     }
 
     public function initializeArrays()
@@ -637,7 +642,8 @@ class Show extends Component
     
         }
       
-       
+        
+        $this->dispatchBrowserEvent("refreshserviceTable");
     }
 
     public function render()
