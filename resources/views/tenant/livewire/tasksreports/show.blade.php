@@ -183,7 +183,7 @@
                                     @endphp
                                     {{ $customer->customers->name }}
                                 </td>
-                                <td>{{ $item->servicesToDo->name}}</td>
+                                <td>{{ $item->descricao}}</td>
                                 <td>{{ $item->tech->name }}</td>
                                 <td>
                                     @if($item->data_agendamento != "")
@@ -232,7 +232,7 @@
                                                     @if($item->estado == 2)
                                                         <a class="dropdown-item" href="{{ route('tenant.tasks.edit', $item->id) }}">Verificar Pedido</a>
                                                     @else
-                                                        <a class="dropdown-item" href="{{ route('tenant.tasks-reports.edit', $item->id) }}">Adicionar Intervenção</a>
+                                                        <a class="dropdown-item" href="{{ route('tenant.tasks-reports.edit', $item->id) }}">Gerir Intervenção</a>
                                                     @endif
                                                     
                                                     

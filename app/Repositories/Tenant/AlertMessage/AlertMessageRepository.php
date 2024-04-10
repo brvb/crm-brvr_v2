@@ -8,17 +8,18 @@ use App\Models\Tenant\Files;
 use App\Models\Tenant\Customers;
 use App\Models\Tenant\TeamMember;
 use Illuminate\Support\Facades\DB;
+use App\Models\Tenant\Notifications;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Models\Tenant\CustomerServices;
 use App\Models\Tenant\CustomerLocations;
+use App\Models\Tenant\CustomerNotifications;
 use Illuminate\Database\Eloquent\Collection;
 use App\Interfaces\Tenant\Files\FilesInterface;
 use Illuminate\Pagination\LengthAwarePaginator;
 use App\Interfaces\Tenant\Customers\CustomersInterface;
 use App\Http\Requests\Tenant\Customers\CustomersFormRequest;
 use App\Interfaces\Tenant\AlertMessage\AlertMessageInterface;
-use App\Models\Tenant\Notifications;
 
 class AlertMessageRepository implements AlertMessageInterface
 {
@@ -49,12 +50,49 @@ class AlertMessageRepository implements AlertMessageInterface
     public function updateReadState($id_receiver): int
     {
 
+      // return DB::transaction(function () use ($id_receiver) {
+         
+      //  $notification =  Notifications::where('receiver_user_id',$id_receiver)->update([
+      //       "read" => 1
+      //    ]);
+
+      //    return $notification;
+      // });
+
       return DB::transaction(function () use ($id_receiver) {
          
-       $notification =  Notifications::where('receiver_user_id',$id_receiver)->update([
+         $notification =  Notifications::where('receiver_user_id',$id_receiver)->update([
             "read" => 1
          ]);
+         
+         if(Auth::user()->type_user == 0){
+            //se for admin apaga logo tudo
+            CustomerNotifications::where('treated',1)->update([
+               "treated" => 2
+            ]);
+         }
+         else {
+            $CustomerServices = CustomerNotifications::where('treated',1)->get();
+         
+            foreach ($CustomerServices as $servic){
+               $services = CustomerServices::where('id',$servic->customer_service_id)->first();
+              
+               $team = TeamMember::where('id',$services->member_associated)->first();
 
+               if($team->user_id == $id_receiver){
+              
+                  CustomerNotifications::where('id',$servic->id)->update([
+                     "treated" => 2
+                  ]);
+
+               }
+
+            }
+
+      
+         }
+        
+    
          return $notification;
       });
      

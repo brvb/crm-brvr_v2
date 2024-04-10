@@ -29,6 +29,7 @@ use App\Interfaces\Tenant\Tasks\TasksInterface;
 use App\Interfaces\Tenant\Customers\CustomersInterface;
 use App\Interfaces\Tenant\TasksReports\TasksReportsInterface;
 use App\Interfaces\Tenant\CustomerServices\CustomerServicesInterface;
+use App\Models\Tenant\StampsClientes;
 
 class EditTasks extends Component
 {
@@ -55,6 +56,7 @@ class EditTasks extends Component
     public string $selectedServico = '';
     public ?object $servicosList = NULL;
     public string $serviceDescription = '';
+    public string $informacaoAdicional = '';
     public string $descriptionReabertura = '';
     public ?object $membersList = NULL;
     protected ?object $customerLocations = NULL;
@@ -154,7 +156,9 @@ class EditTasks extends Component
         $this->selectedId = $taskToUpdate->id;
        
         $this->selectedCustomer = $taskToUpdate->customer_id;
-        $this->customerList = $this->customersInterface->getAllCustomersCollection();
+        // $this->customerList = $this->customersInterface->getAllCustomersCollection();
+
+        $this->customerList = StampsClientes::all();
 
         $this->selectedPedido = $taskToUpdate->tipo_pedido;
         $this->pedidosList = TiposPedidos::all();
@@ -165,6 +169,11 @@ class EditTasks extends Component
         $this->membersList = TeamMember::all();
 
         $this->serviceDescription = $taskToUpdate->descricao;
+
+        if($taskToUpdate->informacao_adicional != null)
+        {
+             $this->informacaoAdicional = $taskToUpdate->informacao_adicional;
+        }
 
         if($taskToUpdate->descricao_reabertura != null)
         {
@@ -388,6 +397,13 @@ class EditTasks extends Component
             $this->imagem = 'impressao'.$this->taskReference.'.pdf';
 
     
+            if(!Storage::exists(tenant('id') . '/app/public/pedidos/etiquetas/'.$this->taskReference))
+            {
+                $caminhoImagess = storage_path('/app/public/pedidos/etiquetas/'.$this->taskReference.'/');
+                mkdir($caminhoImagess, 0755, true);
+                // File::makeDirectory(tenant('id') . '/app/public/pedidos/etiquetas/'.$this->taskReference, 0755, true, true);
+            }
+
             Storage::put(tenant('id') . '/app/public/pedidos/etiquetas/'.$this->taskReference.'/etiqueta'.$this->taskReference.'.pdf',$content);
         }
 
@@ -398,6 +414,20 @@ class EditTasks extends Component
         $pedido = $this->tasksInterface->updatePedido($this);
 
         //GRAVA AS IMAGENS
+
+        if(!Storage::exists(tenant('id') . '/app/public/pedidos/imagens_pedidos/'.$this->taskReference))
+        {
+            // File::makeDirectory(tenant('id') . '/app/public/pedidos/imagens_pedidos/'.$this->taskReference, 0755, true, true);
+            $caminhoImages = storage_path('/app/public/pedidos/imagens_pedidos/'.$this->taskReference.'/');
+            mkdir($caminhoImages, 0755, true);
+        }
+        if(!Storage::exists(tenant('id') . '/app/public/pedidos/equipamentos_pedidos/'.$this->taskReference))
+        {
+            $caminhoEquipamentos = storage_path('/app/public/pedidos/equipamentos_pedidos/'.$this->taskReference.'/');
+            mkdir($caminhoEquipamentos, 0755, true);
+            // File::makeDirectory(tenant('id') . '/app/public/pedidos/equipamentos_pedidos/'.$this->taskReference, 0755, true, true);
+        }
+        
         
        
         if(!empty($this->arrayFirstUploaded)){

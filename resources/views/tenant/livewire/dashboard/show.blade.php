@@ -62,7 +62,7 @@ style="background:rgba(255, 255, 255, 0.8);z-index:999;position:fixed;top:0;left
               
                         <td>{{ $item->reference }}</td>
                         <td>{{ $cust->customers->name }}</td>
-                        <td>{{ $item->servicesToDo->name}}</td>
+                        <td>{{ $item->descricao }}</td>
                         <td>{{ $item->tech->name }}</td>
                         <td>
                             @if($item->data_agendamento != "")
@@ -90,6 +90,65 @@ style="background:rgba(255, 255, 255, 0.8);z-index:999;position:fixed;top:0;left
         {{-- </div> --}}
 
           </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h4 class="card-title">Pedidos Concluídos</h4>
+            </div>
+            <div class="card-body" style="display:flex;overflow:auto;">
+
+          <div class="table-responsive" style="position: relative;">
+            {{-- class="display dataTable no-footer" --}}
+            <table id="dataTables-data" class="table table-responsive-lg mb-0 table-striped">
+                <thead>
+                    <tr>
+                      <th>{{ __('Reference') }}</th>
+                      <th>{{ __('Customer') }}</th>
+                      <th>Serviço</th>
+                      <th>{{ __('Technical') }}</th>
+                      <th>{{ __('Date') }}</th>
+                      <th>{{ __('County') }}</th>
+                      <th>{{ __('Estado do Pedido') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                  @foreach ($pedidosconcluidos as $item)
+                     @php
+                       $cust = $customersRepository->getSpecificCustomerInfo($item->customer_id);
+                     @endphp
+                    <tr id="pedidoLinha" data-id="{{$item->id}}" data-cliente="{{str_replace(' ', '£', $cust->customers->name)}}" data-referencia="{{$item->reference}}" style="background:{{ $item->prioridadeStat->cor }};">
+            
+                      <td>{{ $item->reference }}</td>
+                      <td>{{ $cust->customers->name }}</td>
+                      <td>{{ $item->descricao }}</td>
+                      <td>{{ $item->tech->name }}</td>
+                      <td>
+                          @if($item->data_agendamento != "")
+          
+                          <i class="fa fa-calendar" aria-hidden="true"></i> {{ $item->data_agendamento }}<br>
+                          <i class="fa fa-clock-o" aria-hidden="true"></i> {{ $item->hora_agendamento }}
+                          @else
+                          <i class="fa fa-calendar" aria-hidden="true"></i> {{ date('Y-m-d',strtotime($item->created_at)) }}<br>
+                          <i class="fa fa-clock-o" aria-hidden="true"></i> {{ date('H:i',strtotime($item->created_at)) }}
+                          @endif
+                      </td>
+                      <td>
+                        @php
+                            $locations = $customerLocationInterface->getSpecificLocationInfo($item->location_id); 
+                        @endphp
+                        {{ $locations->locations->address }}
+                      </td>
+
+                      <td>{{ $item->tipoEstado->nome_estado }}</td>
+                    </tr> 
+                  @endforeach
+                </tbody>
+            </table>
+        </div>
+      {{-- </div> --}}
+
+        </div>
         </div>
 
           {{-- @if(Auth::user()->type_user == 0) --}}
@@ -275,6 +334,10 @@ style="background:rgba(255, 255, 255, 0.8);z-index:999;position:fixed;top:0;left
         
     });
 
+    window.addEventListener('refreshserviceTable', function(e) {
+     
+      Livewire.emit("refreshserviceTable");
+    });
 
 
   });

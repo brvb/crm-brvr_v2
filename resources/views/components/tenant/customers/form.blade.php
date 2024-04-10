@@ -31,15 +31,26 @@
                                                 @if(null !== old('slug'))value="{{ old('slug') }}"@endisset
                                                 placeholder="{{ __('slug') }}">
                                         </section>
+                                        <section class="col-xl-2 col-xs-12">
+                                            <label>{{ __('VAT') }}</label>
+                                            <input type="text" name="vat" id="vat" class="form-control"
+                                                @isset($vat)value="{{ $vat }}" @endisset
+                                                @if(null !== old('vat'))value="{{ old('vat') }}"@endisset
+                                                placeholder="{{ __('VAT') }}">
+                                        </section>
+                                        
                                         @endif
+                                        @else
+                                            <section class="col-xl-4 col-xs-12">
+                                                <label>{{ __('VAT') }}</label>
+                                                <input typection="text" name="vat" id="vat" class="form-control"
+                                                    @isset($vat)value="{{ $vat }}" @endisset
+                                                    @if(null !== old('vat'))value="{{ old('vat') }}"@endisset
+                                                    placeholder="{{ __('VAT') }}">
+                                            </section>
+
                                     @endif
-                                    <section class="col-xl-2 col-xs-12">
-                                        <label>{{ __('VAT') }}</label>
-                                        <input type="text" name="vat" id="vat" class="form-control"
-                                            @isset($vat)value="{{ $vat }}" @endisset
-                                            @if(null !== old('vat'))value="{{ old('vat') }}"@endisset
-                                            placeholder="{{ __('VAT') }}">
-                                    </section>
+
                                 </div>
                                 <div class="form-group row">
                                     <section class="col-xl-3 col-xs-12">
@@ -81,7 +92,7 @@
                                     </section>
                                 </div>
                                 <div class="form-group row">
-                                    <section class="col-xl-2 col-xs-12">
+                                    <section class="col-xl-12 col-xs-12" style="margin-bottom:10px;">
                                         <label>{{ __('Zip Code') }}</label>
                                         <input type="text" name="zipcode" id="zipcode" class="form-control"
                                             @isset($zipcode)value="{{ $zipcode }}" @endisset
@@ -90,7 +101,29 @@
                                     </section>
 
                                     @livewire('tenant.common.location',  ['districts' => $districts, 'counties' => $counties, 'district' => $district, 'county' => $county])
+                                   
                                 </div>
+
+                                @if(!$update)
+                                    <div class="form-group row">
+                                        <section class="col-xl-6 col-xs-12">
+                                            <label>{{ __('Latitude') }}</label>
+                                            <input type="text" name="latitude" id="latitude" class="form-control"
+                                                @isset($latitude)value="{{ $latitude }}" @endisset
+                                                @if(null !== old('latitude'))value="{{ old('latitude') }}"@endisset
+                                                placeholder="Latitude">
+                                        </section>
+
+                                        <section class="col-xl-6 col-xs-12">
+                                            <label>{{ __('Longitude') }}</label>
+                                            <input type="text" name="longitude" id="longitude" class="form-control"
+                                                @isset($longitude)value="{{ $longitude }}" @endisset
+                                                @if(null !== old('longitude'))value="{{ old('longitude') }}"@endisset
+                                                placeholder="{{ __('Longitude') }}">
+                                        </section>
+
+                                    </div>
+                                @endif
                                 {{-- <div class="form-group row">
                                     <section class="col">
                                         <label>{{ __('Account manager') }}</label>

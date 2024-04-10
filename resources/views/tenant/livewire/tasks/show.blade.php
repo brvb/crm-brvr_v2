@@ -43,13 +43,16 @@
                             <div class="col-12 col-sm-6 col-md-3">
                                 <div class="form-group">
                                     <label>{{__("Select Customer")}}</label>
-                                    @php
+                                    {{-- @php
                                         $customers = $customersRepository->getAllCustomersCollection();
+                                    @endphp --}}
+                                    @php
+                                        $customers = \App\Models\Tenant\StampsClientes::all();
                                     @endphp
                                     <select class="form-control" name="selectCustomer" id="selectCustomer" wire:model="client">
                                         <option value="0">{{__("All")}}</option>
-                                            @foreach ($customers->customers as $customer)
-                                                <option value={{$customer->id}}>{{$customer->name}}</option> 
+                                            @foreach ($customers as $customer)
+                                                <option value={{$customer->stamp}}>{{$customer->nome_cliente}}</option> 
                                             @endforeach
                                     </select>
                                 </div>
@@ -188,7 +191,7 @@
                                     @endphp
                                     {{ $customer->customers->name }}
                                 </td>
-                                <td>{{ $item->servicesToDo->name}}</td>
+                                <td>{{ $item->descricao}}</td>
                                 <td>{{ $item->tech->name }}</td>
                                 <td>
                                     @if($item->data_agendamento != "")
@@ -250,17 +253,21 @@
                                                     @if($item->tipoEstado->id == 2 && Auth::user()->type_user == 0)
                                                         <button class="dropdown-item" wire:click="finalizarPedido({{$item->id}})">Finalizar Pedido</button>
                                                     @endif
-                                                
-                                                    <button class="dropdown-item btn-sweet-alert" data-type="form"
-                                                        data-route="{{ route('tenant.tasks.destroy', $item->id) }}"
-                                                        data-style="warning" data-csrf="csrf"
-                                                        data-text="Quer eliminar este pedido?"
-                                                        data-title="{{ __('Are you sure?') }}"
-                                                        data-btn-cancel="{{ __('No, do not delete!!') }}"
-                                                        data-btn-ok="Sim, apagar pedido" data-method="DELETE">
-                                                        Apagar Pedido
-                                                    </button>
-                                                    
+
+                                                    <a class="dropdown-item" href="{{ route('tenant.tasks-reports.edit', $item->id) }}" style="pointer-events: auto">Gerir Intervenção</a>
+
+                
+                                                    @if(Auth::user()->type_user == 0 || $user->user_id == Auth::user()->id)
+                                                        <button class="dropdown-item btn-sweet-alert" data-type="form"
+                                                            data-route="{{ route('tenant.tasks.destroy', $item->id) }}"
+                                                            data-style="warning" data-csrf="csrf"
+                                                            data-text="Quer eliminar este pedido?"
+                                                            data-title="{{ __('Are you sure?') }}"
+                                                            data-btn-cancel="{{ __('No, do not delete!!') }}"
+                                                            data-btn-ok="Sim, apagar pedido" data-method="DELETE">
+                                                            Apagar Pedido
+                                                        </button>
+                                                    @endif
 
                                                 </div>
                                             </div>

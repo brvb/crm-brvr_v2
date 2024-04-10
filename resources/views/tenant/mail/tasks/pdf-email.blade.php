@@ -54,7 +54,7 @@
                                             <div class="table" style="font-family: Avenir, Helvetica, sans-serif; box-sizing: border-box;">
                                                    
                                                    <p style="font-family:Arial, Helvetica, sans-serif; color: #74787e;">
-                                                      <b>O seu pedido {{strtolower($task->tipoPedido->name)}} #{{$task->reference}} foi <b>CONCLUÍDA</b> {{$dataInicio}} - {{$horaInicio}}</b>
+                                                      <b>O seu pedido {{strtolower($task->tipoPedido->name)}} #{{$task->reference}} foi <b>CONCLUÍDA</b> {{ date('Y-m-d') }} - {{ date('H:i:s') }}</b>
                                                    </p>
                                                    {{-- @if($pdf == "1") --}}
                                                         <p style="font-family:Arial, Helvetica, sans-serif; color: #74787e;">
@@ -73,7 +73,8 @@
                                                 <p>
                                                     <small>
                                                         <label style="font-size: 1.5em;font-weight: bold;text-decoration: underline;">Não responda a este email. </label><br>
-                                                            Para qualquer esclarecimento use os contactos habituais:<br>
+                                                    Para qualquer esclarecimento use os contactos habituais:<br>
+                                                            Telefone: 252646260 Email: suporte@brvr.pt <br>
                                                             Identifique sempre o número de pedido.
                                                     </small>
                                                 </p>

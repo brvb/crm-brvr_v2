@@ -2,12 +2,13 @@
 
 namespace App\Repositories\Tenant\CustomerNotification;
 
+use App\Models\User;
 use App\Models\Tenant\Customers;
+use App\Models\Tenant\TeamMember;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Tenant\CustomerServices;
 use App\Models\Tenant\CustomerNotifications;
 use App\Interfaces\Tenant\CustomerNotification\CustomerNotificationInterface;
-use App\Models\Tenant\CustomerServices;
-use App\Models\Tenant\TeamMember;
 
 class CustomerNotificationRepository implements CustomerNotificationInterface
 {
@@ -59,13 +60,19 @@ class CustomerNotificationRepository implements CustomerNotificationInterface
             // }
 
             $personService = CustomerServices::where('id',$notification->customer_service_id)->first();
-            $member = TeamMember::where('id',$personService->member_associated)->first();
-        
-            $customer = $customersRepository->getSpecificCustomerInfo($personService->customer_id);
-            $location = $customerLocationRepository->getSpecificLocationInfo($personService->location_id); 
-
-
-            $notificationInfo[$count] = ["customerServicesId" => $notification->id, "service" => $notification->service->name, "date_final_service" => $notification->end_service_date, "customer" => $customer->customers->name, "team_member" => $member->name, "customer_county" => $location->locations->address, "notification" => $notification->notification_day, "tratada" => $notification->treated];
+            
+            if($personService != null)
+            {
+                $member = TeamMember::where('id',$personService->member_associated)->first();
+                $user = User::where('id',$member->user_id)->first();
+    
+                $customer = $customersRepository->getSpecificCustomerInfo($personService->customer_id);
+                $location = $customerLocationRepository->getSpecificLocationInfo($personService->location_id); 
+    
+                $notificationInfo[$count] = ["userphoto" => $user->photo, "customerServicesId" => $notification->id, "service" => $notification->service->name, "date_final_service" => $notification->end_service_date, "customer" => $customer->customers->name, "team_member" => $member->name, "customer_county" => $location->locations->address, "notification" => $notification->notification_day, "tratada" => $notification->treated];
+            }
+           
+            //$notificationInfo[$count] = ["customerServicesId" => $notification->id, "service" => $notification->service->name, "date_final_service" => $notification->end_service_date, "customer" => $customer->customers->name, "team_member" => $member->name, "customer_county" => $location->locations->address, "notification" => $notification->notification_day, "tratada" => $notification->treated];
         }
 
         return $notificationInfo;

@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use App\Console\Commands\AlertsEmailConclusion;
 use App\Console\Commands\EmailNotify;
 use App\Console\Commands\AlertsEmails;
+use App\Console\Commands\CheckFinalizados;
 use App\Models\Tenant\CustomerServices;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
@@ -17,7 +18,8 @@ class Kernel extends ConsoleKernel
     protected $commands = [
         Commands\AlertsEmails::class,
         Commands\EmailNotify::class,
-        Commands\AlertsEmailConclusion::class
+        Commands\AlertsEmailConclusion::class,
+        Commands\CheckFinalizados::class
     ];
 
     /**
@@ -37,7 +39,7 @@ class Kernel extends ConsoleKernel
 
         $schedule->command('alerts:check_finalizados')->dailyAt('07:00');
 
-        // $schedule->command('alerts:cron')->everyMinute();
+        $schedule->command('alerts:check_stamps')->everyMinute();
 
     }
 

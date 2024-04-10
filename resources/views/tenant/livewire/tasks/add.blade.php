@@ -37,13 +37,14 @@
                                                         <i class="fa fa-user"></i> Criar Cliente
                                                     </a>
                                                 </section>
+
                                                 <section class="col" style="margin-top:20px;" wire:ignore>
                                                     <label>{{ __('Customer Name') }}</label>
                                                     <select name="selectedCustomer" id="selectedCustomer">
                                                         <option value="">{{ __('Select customer') }}</option>
-                                                        @forelse ($customerList->customers as $item)
+                                                        @forelse ($customerList as $item)
                                               
-                                                            <option value="{{ $item->id }}">{{ $item->name }}</option>
+                                                            <option value="{{ $item->stamp }}">{{ $item->nome_cliente }}</option>
                                                         @empty
                                                         @endforelse
                                                     </select>
@@ -63,10 +64,35 @@
                                                         <label>Tipo de Contrato:</label>
                                                         <input type="text" value="{{ $customer->customers->type}}" class="form-control" readonly>
                                                     </section>
+                                                    @if($customer->customers->type == "Avença")
                                                     <section class="col-xl-4 col-xs-12">
-                                                        <label>Horas:</label>
-                                                        <input type="text" value="{{ date('H:i',strtotime($customer->customers->hours_spent))}}" class="form-control" readonly>
+                                                        <label>Minutos:</label>
+                                                        <input type="text" value="{{$customer->customers->balance_hours}}" class="form-control" readonly>
+                                                    
+                                                                                                               
+                                                    
                                                     </section>
+                                                    @elseif($customer->customers->type == "Bolsa de Horas")
+                                                        <section class="col-xl-2 col-xs-12">
+                                                            <label>Minutos disponiveis:</label>
+                                                        
+                                                            <input type="text" value="{{$customer->customers->balance_hours}}" class="form-control" readonly>
+                                                    
+                                                        </section>
+
+                                                        <section class="col-xl-2 col-xs-12">
+                                                            <label>Gasto no Mês:</label>
+                                                            <input type="text" value="{{ $customer->customers->hours_spent}}" class="form-control" readonly>
+                                                        </section>
+                                                    @else
+
+                                                    <section class="col-xl-4 col-xs-12">
+                                                        <label>Gasto no Mês:</label>
+                                                        <input type="text" value="{{ $customer->customers->hours_spent}}" class="form-control" readonly>
+                                                    </section>
+                                                       
+                                                    @endif
+                                                   
                                                     <section class="col-xl-4 col-xs-12">
                                                         <label>Conta Corrente:</label>
                                                         <input type="text" value="{{ $customer->customers->current_account}}" class="form-control" readonly>
@@ -174,10 +200,10 @@
                                     <div class="row">
                                         <div class="col-6">
     
-                                            <div class="row form-group">
+                                            <div class="row form-group" wire:ignore>
                                                 <section class="col" style="margin-top:20px;" wire:ignore>
                                                     <label>Tipo Pedido</label>
-                                                    <select name="selectedPedido" id="selectedPedido">
+                                                    <select name="selectedPedido" id="selectedPedido" wire:ignore>
                                                         <option value="">Selecione Pedido</option>
                                                         @forelse ($pedidosList as $item)
                                                             <option value="{{ $item->id }}">{{ $item->name }}</option>
@@ -189,10 +215,10 @@
                                             
                                         </div>
                                         <div class="col-6">
-                                            <div class="row form-group">
+                                            <div class="row form-group" wire:ignore>
                                                 <section class="col" style="margin-top:20px;" wire:ignore>
                                                     <label>Tipo Serviço</label>
-                                                    <select name="selectedServico" id="selectedServico">
+                                                    <select name="selectedServico" id="selectedServico" wire:ignore>
                                                         <option value="">Selecione Serviço</option>
                                                         @forelse ($servicosList as $item)
                                                             <option value="{{ $item->id }}">{{ $item->name }}</option>
@@ -209,6 +235,16 @@
                                             <textarea name="serviceDescription"
                                             class="form-control serviceDesription" id="serviceDescription"
                                             wire:model.defer="serviceDescription"
+                                            rows="4"></textarea>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <label>Informações adicionais</label>
+                                            <textarea name="informacaoAdicional"
+                                            class="form-control informacaoAdicional" id="informacaoAdicional"
+                                            wire:model.defer="informacaoAdicional"
                                             rows="4"></textarea>
                                         </div>
                                     </div>
@@ -719,6 +755,7 @@
     <script>
         var services = [];
 
+    
         jQuery("body").on('click','#verificaContrato', function(){
             if(jQuery(this).is(":checked"))
             {
@@ -1044,12 +1081,12 @@
 
             jQuery('#selectedPedido').select2();
             jQuery("#selectedPedido").on("select2:select", function (e) {
-                @this.set('selectedPedido', jQuery('#selectedPedido').find(':selected').val());
+                @this.set('selectedPedido', jQuery('#selectedPedido').find(':selected').val(),true);
             });
 
             jQuery('#selectedServico').select2();
             jQuery("#selectedServico").on("select2:select", function (e) {
-                @this.set('selectedServico', jQuery('#selectedServico').find(':selected').val());
+                @this.set('selectedServico', jQuery('#selectedServico').find(':selected').val(),true);
             });
 
             jQuery('#selectedLocation').select2();
@@ -1083,7 +1120,7 @@
         
             function formatState (state) {
 
-                var base_url = "https://suporte.brvr.pt/cl/7f3a1b73-d8ae-464f-b91e-2a3f8163bdfb/app/public/tasks_colors";
+                var base_url = "https://suporte.brvr.pt/cl/brv2-7f3a1b73-d8ae-464f-b91e-2a3f8163bdfb/app/public/tasks_colors";
     
                 if (!state.id) {
                     return state.text;
@@ -1161,6 +1198,14 @@
             @this.loading();
 
         })
+
+
+        window.addEventListener('downloadEvent', function(e) {
+            var url = e.detail.link;
+
+            window.open(url, '_blank');
+
+        });
 
       
 

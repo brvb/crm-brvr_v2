@@ -22,11 +22,13 @@ use App\Interfaces\Tenant\Customers\CustomersInterface;
 use App\Interfaces\Tenant\TeamMember\TeamMemberInterface;
 use App\Interfaces\Tenant\CustomerServices\CustomerServicesInterface;
 use App\Interfaces\Tenant\CustomerNotification\CustomerNotificationInterface;
+use App\Models\Tenant\StampsClientes;
 
 class Show extends Component
 {
     
-    protected $listeners = ["checkStatePedido" => 'checkStatePedido','intervencaoCheck' => 'intervencaoCheck'];
+    // protected $listeners = ["checkStatePedido" => 'checkStatePedido','intervencaoCheck' => 'intervencaoCheck'];
+    protected $listeners = ["checkStatePedido"=>'checkStatePedido','intervencaoCheck'=>'intervencaoCheck','tableservice'=>'tableservice'];
     public string $month = '';
 
     public string $nextMonth = "";
@@ -44,6 +46,7 @@ class Show extends Component
     //Parte da segunda tabela
 
     private ?object $secondTable = NULL;
+    private ?object $thirdTable = NULL;
 
     //Parte do filtro
 
@@ -73,7 +76,6 @@ class Show extends Component
         $this->servicesNotifications = $this->customerNotification->getNotificationTimes($this->customersRepository,$this->customerLocationInterface);
 
         //PARTE EM TEMPO REAL
-       
       
         $users = User::where('type_user','!=','2')->get();
         $arrayUser = [];
@@ -118,6 +120,17 @@ class Show extends Component
         if(Auth::user()->type_user == "0")
         {
             $this->secondTable = Pedidos::where('estado','!=','5')
+            ->where('estado','!=','2')
+            ->with('prioridadeStat')
+            ->with('customer')
+            ->with('tipoEstado')
+            ->with('tech')
+            ->with('servicesToDo')
+            ->with('location')
+            ->orderBy('prioridade','asc')
+            ->get();
+
+            $this->thirdTable = Pedidos::where('estado','2')
             ->with('prioridadeStat')
             ->with('customer')
             ->with('tipoEstado')
@@ -130,6 +143,18 @@ class Show extends Component
         else {
             $this->secondTable = Pedidos::where('tech_id',$teammember->id)
             ->where('estado','!=','5')
+            ->where('estado','!=','2')
+            ->with('prioridadeStat')
+            ->with('customer')
+            ->with('tipoEstado')
+            ->with('tech')
+            ->with('servicesToDo')
+            ->with('location')
+            ->orderBy('prioridade','asc')
+            ->get();
+
+            $this->thirdTable = Pedidos::where('tech_id',$teammember->id)
+            ->where('estado','2')
             ->with('prioridadeStat')
             ->with('customer')
             ->with('tipoEstado')
@@ -141,6 +166,10 @@ class Show extends Component
     
         }
       
+    }
+
+    public function tableservice(){
+        $this->mount();
     }
 
     public function initializeArrays()
@@ -187,6 +216,17 @@ class Show extends Component
         if(Auth::user()->type_user == "0")
         {
             $this->secondTable = Pedidos::where('estado','!=','5')
+            ->where('estado','!=','2')
+            ->with('prioridadeStat')
+            ->with('customer')
+            ->with('tipoEstado')
+            ->with('tech')
+            ->with('servicesToDo')
+            ->with('location')
+            ->orderBy('prioridade','asc')
+            ->get();
+
+            $this->thirdTable = Pedidos::where('estado','2')
             ->with('prioridadeStat')
             ->with('customer')
             ->with('tipoEstado')
@@ -199,6 +239,7 @@ class Show extends Component
         else {
             $this->secondTable = Pedidos::where('tech_id',$teammember->id)
             ->where('estado','!=','5')
+            ->where('estado','!=','2')
             ->with('prioridadeStat')
             ->with('customer')
             ->with('tipoEstado')
@@ -207,6 +248,18 @@ class Show extends Component
             ->with('location')
             ->orderBy('prioridade','asc')
             ->get();
+
+            $this->thirdTable = Pedidos::where('tech_id',$teammember->id)
+            ->where('estado','2')
+            ->with('prioridadeStat')
+            ->with('customer')
+            ->with('tipoEstado')
+            ->with('tech')
+            ->with('servicesToDo')
+            ->with('location')
+            ->orderBy('prioridade','asc')
+            ->get();
+    
     
         }
     }
@@ -221,10 +274,10 @@ class Show extends Component
         if($pedido->estado != "7")
         {
          
-            if($checkIntervencaoUser != null)
-            {
-                return redirect()->route('tenant.tasks-reports.edit',["tasks_report" => $idPedido]);
-            }
+            // if($checkIntervencaoUser != null)
+            // {
+            //     return redirect()->route('tenant.tasks-reports.edit',["tasks_report" => $idPedido]);
+            // }
 
             $data_agendamento = $pedido->data_agendamento;
             $hora_agendamento = $pedido->hora_agendamento;
@@ -354,38 +407,59 @@ class Show extends Component
         $resposta = "";
 
 
-        if(empty($intervencoes))
-        {
-            $resposta = "abrir";
-        } else {
 
-            if($intervencoes->hora_final == "") {
-                if($pedido->estado == 2)
-                {
-                    $resposta = "concluida";
-                }
-                else {
-                    $resposta = "fechar";
-                }
-                
+        if(Auth::user()->type_user == "0")
+        {
+            $resposta = "concluida";
+        }
+        else 
+        {
+            if(empty($intervencoes))
+            {
+                $resposta = "abrir";
             } else {
-                if($pedido->estado == 2)
-                {
-                    $resposta = "concluida";
+    
+                if($intervencoes->hora_final == "") {
+                    if($pedido->estado == 2)
+                    {
+                        $resposta = "concluida";
+                    }
+                    else {
+                        $resposta = "fechar";
+                    }
+                    
+                } else {
+                    if($pedido->estado == 2)
+                    {
+                        $resposta = "concluida";
+                    }
+                    else {
+                        $resposta = "abrir";
+                    }
+                   
                 }
-                else {
-                    $resposta = "abrir";
-                }
-               
             }
+    
         }
 
+       
       
         $teammember = TeamMember::where('user_id',Auth::user()->id)->first();
         
         if(Auth::user()->type_user == "0")
         {
             $this->secondTable = Pedidos::where('estado','!=','5')
+            ->where('estado','!=',"2")
+            ->with('prioridadeStat')
+            ->with('customer')
+            ->with('tipoEstado')
+            ->with('tech')
+            ->with('servicesToDo')
+            ->with('location')
+            ->orderBy('prioridade','asc')
+            ->get();
+
+            $this->thirdTable = Pedidos::where('estado','2')
             ->with('prioridadeStat')
             ->with('customer')
             ->with('tipoEstado')
@@ -398,6 +472,7 @@ class Show extends Component
         else {
             $this->secondTable = Pedidos::where('tech_id',$teammember->id)
             ->where('estado','!=','5')
+            ->where('estado','!=','2')
             ->with('prioridadeStat')
             ->with('customer')
             ->with('tipoEstado')
@@ -406,6 +481,18 @@ class Show extends Component
             ->with('location')
             ->orderBy('prioridade','asc')
             ->get();
+
+            $this->thirdTable = Pedidos::where('tech_id',$teammember->id)
+            ->where('estado','2')
+            ->with('prioridadeStat')
+            ->with('customer')
+            ->with('tipoEstado')
+            ->with('tech')
+            ->with('servicesToDo')
+            ->with('location')
+            ->orderBy('prioridade','asc')
+            ->get();
+    
     
         }
       
@@ -508,6 +595,17 @@ class Show extends Component
         if(Auth::user()->type_user == "0")
         {
             $this->secondTable = Pedidos::where('estado','!=','5')
+            ->where('estado','!=',"2")
+            ->with('prioridadeStat')
+            ->with('customer')
+            ->with('tipoEstado')
+            ->with('tech')
+            ->with('servicesToDo')
+            ->with('location')
+            ->orderBy('prioridade','asc')
+            ->get();
+
+            $this->thirdTable = Pedidos::where('estado','2')
             ->with('prioridadeStat')
             ->with('customer')
             ->with('tipoEstado')
@@ -520,6 +618,18 @@ class Show extends Component
         else {
             $this->secondTable = Pedidos::where('tech_id',$teammember->id)
             ->where('estado','!=','5')
+            ->where('estado','!=','2')
+            ->with('prioridadeStat')
+            ->with('customer')
+            ->with('tipoEstado')
+            ->with('tech')
+            ->with('servicesToDo')
+            ->with('location')
+            ->orderBy('prioridade','asc')
+            ->get();
+
+            $this->thirdTable = Pedidos::where('tech_id',$teammember->id)
+            ->where('estado','2')
             ->with('prioridadeStat')
             ->with('customer')
             ->with('tipoEstado')
@@ -529,14 +639,16 @@ class Show extends Component
             ->orderBy('prioridade','asc')
             ->get();
     
+    
         }
       
-       
+        
+        $this->dispatchBrowserEvent("refreshserviceTable");
     }
 
     public function render()
     {
 
-        return view('tenant.livewire.dashboard.show',['servicesNotifications' => $this->servicesNotifications, 'openTimes' => $this->openTimes, 'pedidos' => $this->secondTable, 'customersRepository' => $this->customersRepository, 'customerLocationInterface' => $this->customerLocationInterface]);
+        return view('tenant.livewire.dashboard.show',['servicesNotifications' => $this->servicesNotifications, 'openTimes' => $this->openTimes, 'pedidos' => $this->secondTable, 'pedidosconcluidos' => $this->thirdTable,'customersRepository' => $this->customersRepository, 'customerLocationInterface' => $this->customerLocationInterface]);
     }
 }

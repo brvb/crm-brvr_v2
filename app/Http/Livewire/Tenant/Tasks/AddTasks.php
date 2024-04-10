@@ -10,6 +10,7 @@ use App\Events\ChatMessage;
 
 use App\Models\Tenant\Tasks;
 use Livewire\WithFileUploads;
+use App\Models\Tenant\Pedidos;
 use App\Models\Tenant\Services;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\Tenant\Customers;
@@ -17,6 +18,7 @@ use App\Events\Tasks\TaskCreated;
 use App\Models\Tenant\TeamMember;
 use App\Events\Tasks\TaskCustomer;
 use App\Models\Tenant\Prioridades;
+use App\Models\Tenant\PivotEstados;
 use App\Models\Tenant\SerieNumbers;
 use App\Models\Tenant\TiposPedidos;
 use Illuminate\Contracts\View\View;
@@ -29,12 +31,12 @@ use App\Models\Tenant\CustomerLocations;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Traits\GenerateTaskReference;
-use App\Interfaces\Tenant\Customers\CustomersInterface;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use Symfony\Component\HttpFoundation\Response;
 use App\Interfaces\Tenant\Tasks\TasksInterface;
+use App\Interfaces\Tenant\Customers\CustomersInterface;
 use App\Interfaces\Tenant\CustomerServices\CustomerServicesInterface;
-use App\Models\Tenant\Pedidos;
-use App\Models\Tenant\PivotEstados;
+use App\Models\Tenant\StampsClientes;
 
 class AddTasks extends Component
 {
@@ -56,6 +58,7 @@ class AddTasks extends Component
     public string $selectedServico = '';
     public ?object $servicosList = NULL;
     public string $serviceDescription = '';
+    public string $informacaoAdicional = '';
     public string $selectedEquipamentos = '';
     private ?object $equipamentosList = NULL;
 
@@ -171,9 +174,9 @@ class AddTasks extends Component
         $this->customersInterface = $customersInterface;
     }
 
-    public function mount($customerList): void
+    public function mount(): void
     {
-        $this->customerList = $customerList;
+
         $this->pedidosList = TiposPedidos::all();
         $this->servicosList = Services::all();
 
@@ -186,6 +189,10 @@ class AddTasks extends Component
         $this->coresObject = Prioridades::all();
 
         $this->alert_email = 0;
+
+        $customerStamps = StampsClientes::all();
+
+        $this->customerList = $customerStamps;
 
         // $this->anexosEquipamentosFromList = [];
 
@@ -419,6 +426,14 @@ class AddTasks extends Component
     public function atualizar_equipment()
     {
         $anexosEquipamento = [];
+
+        if(!Storage::exists(tenant('id') . '/app/public/pedidos/equipamentos_pedidos/'.$this->taskReference))
+        {
+            $caminhoImagess = storage_path('/app/public/pedidos/equipamentos_pedidos/'.$this->taskReference.'/');
+            mkdir($caminhoImagess, 0755, true);
+            // File::makeDirectory(tenant('id') . '/app/public/pedidos/equipamentos_pedidos/'.$this->taskReference, 0755, true, true);
+        }
+        
         if(!empty($this->arrayEquipamentoUploaded)){
             foreach($this->arrayEquipamentoUploaded as $img)
             {
@@ -642,8 +657,19 @@ class AddTasks extends Component
 
             $this->imagem = 'impressao'.$this->taskReference.'.pdf';
 
+
+            if(!Storage::exists(tenant('id') . '/app/public/pedidos/etiquetas/'.$this->taskReference))
+            {
+                // File::makeDirectory(tenant('id') . '/app/public/pedidos/etiquetas/'.$this->taskReference, 0755, true, true);
+                $caminhoImagesEt = storage_path('/app/public/pedidos/etiquetas/'.$this->taskReference.'/');
+                mkdir($caminhoImagesEt, 0755, true);
+            }
     
             Storage::put(tenant('id') . '/app/public/pedidos/etiquetas/'.$this->taskReference.'/etiqueta'.$this->taskReference.'.pdf',$content);
+
+
+            $this->dispatchBrowserEvent('downloadEvent', ['link' => "http://".$_SERVER['SERVER_NAME'].'/cl/'.tenant('id') . '/app/public/pedidos/etiquetas/'.$this->taskReference.'/etiqueta'.$this->taskReference.'.pdf']);
+        
         }
 
 
@@ -653,6 +679,19 @@ class AddTasks extends Component
         $this->pedido_id = $this->tasksInterface->createPedido($this);
 
         //GRAVA AS IMAGENS
+
+        if(!Storage::exists(tenant('id') . '/app/public/pedidos/imagens_pedidos/'.$this->taskReference))
+        {
+            // File::makeDirectory(tenant('id') . '/app/public/pedidos/imagens_pedidos/'.$this->taskReference, 0755, true, true);
+            $caminhoImages = storage_path('/app/public/pedidos/imagens_pedidos/'.$this->taskReference.'/');
+            mkdir($caminhoImages, 0755, true);
+        }
+        if(!Storage::exists(tenant('id') . '/app/public/pedidos/equipamentos_pedidos/'.$this->taskReference))
+        {
+            $caminhoEquipamentos = storage_path('/app/public/pedidos/equipamentos_pedidos/'.$this->taskReference.'/');
+            mkdir($caminhoEquipamentos, 0755, true);
+            // File::makeDirectory(tenant('id') . '/app/public/pedidos/equipamentos_pedidos/'.$this->taskReference, 0755, true, true);
+        }
         
         if(!empty($this->arrayFirstUploaded)){
             foreach($this->arrayFirstUploaded as $img)
@@ -674,7 +713,10 @@ class AddTasks extends Component
         //Checka o Nao enviar email de alerta se devo enviar email ou nao
         if($this->alert_email == 0)
         {
-            event(new TaskCustomer($this->pedido_id));
+            if($this->selectedPedido == 1 ){
+                event(new TaskCustomer($this->pedido_id));
+            }
+            
         }
 
 
@@ -695,7 +737,7 @@ class AddTasks extends Component
 
        
 
-        return redirect()->route('tenant.tasks.index')
+        return redirect()->route('tenant.dashboard')
             ->with('message', "Pedido criado com sucesso!")
             ->with('status', 'info');
      
@@ -842,14 +884,20 @@ class AddTasks extends Component
   
     public function render(): View
     {
-        $this->customerList = $this->customerServicesInterface->getAllCustomers();
+        // $this->customerList = $this->customerServicesInterface->getAllCustomers();
+
+        $customerStamps = StampsClientes::distinct()->get();
+
 
         $getClient = $this->customersInterface->getSpecificCustomerInfo($this->selectedCustomer);
-        // dd($getClient);
-        $this->equipamentosList = $this->tasksInterface->getEquipments($getClient->customers->no);
+
+        if(isset($getClient->customers->no))
+        {
+            $this->equipamentosList = $this->tasksInterface->getEquipments($getClient->customers->no);
+        } 
 
 
-        return view('tenant.livewire.tasks.add',["customerList" => $this->customerList, "customer" => $this->customer, "customerLocations" => $this->customerLocations, "customerInterface" => $this->customersInterface, "equipamentosList" => $this->equipamentosList]);
+        return view('tenant.livewire.tasks.add',["customerList" => $customerStamps, "customer" => $this->customer, "customerLocations" => $this->customerLocations, "customerInterface" => $this->customersInterface, "equipamentosList" => $this->equipamentosList]);
     }
 
 }

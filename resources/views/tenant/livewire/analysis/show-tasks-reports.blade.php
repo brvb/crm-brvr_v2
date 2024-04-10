@@ -44,12 +44,13 @@
                                 <div class="form-group">
                                     <label>{{__("Select Customer")}}</label>
                                     @php
-                                        $customers = $customersRepository->getAllCustomersCollection();
+                                        // $customers = $customersRepository->getAllCustomersCollection();
+                                        $customers = \App\Models\Tenant\StampsClientes::all();
                                     @endphp
                                     <select class="form-control" name="selectCustomer" id="selectCustomer" wire:model="client">
                                         <option value="0">{{__("All")}}</option>
-                                            @foreach ($customers->customers as $customer)
-                                                <option value={{$customer->id}}>{{$customer->name}}</option> 
+                                            @foreach ($customers as $customer)
+                                                <option value={{$customer->stamp}}>{{$customer->nome_cliente}}</option> 
                                             @endforeach
                                     </select>
                                 </div>
@@ -164,7 +165,7 @@
                         <th>{{ __('Date') }}</th>
                         <th>{{ __('County') }}</th>
                         <th>{{ __('Estado do Pedido') }}</th>
-                        <th>Horas Gastas</th>
+                        <th>Tempo Gasto</th>
                         @if(Auth::user()->type_user !="2")
                             <th>{{ __('Action') }}</th>
                         @endif
@@ -187,7 +188,7 @@
                                 @endphp
                                 {{ $customer->customers->name }}
                             </td>
-                            <td>{{ $item->servicesToDo->name}}</td>
+                            <td>{{ $item->descricao}}</td>
                             <td>{{ $item->tech->name }}</td>
                             <td>
                                 @if($item->data_agendamento != "")
@@ -211,7 +212,7 @@
                             <td>
                                 @php
                                     $intervencoes = \App\Models\Tenant\Intervencoes::where('id_pedido',$item->id)->where('data_inicio','!=',null)->get();
-                                    
+                                    $minutosSomados = 0;
                                     $somaDiferencasSegundos = 0;
 
                                     $arrHours= [];
@@ -220,87 +221,47 @@
 
                                     foreach($intervencoes as $hora)
                                     {
-            
-                                        // $data1 = Carbon\Carbon::parse($hora->hora_inicio);
-                                        // $data2 = Carbon\Carbon::parse($hora->hora_final);
-                                        // $result = $data1->diff($data2)->format("%h.%i");
-                                        // $hours = date("H:i",strtotime($result));
-
-                                        // array_push($arrHours,$hours);
-
+                                                 
                                         $somaDiferencasSegundos = 0;
                                         $horaFormatada = "";
 
                                         $dia_inicial = $hora->data_inicio.' '.$hora->hora_inicio;
-                                        $dia_final = $hora->data_final.' '.$hora->hora_final;
+                                        $dia_final = $hora->data_inicio.' '.$hora->hora_final;
 
                                         $data1 = Carbon\Carbon::parse($dia_inicial);
                                         $data2 = Carbon\Carbon::parse($dia_final);
 
                            
-                                        $result = $data1->diff($data2);
+                                        $result = $data1->diffInMinutes($data2);
 
-                                        $hours = $result->days * 24 + $result->h;
-                                        $minutes = $result->i;
-                        
-  
-                                        $hoursMinutesDifference = sprintf('%d:%02d', $hours, $minutes);
+                                      //*****PARTE A DESCONTAR********/
 
-
-                                        $arrHours[$hora->id] = [
-                                            "valor" => $hoursMinutesDifference,
-                                            "descontos" => $hora->descontos
-                                        ];
-                                        // array_push($arrHours,$hoursMinutesDifference);
-
-
-                                    }
-
-                                    $arrDescontado = [];
-
-                                    foreach($arrHours as $hora)
-                                    {
-                                        if($hora["descontos"] == null)
+            
+                                        if($hora->descontos == null)
                                         {
-                                            $hora["descontos"] = "+0";
+                                            $hora->descontos = "+0";
                                         }
 
-                                        $valorOriginal = $hora["valor"]; // Exemplo de valor original em horas
+                                    
+                                        $minutosSomados += $result;
 
-                                       
-                                        list($horas, $minutos) = explode(':', $valorOriginal);
-
-                                  
-                                        $valorEmHorasDecimais = $horas + ($minutos / 60);
-
-                                        if($hora["descontos"][0] == "+"){
-                                            $novoValorEmHorasDecimais = $valorEmHorasDecimais + substr($hora["descontos"], 1);
+                                        if($hora["descontos"][0] == "+"){ 
+                                            $minutosSomados += substr($hora->descontos, 1);
+                                        } 
+                                        else { 
+                                            $minutosSomados -= substr($hora->descontos, 1);
                                         }
-                                        else {
-                                            $novoValorEmHorasDecimais = $valorEmHorasDecimais - substr($hora["descontos"], 1);
-                                        }
-                                       
                                     
-                                        $novoValorEmHorasDecimais = max(0, $novoValorEmHorasDecimais);
+                                        /*********************** */           
 
-                                    
-                                        $novoHoras = floor($novoValorEmHorasDecimais);
-                                        $novoMinutos = ($novoValorEmHorasDecimais - $novoHoras) * 60;
-
-                                    
-                                        $novoValor = sprintf('%d:%02d', $novoHoras, $novoMinutos);
-
-                                        array_push($arrDescontado,$novoValor);
 
                                     }
 
-                                    $horas = global_hours_sum_individual($arrDescontado);
-                               
-                               
+                                                                
 
                                 @endphp
-                                    {{-- {{json_encode($arrDescontado)}} --}}
-                                    {{$horas}}
+                                    
+                                    {{$minutosSomados}} min
                             </td>
                            
                             <td>

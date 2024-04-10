@@ -129,6 +129,7 @@ class EditCustomerlocations extends Component
     {
         $id_customerLocation = $this->customerLocation;
         $customerList = $this->customerList;
+
         return view('tenant.livewire.customerlocations.edit',compact('id_customerLocation','customerList'));
     }
 

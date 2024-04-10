@@ -15,12 +15,12 @@
             <a class="nav-link {{ $techPanel }}" data-toggle="tab" href="#techPanel"><i
                     class="flaticon-381-calendar mr-2"></i> Agendamento</a>
         </li>
-        @if($taskToUpdate->estado == "2" || $taskToUpdate->estado == "5")
+        {{-- @if($taskToUpdate->estado == "2" || $taskToUpdate->estado == "5") --}}
             <li class="nav-item">
                 <a class="nav-link {{ $intervencoesPanel }}" data-toggle="tab" href="#intervencoesPanel"><i
                         class="la la-file mr-2"></i> Intervenções</a>
             </li>
-        @endif
+        {{-- @endif --}}
     </ul>
     <div class="tab-content">
         <div class="tab-pane fade {{ $homePanel }}" id="homePanel" role="tabpanel">
@@ -38,14 +38,15 @@
                                         <div class="col-12">
                                             <div class="row form-group">
                                                 @php
-                                                    $customerList = $customersInterface->getAllCustomersCollection();
+                                                    // $customerList = $customersInterface->getAllCustomersCollection();
+                                                    $customerList = \App\Models\Tenant\StampsClientes::all();
                                                 @endphp
                                                 <section class="col" style="margin-top:20px;" wire:ignore>
                                                     <label>{{ __('Customer Name') }}</label>
                                                     <select name="selectedCustomer" id="selectedCustomer">
                                                         <option value="">{{ __('Select customer') }}</option>
-                                                        @forelse ($customerList->customers as $item)
-                                                            <option @if(isset($selectedCustomer)) @if($item->id == $selectedCustomer) selected @endif @endif value="{{ $item->id }}">{{ $item->nif }} | {{ $item->name }}</option>
+                                                        @forelse ($customerList as $item)
+                                                            <option @if(isset($selectedCustomer)) @if($item->stamp == $selectedCustomer) selected @endif @endif value="{{ $item->stamp }}">{{ $item->nome_cliente }}</option>
                                                         @empty
                                                         @endforelse
                                                     </select>
@@ -64,10 +65,34 @@
                                                            <label>Tipo de Contrato:</label>
                                                            <input type="text" value="{{ $customer->customers->type}}" class="form-control" readonly>
                                                        </section>
+                                                       @if($customer->customers->type == "Avença")
                                                        <section class="col-xl-4 col-xs-12">
-                                                           <label>Horas:</label>
-                                                           <input type="text" value="{{ date('H:i',strtotime($customer->customers->hours_spent)) }}" class="form-control" readonly>
+                                                           <label>Minutos:</label>
+                                                           <input type="text" value="{{$customer->customers->balance_hours}}" class="form-control" readonly>
+                                                       
+                                                                                                                  
+                                                       
                                                        </section>
+                                                       @elseif($customer->customers->type == "Bolsa de Horas")
+                                                           <section class="col-xl-2 col-xs-12">
+                                                               <label>Minutos disponiveis:</label>
+                                                           
+                                                               <input type="text" value="{{$customer->customers->balance_hours}}" class="form-control" readonly>
+                                                       
+                                                           </section>
+   
+                                                           <section class="col-xl-2 col-xs-12">
+                                                               <label>Gasto no Mês:</label>
+                                                               <input type="text" value="{{ $customer->customers->hours_spent}}" class="form-control" readonly>
+                                                           </section>
+                                                       @else
+   
+                                                       <section class="col-xl-4 col-xs-12">
+                                                           <label>Gasto no Mês:</label>
+                                                           <input type="text" value="{{ $customer->customers->hours_spent}}" class="form-control" readonly>
+                                                       </section>
+                                                          
+                                                       @endif
                                                        <section class="col-xl-4 col-xs-12">
                                                            <label>Conta Corrente:</label>
                                                            <input type="text" value="{{ $customer->customers->current_account}}" class="form-control" readonly>
@@ -200,6 +225,16 @@
                                             class="form-control serviceDesription" id="serviceDescription"
                                             wire:model.defer="serviceDescription"
                                             rows="4" @if($taskToUpdate->estado == "6") disabled @endif>@if(isset($serviceDescription)) {{$serviceDescription}} @endif</textarea>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <label>Informações adicionais</label>
+                                            <textarea name="informacaoAdicional"
+                                            class="form-control informacaoAdicional" id="informacaoAdicional"
+                                            wire:model.defer="informacaoAdicional"
+                                            rows="4">@if(isset($informacaoAdicional)) {{$informacaoAdicional}} @endif</textarea>
                                         </div>
                                     </div>
 
@@ -680,7 +715,7 @@
         </div>
     </div>
 
-    @if($taskToUpdate->estado == "2" || $taskToUpdate->estado == "5")
+    {{-- @if($taskToUpdate->estado == "2" || $taskToUpdate->estado == "5") --}}
     <div class="tab-pane fade {{ $intervencoesPanel }}" id="intervencoesPanel" role="tabpanel">
         <div class="row">
             <div class="col-12">
@@ -692,7 +727,7 @@
             </div>
         </div>
     </div>
-    @endif
+    {{-- @endif --}}
     </div>
    
     <div class="card" style="display: table-cell;width:100vw;">
@@ -1050,7 +1085,7 @@
            
             function formatState (state) {
 
-                var base_url = "https://suporte.brvr.pt/cl/7f3a1b73-d8ae-464f-b91e-2a3f8163bdfb/app/public/tasks_colors";
+                var base_url = "https://suporte.brvr.pt/cl/brv2-7f3a1b73-d8ae-464f-b91e-2a3f8163bdfb/app/public/tasks_colors";
     
                 if (!state.id) {
                     return state.text;

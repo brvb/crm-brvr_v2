@@ -85,7 +85,7 @@ class AlertCheckFinalizados extends Mailable
                 "email" => $config->email,
                 "address" =>$config->address,
                 "logotipo" => $config->logotipo,
-            ]);
+            ])->bcc(['bruno@brvr.pt']);
 
         return $email;
     }

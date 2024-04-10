@@ -98,21 +98,21 @@
                                             </div>
                                         </section>
                                         <section class="form-group row">
-                                            <div class="col-xl-2 col-xs-12">
+                                            <div class="col-xl-4 col-xs-12">
                                                 <label>{{ __('Location Zip Code') }}</label>
                                                 <input type="text" name="zipcode" id="zipcode" class="form-control" @if(null
                                                     !==old('zipcode'))value="{{ old('zipcode') }}" @endisset
                                                     placeholder="{{ __('Zip Code') }}" wire:model.defer="zipcode">
                                             </div>
 
-                                            <div class="col-xl-2 col-xs-12">
+                                            <div class="col-xl-4 col-xs-12">
                                                 <label>Distrito</label>
                                                 <input type="text" name="district" id="district" class="form-control" @if(null
                                                     !==old('district'))value="{{ old('district') }}" @endisset
                                                     placeholder="Distrito" wire:model.defer="district">
                                             </div>
 
-                                            <div class="col-xl-2 col-xs-12">
+                                            <div class="col-xl-4 col-xs-12">
                                                 <label>Cidade</label>
                                                 <input type="text" name="county" id="county" class="form-control" @if(null
                                                     !==old('county'))value="{{ old('county') }}" @endisset
@@ -120,6 +120,23 @@
                                             </div>
                                         
                                         </section>
+                                        <div class="form-group row">
+                                            <section class="col-xl-6 col-xs-12">
+                                                <label>{{ __('Latitude') }}</label>
+                                                <input type="text" name="latitude" id="latitude" class="form-control"
+                                                    @isset($latitude)value="{{ $latitude }}" @endisset
+                                                    @if(null !== old('latitude'))value="{{ old('latitude') }}"@endisset
+                                                    placeholder="Latitude">
+                                            </section>
+    
+                                            <section class="col-xl-6 col-xs-12">
+                                                <label>{{ __('Longitude') }}</label>
+                                                <input type="text" name="longitude" id="longitude" class="form-control"
+                                                    @isset($longitude)value="{{ $longitude }}" @endisset
+                                                    @if(null !== old('longitude'))value="{{ old('longitude') }}"@endisset
+                                                    placeholder="{{ __('Longitude') }}">
+                                            </section>
+                                        </div>
                                 
                                 </div>
                             </div>
@@ -134,14 +151,15 @@
                     <div class="card" style="border-top-left-radius: 0px; border-top-right-radius: 0px;">
                         <div class="card-body">
                             <div class="basic-form">
+           
                                 
                                 <div id="map"></div><br>
                                 @if(isset($latitude))
-                                    <span id="latitude" style="display:none;">{{ $latitude }}</span>
+                                    <span id="latitudeMap" style="display:none;">{{ $latitude }}</span>
                                 @endif
 
                                 @if(isset($longitude))
-                                 <span id="longitude" style="display:none;">{{ $longitude }}</span>
+                                 <span id="longitudeMap" style="display:none;">{{ $longitude }}</span>
                                 @endif
                                 <button type="button" class="btn btn-primary" id="googleMaps">Google Maps</button>
                         </div>
@@ -187,14 +205,15 @@
 
             var startPoint = [41.3729345, -8.7531294];
 
+           
             //VOU RECEBER DO VINICIUS
-            
-            if(jQuery("#latitude").text() == 0 && jQuery("#longitude").text() == 0)
+            if(jQuery("#latitudeMap").text() == 0 && jQuery("#longitudeMap").text() == 0)
             {
                 var endPoint = [41.3729345, -8.7531294];
             } else 
             {
-                var endPoint = [jQuery("#latitude").text(), jQuery("#longitude").text()];
+                var endPoint = [jQuery("#latitudeMap").text(), jQuery("#longitudeMap").text()];
+                
             }
             
 
@@ -216,6 +235,7 @@
             {
                 startPoint = [41.3729345, -8.7531294];
             }
+
 
                
                 var map = L.map('map').setView(endPoint, 12);

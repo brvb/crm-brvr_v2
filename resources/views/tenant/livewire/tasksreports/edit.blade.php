@@ -39,7 +39,7 @@
                                                     @if($horasAtuais == "[]") 
                                                     0 
                                                     @else 
-                                                    {{$horasAtuais}} 
+                                                    {{$horasAtuais}} min
                                                     @endif
                                                 </h4>
                                                 
@@ -50,86 +50,96 @@
                                                 <label>Descrição do Pedido</label>
                                                 <textarea class="form-control" rows="4" cols="50" name="notes" id="notes"  disabled>@if($task->descricao != null){{$task->descricao}}@endif</textarea>
                                             </section>
+
+                                            <section class="col-xl-12 col-xs-12 mb-2">
+                                                <label>Produtos?</label>
+                                                <input type="checkbox" id="verificaProdutos" wire:model="verificaProdutos">
+                                            </section>
                                            
-                                            <section class="col-xl-12 col-xs-12 form-group">
-                                            
-                                                @if(!empty($arrayProdutos))
-                                            
-                                                    <div class="form-group row">
-                                                        <section class="col-xl-12 col-xs-12 form-group">
-                                                            <table class="table">
-                                                                <thead style="background:lightgray;">
-                                                                    <tr>
-                                                                        <th>Referência</th>
-                                                                        <th>Designação</th>
-                                                                        <th>Quantidade</th>
-                                                                        <th>Ação</th>
-                                                                    </tr>
-                                                                </thead>
-                                                                <tbody>
-                                                                    
-                                                                    @foreach ($arrayProdutos as $i => $prod )
+                                           
+                                                <section class="col-xl-12 col-xs-12 form-group">
+                                                
+                                                    @if(!empty($arrayProdutos))
+                                                
+                                                        <div class="form-group row">
+                                                            <section class="col-xl-12 col-xs-12 form-group">
+                                                                <table class="table">
+                                                                    <thead style="background:lightgray;">
                                                                         <tr>
-                                                                            <td>
-                                                                                {{ $prod["referencia"] }}
-                                                        
-                                                                            </td>
-                                                                            <td>
-                                                                               
-                                                                                @if( $prod["referencia"] == "")
-                                                                                
-                                                                                <input class="form-control" type="text" name="designacao_intervencao"  wire:model.defer="designacao_intervencao.{{$i}}.description">
-                                                                                @else
-                                                                                {{$arrayDesignacoes[$i]["description"]}}
-                                                                                {{-- {{ $arrayDesignacoes[$i] }} --}}
-                                                                                                  
-                                                                                @endif
-                                                                                
-                                                                                {{-- <textarea class="form-control" rows="4" cols="50" name="referencia_intervencao"  wire:model.defer="referencia_intervencao.{{$i}}"></textarea> --}}
-                                                                            </td>
-                                                                            <td>
-                                                                                <input class="form-control" type="number"  wire:model.defer="quantidade_intervencao.{{$i}}">
-                                                                            </td>
-                                                                            <td>
-                                                                                <button type="button" class="btn btn-primary" wire:click="removeProduto({{$i}})">Remover</button>
-                                                                            </td>
+                                                                            <th>Referência</th>
+                                                                            <th>Designação</th>
+                                                                            <th>Quantidade</th>
+                                                                            <th>Ação</th>
                                                                         </tr>
-                                                                    @endforeach
-                                                                </tbody>
-                                                            </table>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        
+                                                                        @foreach ($arrayProdutos as $i => $prod )
+                                                                            <tr>
+                                                                                <td>
+                                                                                    {{ $prod["referencia"] }}
+                                                            
+                                                                                </td>
+                                                                                <td>
+                                                                                
+                                                                                    @if( $prod["referencia"] == "")
+                                                                                    
+                                                                                    <input class="form-control" type="text" name="designacao_intervencao"  wire:model.defer="designacao_intervencao.{{$i}}.description">
+                                                                                    @else
+                                                                                    {{$arrayDesignacoes[$i]["description"]}}
+                                                                                    {{-- {{ $arrayDesignacoes[$i] }} --}}
+                                                                                                    
+                                                                                    @endif
+                                                                                    
+                                                                                    {{-- <textarea class="form-control" rows="4" cols="50" name="referencia_intervencao"  wire:model.defer="referencia_intervencao.{{$i}}"></textarea> --}}
+                                                                                </td>
+                                                                                <td>
+                                                                                    <input class="form-control" type="number"  wire:model.defer="quantidade_intervencao.{{$i}}">
+                                                                                </td>
+                                                                                <td>
+                                                                                    <button type="button" class="btn btn-primary" wire:click="removeProduto({{$i}})">Remover</button>
+                                                                                </td>
+                                                                            </tr>
+                                                                        @endforeach
+                                                                    </tbody>
+                                                                </table>
+                                                            </section>
+                                                        </div>
+                                                    @endif
+
+                                                
+                                                </section>
+
+                                                <section class="col-xl-12 col-xs-12 form-group" id="produtosDIV">
+                                                
+                                                    <div class="form-group row" style="display:flex;margin-right:0px;justify-content:end;">
+                                                        <button type="button" class="btn btn-secondary" wire:click="adicionaProduto">Adiciona Produto</button>
+                                                    </div>
+                                                    
+                                                    <div class="form-group row">
+                                                        <section class="col-xl-12 col-xs-12 form-group">  
+                                                            <label>Produtos:</label>                                 
+                                                            <select name="selectedProdutos" id="selectedProdutos">
+                                                                <option value="">Selecione Produto</option>
+                                                                 @if(isset($produtos))
+                                                                    @forelse ($produtos as $item)
+                                                                        <option value="{{ $item->reference }}">{{ $item->reference }} | {{ $item->description }}</option>
+                                                                    @empty
+                                                                    @endforelse
+                                                                 @endif
+                                                            </select>
                                                         </section>
                                                     </div>
-                                                @endif
+                                                    <div class="form-group row">
+                                                        <section class="col-xl-12 col-xs-12 form-group">
+                                                            <label>Descrição</label>
+                                                            <textarea class="form-control" rows="4" cols="50" name="descricao_intervencao" id="descricao_intervencao" wire:model.defer="descricao_intervencao"></textarea>
+                                                        </section>
+                                                        
+                                                    </div>
+                                                </section>
+                                          
 
-                                              
-                                            </section>
-
-                                            <section class="col-xl-12 col-xs-12 form-group">
-                                              
-                                                <div class="form-group row" style="display:flex;margin-right:0px;justify-content:end;">
-                                                    <button type="button" class="btn btn-secondary" wire:click="adicionaProduto">Adiciona Produto</button>
-                                                </div>
-                                                
-                                                <div class="form-group row">
-                                                    <section class="col-xl-12 col-xs-12 form-group">  
-                                                        <label>Produtos:</label>                                 
-                                                        <select name="selectedProdutos" id="selectedProdutos">
-                                                            <option value="">Selecione Produto</option>
-                                                                @forelse ($produtos->products as $item)
-                                                                    <option value="{{ $item->reference }}">{{ $item->reference }} | {{ $item->description }}</option>
-                                                                @empty
-                                                                @endforelse
-                                                        </select>
-                                                    </section>
-                                                </div>
-                                                <div class="form-group row">
-                                                    <section class="col-xl-12 col-xs-12 form-group">
-                                                        <label>Descrição</label>
-                                                        <textarea class="form-control" rows="4" cols="50" name="descricao_intervencao" id="descricao_intervencao" wire:model.defer="descricao_intervencao"></textarea>
-                                                    </section>
-                                                    
-                                                </div>
-                                            </section>
             
                                             <section class="col-12 form-group" wire:ignore>
                                                 <label>Estado do Pedido</label>
@@ -155,14 +165,43 @@
                                             @if($selectedEstado != "7")
 
                                             <div class="container-fluid" style="display:{{$descricaoPanel}};position: relative;border:1px solid #49748fec;padding: 10px;border-radius:6px;margin-top:20px;">
+                                                
+                                                <section class="col-xl-12 col-xs-12" wire:ignore>
+                                                    <label>{{ __('Nível de prioridade') }}</label>
+                                                    <select name="prioridadeColors" id="prioridadeColors" wire:model.defer="selectPrioridade" class="form-control">
+                                                            <option value="0">Não mudar</option>
+                                                        @foreach ($coresObject as $cor)
+                                                            <option style="background:{{$cor->cor}};" value="{{$cor->id}}">
+                                                                
+                                                                {{ $cor->nivel}}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                </section>
+
                                                 <div class="inner-text" style="position: absolute;top: 0%;left: 50%;transform: translate(-50%, -50%);background:white;">
                                                     <h4>Descrição da Intervenção</h4>
                                                 </div>
 
-                                                <section class="col-xl-12 col-xs-12 form-group">
+                                                <section class="col-xl-12 col-xs-12 form-group mt-2">
                                                     <label>Descrição</label>
                                                     <textarea class="form-control" rows="4" cols="50" name="descricaoRealizado" id="descricaoRealizado" wire:model.defer="descricaoRealizado"></textarea>
                                                 </section>
+
+                                                @if($selectedEstado == "2")
+                                                    <section class="col-xl-12 col-xs-12 form-group">
+                                                        <label>Selecione Sinal</label>
+                                                        <select name="selectSignal" id="selectSignal" wire:model.defer="selectSignal" class="form-control">
+                                                            <option value="+" selected>+</option>
+                                                            <option value="-">-</option>
+                                                        </select>
+                                                    </section>
+
+                                                    <section class="col-xl-12 col-xs-12 form-group">
+                                                        <label>Tempo</label>
+                                                        <input type='number' id='horaFinal' wire:model.defer="horaFinal" class='form-control'>
+                                                    </section>
+                                                @endif
 
                                                 <section class="col-xl-12 col-xs-12 form-group">
                                                     <div class="row form-group">
@@ -213,6 +252,7 @@
                                                     </div>
                                                 </section>
 
+                                                
                                                 
                                                 <section class="col-xl-12 col-xs-12 form-group" style="display:{{$signaturePad}}">
                                                     <div class="container text-center" style="margin-top: 0">
@@ -328,7 +368,7 @@
             }
             
                     
-
+            jQuery('#selectedProdutos').select2();
 
 
             Livewire.emit("teste",cliente,tecnico);
@@ -379,6 +419,36 @@
                 }
                 
             });
+
+            function formatState (state) {
+
+                var base_url = "https://suporte.brvr.pt/cl/brv2-7f3a1b73-d8ae-464f-b91e-2a3f8163bdfb/app/public/tasks_colors";
+
+                if (!state.id) {
+                    return state.text;
+                }
+
+                var $state = $(
+                    '<span><img src="' + base_url + '/' + state.id + '.png" class="img-flag" style="width:30px;" /> ' + state.text + '</span>'
+                );
+
+
+                return $state;
+            };
+
+
+
+            @this.set('selectPrioridade',0,true);
+
+            jQuery('#prioridadeColors').select2({
+                templateResult: formatState,
+                templateSelection: formatState
+            });
+
+
+            jQuery("#prioridadeColors").on("select2:select", function (e) {
+                @this.set('selectPrioridade', jQuery('#prioridadeColors').find(':selected').val(), true)
+            });
         });
 
         jQuery("#uploadFile").change(function (){
@@ -406,11 +476,7 @@
           
         });
 
-        
-    
 
-
-      
 
     </script>
     @endpush

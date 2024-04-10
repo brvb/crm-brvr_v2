@@ -18,12 +18,16 @@ use App\Models\Tenant\EstadoPedido;
 use App\Models\Tenant\Intervencoes;
 use App\Models\Tenant\PivotEstados;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use App\Interfaces\Tenant\Tasks\TasksInterface;
 use App\Interfaces\Tenant\Customers\CustomersInterface;
 use App\Interfaces\Tenant\TasksTimes\TasksTimesInterface;
 use App\Interfaces\Tenant\TasksReports\TasksReportsInterface;
+use App\Models\Tenant\TeamMember;
+use App\Models\Tenant\Prioridades;
+use App\Models\Tenant\ProdutosPHC;
 
 class EditTasksReports extends Component
 {
@@ -58,9 +62,14 @@ class EditTasksReports extends Component
     public $signatureTecnico;
     public $email_pdf;
 
+    public string $selectSignal = "+";
+    public int $horaFinal = 0;
+
     public $loading;
     
     public ?object $taskTimes =  NULL;
+
+    public ?object $coresObject = NULL;
 
     public int $reportInfo  = 1;
 
@@ -69,6 +78,12 @@ class EditTasksReports extends Component
     public bool $changed = false;
 
     public array $array_produtos = [];
+
+    public ?object $produtos = NULL;
+
+    public ?int $selectPrioridade;
+
+    public int $verificaProdutos;
 
     protected $listeners = ['resetChanges' => 'resetChanges', 'signaturePads' => 'signaturePads','signaturePadsClear' => 'signaturePadsClear','teste' => 'teste'];
 
@@ -99,7 +114,7 @@ class EditTasksReports extends Component
         })->get();
 
 
-
+        // $this->produtos = ProdutosPHC::all();
 
         // $this->statesPedido = EstadoPedido::all();
 
@@ -114,70 +129,47 @@ class EditTasksReports extends Component
 
         $arrHours[$this->task->id] = [];
 
+        $minutosSomados = 0;
+
         foreach($horas as $hora)
         {
             
             $dia_inicial = $hora->data_inicio.' '.$hora->hora_inicio;
-            $dia_final = $hora->data_final.' '.$hora->hora_final;
+            $dia_final = $hora->data_inicio.' '.$hora->hora_final;
 
             $data1 = Carbon::parse($dia_inicial);
             $data2 = Carbon::parse($dia_final);
 
-            $result = $data1->diff($data2);
-
-            $hours = $result->days * 24 + $result->h;
-            $minutes = $result->i;
-
-            $hoursMinutesDifference = sprintf('%d:%02d', $hours, $minutes);
+            $result = $data1->diffInMinutes($data2);
 
            
 
             //*****PARTE A DESCONTAR********/
 
-            $valorOriginal = $hoursMinutesDifference;
-
-            list($horas, $minutos) = explode(':', $valorOriginal);
-
-            $valorEmHorasDecimais = $horas + ($minutos / 60);
-
-            if(!isset($hora->descontos[0]))
+            
+            if($hora->descontos == null)
             {
-                $sinal = "+";
-            }
-            else {
-                $sinal = $hora->descontos[0];
+                $hora->descontos = "+0";
             }
 
-            if($hora->descontos == "")
-            {
-                $hora->descontos = "+0";  
+          
+            $minutosSomados += $result;
+
+            if($hora["descontos"][0] == "+"){ 
+                $minutosSomados += substr($hora->descontos, 1);
+            } 
+            else { 
+                $minutosSomados -= substr($hora->descontos, 1);
             }
-
-
-
-            if($sinal == "+"){
-                $novoValorEmHorasDecimais = $valorEmHorasDecimais + substr($hora->descontos, 1);
-            }
-            else {
-                $novoValorEmHorasDecimais = $valorEmHorasDecimais - substr($hora->descontos, 1);
-            }
-        
-            $novoValorEmHorasDecimais = max(0, $novoValorEmHorasDecimais);
-
-            $novoHoras = floor($novoValorEmHorasDecimais);
-            $novoMinutos = ($novoValorEmHorasDecimais - $novoHoras) * 60;
-
-            $novoValor = sprintf('%d:%02d', $novoHoras, $novoMinutos);
-
-            /*********************** */
-
-            array_push($arrHours[$this->task->id],$novoValor);
+          
+            /*********************** */           
 
         }
 
 
 
-        $this->horasAtuais = global_hours_sum($arrHours);
+
+        $this->horasAtuais = $minutosSomados;
 
 
 
@@ -188,6 +180,12 @@ class EditTasksReports extends Component
         }
         
      
+    }
+
+    public function updatedVerificaProdutos()
+    {
+        $this->produtos = ProdutosPHC::all();
+        $this->dispatchBrowserEvent("reloadProdutos");
     }
 
     public function removeProduto($i)
@@ -254,9 +252,11 @@ class EditTasksReports extends Component
         if($this->selectedEstado != "7")
         {
             $this->descricaoPanel="block";
+
         } else {
             $this->descricaoPanel="none";
         }
+
 
         $this->dispatchBrowserEvent("reloadProdutos");
         
@@ -309,13 +309,19 @@ class EditTasksReports extends Component
      */
     public function addIntervention()
     {
-
         $config = Config::first();
 
         if($this->horasAlterado != "")
         {
             Pedidos::where('id',$this->task->id)->update([
                 "horas_alterado" => $this->horasAlterado
+            ]);
+        }
+
+        if($this->selectPrioridade != 0)
+        {
+            Pedidos::where('id',$this->task->id)->update([
+                "prioridade" => $this->selectPrioridade
             ]);
         }
 
@@ -363,6 +369,16 @@ class EditTasksReports extends Component
                 $this->dispatchBrowserEvent('swal', ['title' => "Intervenção", 'message' => "Tem de abrir intervenção antes poder fechar", 'status'=>'error']);
                 return false;
             }
+
+            $pedidoSpec = Pedidos::where('id',$this->task->id)->first();
+
+            $memberSpec = TeamMember::where('id',$pedidoSpec->tech_id)->first();
+
+            if($memberSpec->user_id != Auth::user()->id)
+            {
+                $this->dispatchBrowserEvent('swal', ['title' => "Intervenção", 'message' => "Não pode concluir um pedido que não lhe pertence", 'status'=>'error']);
+                return false;
+            }
            
         }
 
@@ -408,6 +424,13 @@ class EditTasksReports extends Component
             }
             $this->dispatchBrowserEvent('swal', ['title' => "Intervenção", 'message' => $errorMessage, 'status'=>'error']);
             return;
+        }
+
+        if(!Storage::exists(tenant('id') . '/app/public/pedidos/intervencoes_anexos/'.$this->task->id))
+        {
+            $caminhoImagesss = storage_path('/app/public/pedidos/intervencoes_anexos/'.$this->task->id.'/');
+            mkdir($caminhoImagesss, 0755, true);
+            // File::makeDirectory(tenant('id') . '/app/public/pedidos/intervencoes_anexos/'.$this->task->id, 0755, true, true);
         }
 
 
@@ -477,76 +500,70 @@ class EditTasksReports extends Component
        
         $this->tasksInterface->addIntervencao($this);
 
+        if($this->selectedEstado == "2")
+        {
+            $intervencao = Intervencoes::where('id_pedido',$this->task->id)->where("data_final","!=",null)->where('estado_pedido',2)->latest()->first();
+
+            Intervencoes::where('id',$intervencao->id)->update([
+                "descontos" => $this->selectSignal.$this->horaFinal,
+            ]);
+        }
+       
+
         $horas = Intervencoes::where('id_pedido',$this->task->id)->where("data_final","!=",null)->get();
 
         $somaDiferencasSegundos = 0;
 
         $arrHours[$this->task->id] = [];
 
+        $minutosSomados = 0;
+
 
         foreach($horas as $hora)
         {
             
             $dia_inicial = $hora->data_inicio.' '.$hora->hora_inicio;
-            $dia_final = $hora->data_final.' '.$hora->hora_final;
+            $dia_final = $hora->data_inicio.' '.$hora->hora_final;
 
             $data1 = Carbon::parse($dia_inicial);
             $data2 = Carbon::parse($dia_final);
 
-            $result = $data1->diff($data2);
-
-            $hours = $result->days * 24 + $result->h;
-            $minutes = $result->i;
-
-            $hoursMinutesDifference = sprintf('%d:%02d', $hours, $minutes);
+            $result = $data1->diffInMinutes($data2);
 
            
 
             //*****PARTE A DESCONTAR********/
 
-            $valorOriginal = $hoursMinutesDifference;
-
-            list($horas, $minutos) = explode(':', $valorOriginal);
-
-            $valorEmHorasDecimais = $horas + ($minutos / 60);
-
-
-            if(!isset($hora->descontos[0]))
+            
+            if($hora->descontos == null)
             {
-                $sinal = "+";
-            }
-            else {
-                $sinal = $hora->descontos[0];
+                $hora->descontos = "+0";
             }
 
-            if($hora->descontos == "")
-            {
-                $hora->descontos = "+0";  
+          
+            $minutosSomados += $result;
+
+            if($hora["descontos"][0] == "+"){ 
+                $minutosSomados += substr($hora->descontos, 1);
+            } 
+            else { 
+                $minutosSomados -= substr($hora->descontos, 1);
             }
-
-            if($sinal == "+"){
-                $novoValorEmHorasDecimais = $valorEmHorasDecimais + substr($hora->descontos, 1);
-            }
-            else {
-                $novoValorEmHorasDecimais = $valorEmHorasDecimais - substr($hora->descontos, 1);
-            }
-        
-            $novoValorEmHorasDecimais = max(0, $novoValorEmHorasDecimais);
-
-            $novoHoras = floor($novoValorEmHorasDecimais);
-            $novoMinutos = ($novoValorEmHorasDecimais - $novoHoras) * 60;
-
-            $novoValor = sprintf('%d:%02d', $novoHoras, $novoMinutos);
-
-            /*********************** */
-
-            array_push($arrHours[$this->task->id],$novoValor);
+          
+            /*********************** */           
 
         }
 
 
+        $resultDivisao = $minutosSomados / 15;
+        $resultBlocos = ceil($resultDivisao) * 15;
+            
 
-        $this->horasAtuais = global_hours_sum($arrHours);
+
+
+        $this->horasAtuais = $minutosSomados;
+
+        
 
 
         if($this->selectedEstado == "2")
@@ -559,34 +576,88 @@ class EditTasksReports extends Component
 
             $content = $pdf->download()->getOriginalContent();
 
+            if(!Storage::exists(tenant('id') . '/app/public/pedidos/pdfs_conclusao/'.$this->task->reference))
+            {
+                $caminhoImagess = storage_path('/app/public/pedidos/pdfs_conclusao/'.$this->task->reference.'/');
+                mkdir($caminhoImagess, 0755, true);
+                // File::makeDirectory(tenant('id') . '/app/public/pedidos/pdfs_conclusao/'.$this->task->reference, 0755, true, true);
+            }
+
             Storage::put(tenant('id') . '/app/public/pedidos/pdfs_conclusao/'.$this->task->reference.'/'.$this->task->reference.'.pdf',$content);
 
+
             $pedido = Pedidos::where('id',$this->task->id)->with('tech')->with('intervencoes')->with('customer')->first();
-            event(new SendPDF($pedido, $this->email_pdf));
+            
+            if($pedido->tipo_pedido == 1){
+                event(new SendPDF($pedido, $this->email_pdf));
+            }
+            
+
         }
 
 
-          //TENTAR VER ESTA SITUAÇÃO PARA ENVIAR PARA O DASHBOARD
-          $usr = User::where('id',Auth::user()->id)->first();
-          $pedido = Pedidos::where('id',$this->task->id)->first();
-  
-          $usrRecebido = User::where('id',$pedido->user_id)->first();
-  
+       
+        //TENTAR VER ESTA SITUAÇÃO PARA ENVIAR PARA O DASHBOARD
+        $usr = User::where('id',Auth::user()->id)->first();
+        $pedido = Pedidos::where('id',$this->task->id)->first();
+
+        $usrRecebido = User::where('id',$pedido->user_id)->first();
+
+
+        $message = "adicionou uma intervenção";
+
+
+        event(new ChatMessage($usr->name, $message));
+
+
+        
+        return redirect()->route('tenant.dashboard')
+        ->with('message', "Intervenção adicionada com sucesso!")
+        ->with('status', 'info');
+        
+
          
-          $message = "adicionou uma intervenção";
-      
-  
-          event(new ChatMessage($usr->name, $message));
-
-
-            
-        return redirect()->route('tenant.tasks-reports.index')
-            ->with('message', "Intervenção adicionada com sucesso!")
-            ->with('status', 'info');
         
 
 
 
+    }
+
+    public function mudarHoraReport($id,$mudarHora,$selectedSinal,$desconto_descricao,$task_id,$emailPDF)
+    {
+        $intervencaoAtual = Intervencoes::where('id',$id)->first();
+
+        if($selectedSinal == "mais"){
+            $selectedSinal = "+";
+        } else {
+            $selectedSinal = "-";
+        }
+       
+        Intervencoes::where('id',$id)->update([
+               "descontos" => $selectedSinal.$mudarHora,
+               "descricao_desconto" => $desconto_descricao
+        ]);
+
+        $pedido = Pedidos::where('id',$task_id)->with('tech')->with('intervencoes')->with('customer')->first();
+        event(new SendPDF($pedido, $emailPDF));
+
+        $usr = User::where('id',Auth::user()->id)->first();
+        $pedido = Pedidos::where('id',$task_id)->first();
+
+        $usrRecebido = User::where('id',$pedido->user_id)->first();
+
+       
+        $message = "adicionou uma intervenção";
+    
+
+        event(new ChatMessage($usr->name, $message));
+
+
+          
+      return redirect()->route('tenant.dashboard')
+          ->with('message', "Intervenção adicionada com sucesso!")
+          ->with('status', 'info');
+        
     }
 
     /**
@@ -640,81 +711,57 @@ class EditTasksReports extends Component
    
     public function render()
     {
-        $produtos = $this->tasksInterface->getProducts();
+        // $produtos = $this->tasksInterface->getProducts();
+        
 
         $horas = Intervencoes::where('id_pedido',$this->task->id)->where('hora_final','!=',null)->get();
 
         $somaDiferencasSegundos = 0;
 
-        $arrHours[$this->task->id] = [];
+        $minutosSomados = 0;
 
         foreach($horas as $hora)
         {
             
             $dia_inicial = $hora->data_inicio.' '.$hora->hora_inicio;
-            $dia_final = $hora->data_final.' '.$hora->hora_final;
+            $dia_final = $hora->data_inicio.' '.$hora->hora_final;
 
             $data1 = Carbon::parse($dia_inicial);
             $data2 = Carbon::parse($dia_final);
 
-            $result = $data1->diff($data2);
-
-            $hours = $result->days * 24 + $result->h;
-            $minutes = $result->i;
-
-            $hoursMinutesDifference = sprintf('%d:%02d', $hours, $minutes);
+            $result = $data1->diffInMinutes($data2);
 
            
 
             //*****PARTE A DESCONTAR********/
 
-            $valorOriginal = $hoursMinutesDifference;
-
-            list($horas, $minutos) = explode(':', $valorOriginal);
-
-            $valorEmHorasDecimais = $horas + ($minutos / 60);
-
-            if(!isset($hora->descontos[0]))
+            
+            if($hora->descontos == null)
             {
-                $sinal = "+";
-            }
-            else {
-                $sinal = $hora->descontos[0];
+                $hora->descontos = "+0";
             }
 
-            if($hora->descontos == "")
-            {
-                $hora->descontos = "+0";  
+          
+            $minutosSomados += $result;
+
+            if($hora["descontos"][0] == "+"){ 
+                $minutosSomados += substr($hora->descontos, 1);
+            } 
+            else { 
+                $minutosSomados -= substr($hora->descontos, 1);
             }
-
-
-            if($sinal == "+"){
-                $novoValorEmHorasDecimais = $valorEmHorasDecimais + substr($hora->descontos, 1);
-            }
-            else {
-                $novoValorEmHorasDecimais = $valorEmHorasDecimais - substr($hora->descontos, 1);
-            }
-        
-            $novoValorEmHorasDecimais = max(0, $novoValorEmHorasDecimais);
-
-            $novoHoras = floor($novoValorEmHorasDecimais);
-            $novoMinutos = ($novoValorEmHorasDecimais - $novoHoras) * 60;
-
-            $novoValor = sprintf('%d:%02d', $novoHoras, $novoMinutos);
-
-            /*********************** */
-
-            array_push($arrHours[$this->task->id],$novoValor);
+          
+            /*********************** */           
 
         }
 
 
-
-        $this->horasAtuais = global_hours_sum($arrHours);
-
+        $this->horasAtuais = $minutosSomados;
 
 
-        return view('tenant.livewire.tasksreports.edit',["produtos" => $produtos, "arrayProdutos" => $this->array_produtos, "arrayDesignacoes" => $this->designacao_intervencao]);
+        $this->coresObject = Prioridades::all();
+
+        return view('tenant.livewire.tasksreports.edit',["produtos" => $this->produtos, "arrayProdutos" => $this->array_produtos, "arrayDesignacoes" => $this->designacao_intervencao]);
 
 
     }

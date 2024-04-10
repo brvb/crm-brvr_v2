@@ -15,7 +15,7 @@
             </ol>
         </div>
         <div class="default-tab">
-            @livewire('tenant.tasks.add-tasks', ['customerList' => $customerList])
+            @livewire('tenant.tasks.add-tasks')
         </div>
     </div>
     <div class="erros">

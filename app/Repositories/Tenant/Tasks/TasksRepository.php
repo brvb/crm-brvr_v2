@@ -76,6 +76,7 @@ class TasksRepository implements TasksInterface
                 'tipo_pedido' => $values->selectedPedido,
                 'tipo_servico' => $values->selectedServico,
                 'descricao' => $values->serviceDescription,
+                'informacao_adicional' => $values->informacaoAdicional,
                 'anexos' => json_encode($imagesPedido),
                 'location_id' => $values->selectedLocation,
                 'nr_serie' => $values->serieNumber,
@@ -161,6 +162,7 @@ class TasksRepository implements TasksInterface
                 'tipo_servico' => $values->selectedServico,
                 'descricao' => $values->serviceDescription,
                 'descricao_reabertura' => $values->descriptionReabertura,
+                'informacao_adicional' => $values->informacaoAdicional,
                 'anexos' => json_encode($imagesPedido),
                 'location_id' => $values->selectedLocation,
                 'nr_serie' => $values->serieNumber,
@@ -503,7 +505,7 @@ class TasksRepository implements TasksInterface
     /**FILTRO */
 
     public function getTasksFilter($searchString,$tech,$client,$typeReport,$work,$ordenation,$dateBegin,$dateEnd,$perPage): LengthAwarePaginator
-    {          
+    {     
         if($client != "")
         {
             $tasks = Pedidos::where('estado','!=',5)->whereHas('tech', function ($query) use ($tech)
@@ -529,15 +531,8 @@ class TasksRepository implements TasksInterface
               
               
             });
-            // ->whereHas('customer', function ($query) use ($searchString)
-            // {
-            //     if($searchString != "")
-            //     {
-            //         $query->where('short_name', 'like', '%' . $searchString . '%');
-            //     }
-            // });
-            
-         
+
+                               
                 $tasks = $tasks
                 ->when($dateBegin != "" && $dateEnd != "", function($query) use($dateBegin,$dateEnd) {
                     $query->where('created_at','>=',$dateBegin)->where('created_at','<=',$dateEnd);
@@ -555,8 +550,11 @@ class TasksRepository implements TasksInterface
                    $tasks = $tasks->where('customer_id',$customer->id);
                 }
 
-
-                $tasks = $tasks->where('customer_id',$client);
+                if($client != "0")
+                {
+                    $tasks = $tasks->where('customer_id',$client);
+                }
+                
 
                 $tasks = $tasks->whereHas('tipoEstado', function ($query) use ($typeReport)
                 {
@@ -575,7 +573,6 @@ class TasksRepository implements TasksInterface
                     $tasks = $tasks->with('tech')->with('servicesToDo')->with('tipoEstado')->with('customer')->with('location')->orderBy('created_at', 'desc')->paginate($perPage);
                  }
 
-        
                      
         }
         else 
@@ -649,7 +646,6 @@ class TasksRepository implements TasksInterface
         
         }
        
-        
         return $tasks;
     }
 
@@ -1038,24 +1034,48 @@ class TasksRepository implements TasksInterface
             } 
             else 
             {
+
                 if($checkIntervencoes->hora_final != "")
                 {
-                    $intervencao = Intervencoes::create([
-                        "id_pedido" => $object->task->id,
-                        "produtos_ref" => json_encode($object->array_produtos),
-                        "produtos_desc" => json_encode($object->designacao_intervencao),
-                        "produtos_qtd" => json_encode($object->quantidade_intervencao),
-                        "descricao" => $object->descricao_intervencao,
-                        "estado_pedido" => $object->selectedEstado,
-                        "descricao_realizado" => $object->descricaoRealizado,
-                        "anexos" => json_encode($imagesPedido),
-                        "assinatura_tecnico" => $object->signatureTecnico,
-                        "assinatura_cliente" => $object->signatureClient,
-                        "horas_alterado" => $object->horasAlterado,
-                        "user_id" => Auth::user()->id,
-                        "data_inicio" => date('Y-m-d'),
-                        "hora_inicio" => date('H:i:s')
-                    ]);
+                    if($object->selectedEstado != "4" && $object->selectedEstado != "7")
+                    {
+                        $intervencao = Intervencoes::create([
+                            "id_pedido" => $object->task->id,
+                            "produtos_ref" => json_encode($object->array_produtos),
+                            "produtos_desc" => json_encode($object->designacao_intervencao),
+                            "produtos_qtd" => json_encode($object->quantidade_intervencao),
+                            "descricao" => $object->descricao_intervencao,
+                            "estado_pedido" => $object->selectedEstado,
+                            "descricao_realizado" => $object->descricaoRealizado,
+                            "anexos" => json_encode($imagesPedido),
+                            "assinatura_tecnico" => $object->signatureTecnico,
+                            "assinatura_cliente" => $object->signatureClient,
+                            "horas_alterado" => $object->horasAlterado,
+                            "user_id" => Auth::user()->id,
+                            "data_inicio" => date('Y-m-d'),
+                            "hora_inicio" => date('H:i:s'),
+                            "hora_final" => date('H:i:s'),
+                            "data_final" => date('Y-m-d')
+                        ]);
+                    } else {
+                        $intervencao = Intervencoes::create([
+                            "id_pedido" => $object->task->id,
+                            "produtos_ref" => json_encode($object->array_produtos),
+                            "produtos_desc" => json_encode($object->designacao_intervencao),
+                            "produtos_qtd" => json_encode($object->quantidade_intervencao),
+                            "descricao" => $object->descricao_intervencao,
+                            "estado_pedido" => $object->selectedEstado,
+                            "descricao_realizado" => $object->descricaoRealizado,
+                            "anexos" => json_encode($imagesPedido),
+                            "assinatura_tecnico" => $object->signatureTecnico,
+                            "assinatura_cliente" => $object->signatureClient,
+                            "horas_alterado" => $object->horasAlterado,
+                            "user_id" => Auth::user()->id,
+                            "data_inicio" => date('Y-m-d'),
+                            "hora_inicio" => date('H:i:s')
+                        ]);
+                    }
+                    
                 }
                 else if($checkIntervencoes->hora_final == null)
                 {
@@ -1483,6 +1503,8 @@ class TasksRepository implements TasksInterface
     public function getProductByReference($reference): object
     {
         $curl = curl_init();
+
+        $reference = str_replace(" ","%20",$reference);
 
         curl_setopt_array($curl, array(
             CURLOPT_URL => 'http://172.19.20.4:24004/products/products?id='.$reference,

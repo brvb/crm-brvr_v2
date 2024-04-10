@@ -73,31 +73,60 @@ class ShowTimes extends Component
 
         $this->taskTimes =  Intervencoes::with('pedido')->where('estado_pedido',"!=","1")->where('id_pedido',$task->id)->paginate($this->perPage);
 
-        $horas = Intervencoes::with('pedido')->where('estado_pedido',"!=","1")->where('id_pedido',$this->task)->get();
+        $horas = Intervencoes::with('pedido')->where('estado_pedido',"!=","1")->where('id_pedido',$this->task)->where('hora_final','!=',null)->get();
 
-        $somaDiferencasSegundos = 0;
 
         $arrHours[$this->task] = [];
 
+        $minutosSomados = 0;
+
         foreach($horas as $hora)
         {
-            $data1 = Carbon::parse($hora->data_inicio);
-            $data2 = Carbon::parse($hora->created_at);
-            $result = $data1->diff($data2);
+
+            $dia_inicial = $hora->data_inicio.' '.$hora->hora_inicio;
+            $dia_final = $hora->data_inicio.' '.$hora->hora_final;
+
+            $data1 = Carbon::parse($dia_inicial);
+            $data2 = Carbon::parse($dia_final);
+
+            $result = $data1->diffInMinutes($data2);
+
+           
+
+            //*****PARTE A DESCONTAR********/
+
+            
+            if($hora->descontos == null)
+            {
+                $hora->descontos = "+0";
+            }
+
           
-            $data = Carbon::createFromTime($result->h, $result->i, $result->s);
+            $minutosSomados += $result;
 
-            $somaDiferencasSegundos += $data->diffInSeconds(Carbon::createFromTime(0, 0, 0));
+            if($hora["descontos"][0] == "+"){ 
+                $minutosSomados += substr($hora->descontos, 1);
+            } 
+            else { 
+                $minutosSomados -= substr($hora->descontos, 1);
+            }
+
+            // $arrHours[$this->task] = $minutosSomados;
+          
+            /*********************** */           
         }
+        // $sum = 0;
+        // foreach($arrHours as $h)
+        // {
+        //     if(!empty($h))
+        //     {
+        //         $sum += $h;
+        //     }
+        // }
 
 
-        //Converter segundos e horas e minutos
-        $horas = floor($somaDiferencasSegundos / 3600);
-        $minutos = floor(($somaDiferencasSegundos % 3600) / 60);
-        //$horaFormatada = Carbon::createFromTime($horas, $minutos, 0)->format('H:i');
 
-        $this->horasAtuais = $horas;
-        $this->minutosAtuais = $minutos;
+        $this->minutosAtuais = $minutosSomados;
 
     }
 
