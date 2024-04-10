@@ -533,7 +533,7 @@ class Show extends Component
         $this->openTimes = $arrayUser;
 
 
-        $this->dispatchBrowserEvent('interventionCheck',["parameter" => $resposta,"idPedido" => $idPedido, "reference" => $pedido->reference, "cliente" => $customer->customers->name, "phone" => $customer->customers->phone]);
+        $this->dispatchBrowserEvent('interventionCheck',["parameter" => $resposta,"idPedido" => $idPedido, "reference" => $pedido->reference, "cliente" => $customer->customers->name,"phone" =>$customer->customers->phone,"quem_pediu" => $pedido->quem_pediu]);
 
 
     }

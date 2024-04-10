@@ -42,7 +42,6 @@ class TasksRepository implements TasksInterface
     public function createPedido(object $values): Pedidos
     {
         
-
         return DB::transaction(function () use ($values) {
 
             if(!empty($values->arrayFirstUploaded)){

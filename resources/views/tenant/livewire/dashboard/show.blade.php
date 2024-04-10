@@ -267,6 +267,7 @@ style="background:rgba(255, 255, 255, 0.8);z-index:999;position:fixed;top:0;left
         var idPedido = e.detail.idPedido;
         var cliente = e.detail.cliente;
         var phone = e.detail.phone;
+        var quem_pediu = e.detail.quem_pediu;
 
         var textButtonConfirm = "";
         var showConfirmButtonResponse;
@@ -282,7 +283,7 @@ style="background:rgba(255, 255, 255, 0.8);z-index:999;position:fixed;top:0;left
           showConfirmButtonResponse = false;
         }
 
-        var message = "Referência: "+referencia+ "<br>Cliente: "+cliente;
+        var message = "Referência: "+referencia+ "<br>Cliente: "+cliente+"<br>Quem pediu: "+quem_pediu;
 
         if(phone != "")
         {
