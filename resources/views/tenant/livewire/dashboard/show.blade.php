@@ -266,6 +266,7 @@ style="background:rgba(255, 255, 255, 0.8);z-index:999;position:fixed;top:0;left
         var referencia = e.detail.reference;
         var idPedido = e.detail.idPedido;
         var cliente = e.detail.cliente;
+        var phone = e.detail.phone;
 
         var textButtonConfirm = "";
         var showConfirmButtonResponse;
@@ -282,6 +283,11 @@ style="background:rgba(255, 255, 255, 0.8);z-index:999;position:fixed;top:0;left
         }
 
         var message = "Referência: "+referencia+ "<br>Cliente: "+cliente;
+
+        if(phone != "")
+        {
+          message += "<br>Telemóvel: "+phone;
+        }
 
         swal.fire({
                 title: "Informação Pedido",
