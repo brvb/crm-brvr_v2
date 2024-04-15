@@ -81,23 +81,24 @@
                     @endforeach
                     @if ($servicesNotifications != null)
                         @foreach ($servicesNotifications as $notification)
-            
-                        <div class="timeline-panel">
-                            <div class="media mr-2">
-                                <img alt="image" width="50"src="{!! global_tenancy_asset('/app/public/profile/'.$notification["userphoto"]) !!}">
-                            </div>
-                            <div class="media-body">
-                                
-                                <h6 class="mb-1">{{$notification["team_member"]}}</h6>
-                                <small class="d-block">{{$notification["customer"]}}</small>
-                                <small class="d-flex justify-content-between align-items-end">
-                                    {{$notification["notification"]}}
-                                    <div class="d-flex">
-                                        <button href="javascript:void(0)" wire:click="treated({{$notification["customerServicesId"]}})" class="btn btn-primary btn-sm light px-4"><i class="fa fa-check"></i></button>
+                            @if ($notification["team_member"] ==Auth::user()->name ||Auth::user()->type_user == 0)
+                                <div class="timeline-panel">
+                                    <div class="media mr-2">
+                                        <img alt="image" width="50"src="{!! global_tenancy_asset('/app/public/profile/'.$notification["userphoto"]) !!}">
                                     </div>
-                                </small>
-                            </div>
-                        </div>
+                                    <div class="media-body">
+                                        
+                                        <h6 class="mb-1">{{$notification["team_member"]}}</h6>
+                                        <small class="d-block">{{$notification["customer"]}}</small>
+                                        <small class="d-flex justify-content-between align-items-end">
+                                            {{$notification["notification"]}}
+                                            <div class="d-flex">
+                                                <button href="javascript:void(0)" wire:click="treated({{$notification["customerServicesId"]}})" class="btn btn-primary btn-sm light px-4"><i class="fa fa-check"></i></button>
+                                            </div>
+                                        </small>
+                                    </div>
+                                </div>
+                            @endif
                         @endforeach
                     @endif
                 </ul>
