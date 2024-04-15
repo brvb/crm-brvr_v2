@@ -93,10 +93,19 @@ class AlertMessages extends Component
         $this->servicesNotifications = $this->customerNotification->getNotificationTimes($this->customersRepository,$this->customerLocationInterface);
 
         $read = 1;
-        if($this->notifications->count() == 0 && empty($this->servicesNotifications))
-        {
-           //as notificações estão todas lidas
-           $read = 0;
+        if($this->servicesNotifications){
+            foreach ($this->servicesNotifications as $notification){
+                if ($notification["team_member"] == Auth::user()->name || Auth::user()->type_user == 0){
+                    if($this->notifications->count() == 0 && empty($this->servicesNotifications ))
+                    {
+                    $read = 0;
+                    }
+                }else{
+                    $read = 0;
+                }
+            }
+        }else{
+            $read = 0;
         }
         
 
