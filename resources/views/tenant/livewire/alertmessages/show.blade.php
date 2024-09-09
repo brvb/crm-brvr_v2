@@ -81,7 +81,7 @@
                     @endforeach
                     @if ($servicesNotifications != null)
                         @foreach ($servicesNotifications as $notification)
-                            @if ($notification["team_member"] == Auth::user()->name || Auth::user()->type_user == 0)
+                            @if ($notification["team_member"] ==Auth::user()->name ||Auth::user()->type_user == 0)
                                 <div class="timeline-panel">
                                     <div class="media mr-2">
                                         <img alt="image" width="50"src="{!! global_tenancy_asset('/app/public/profile/'.$notification["userphoto"]) !!}">

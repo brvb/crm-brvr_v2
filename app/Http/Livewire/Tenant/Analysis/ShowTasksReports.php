@@ -124,7 +124,8 @@ class ShowTasksReports extends Component
      */
     public function updatedSearchString(): void
     {
-        $this->resetPage();
+       $this->resetPage();
+       $this->flagRender = 1;
     }
 
     /**
@@ -231,6 +232,7 @@ class ShowTasksReports extends Component
                 $this->analysisToExcel = $this->analysisRepository->getAllAnalysisToExcelSearchString("all",$this->searchString);
             }
             else {
+           
                 $this->tasksList = $this->tasksInterface->getTasksFilterCompleted("all",$this->searchString,$this->technical,$this->client,$this->typeTask,$this->work,$this->ordenation,$this->dateBegin,$this->dateEnd,$this->perPage);
                 $this->analysisToExcel = $this->analysisRepository->getAnalysisFilterToExcel("all",$this->searchString,$this->technical,$this->client,$this->typeTask,$this->work,$this->ordenation,$this->dateBegin,$this->dateEnd);
             }

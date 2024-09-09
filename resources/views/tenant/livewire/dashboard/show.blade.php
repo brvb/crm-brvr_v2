@@ -230,20 +230,20 @@ style="background:rgba(255, 255, 255, 0.8);z-index:999;position:fixed;top:0;left
                 <tbody>
                   @if ($servicesNotifications != null)
                     @foreach ($servicesNotifications as $notification)
-                      @if ($notification["team_member"] == Auth::user()->name || Auth::user()->type_user == 0)
-                        <tr>
-                          <td>{{$notification["service"]}}</td>
-                          <td>{{$notification["team_member"]}}</td>
-                          <td>{{$notification["customer"]}}</td>
-                          <td>{{$notification["customer_county"]}}</td>
-                          <td>{{$notification["notification"]}}</td>
-                          <td>
-                            <div class="d-flex">
-                              <button href="javascript:void(0)" wire:click="treated({{$notification["customerServicesId"]}})" class="btn btn-primary btn-sm light px-4">{{__("Treated")}}</button>
-                            </div>
-                          </td>
-                        </tr>
-                      @endif
+                      @if ($notification["team_member"] ==Auth::user()->name ||Auth::user()->type_user == 0)
+                          <tr>
+                            <td>{{$notification["service"]}}</td>
+                            <td>{{$notification["team_member"]}}</td>
+                            <td>{{$notification["customer"]}}</td>
+                            <td>{{$notification["customer_county"]}}</td>
+                            <td>{{$notification["notification"]}}</td>
+                            <td>
+                              <div class="d-flex">
+                                <button href="javascript:void(0)" wire:click="treated({{$notification["customerServicesId"]}})" class="btn btn-primary btn-sm light px-4">{{__("Treated")}}</button>
+                              </div>
+                            </td>
+                          </tr>
+                        @endif
                     @endforeach
                   @endif
                 </tbody>
@@ -269,6 +269,7 @@ style="background:rgba(255, 255, 255, 0.8);z-index:999;position:fixed;top:0;left
         var idPedido = e.detail.idPedido;
         var cliente = e.detail.cliente;
         var phone = e.detail.phone;
+        var quem_pediu = e.detail.quem_pediu;
 
         var textButtonConfirm = "";
         var showConfirmButtonResponse;
@@ -284,7 +285,7 @@ style="background:rgba(255, 255, 255, 0.8);z-index:999;position:fixed;top:0;left
           showConfirmButtonResponse = false;
         }
 
-        var message = "Referência: "+referencia+ "<br>Cliente: "+cliente;
+        var message = "Referência: "+referencia+ "<br>Cliente: "+cliente+"<br>Quem pediu: "+quem_pediu;
 
         if(phone != "")
         {
