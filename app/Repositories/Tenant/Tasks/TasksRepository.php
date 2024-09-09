@@ -42,6 +42,7 @@ class TasksRepository implements TasksInterface
     public function createPedido(object $values): Pedidos
     {
         
+
         return DB::transaction(function () use ($values) {
 
             if(!empty($values->arrayFirstUploaded)){
@@ -524,7 +525,7 @@ class TasksRepository implements TasksInterface
 
                     if($searchString != "")
                     {
-                        $query->where('name', 'like', '%' . $searchString . '%');
+                        $query->where('reference', 'like', '%' . $searchString . '%');
                     }
 
               
@@ -1322,6 +1323,12 @@ class TasksRepository implements TasksInterface
                 {
                     $tasks = $tasks;
                 }
+                
+                 if($searchString != "")
+                 {
+                    
+                     $tasks = $tasks->where('reference',$searchString);
+                  }
     
                 if($ordenation == "asc"){
                     $tasks = $tasks->with('tech')->with('servicesToDo')->with('tipoEstado')->with('customer')->with('location')->orderBy('created_at', 'asc')->paginate($perPage);
@@ -1401,6 +1408,11 @@ class TasksRepository implements TasksInterface
                 {
                     $tasks = $tasks;
                 }
+           
+                 if($searchString != "")
+                 {
+                     $tasks = $tasks->where('reference', $searchString);
+                  }
     
                 if($ordenation == "asc"){
                     $tasks = $tasks->with('tech')->with('servicesToDo')->with('tipoEstado')->with('customer')->with('location')->orderBy('created_at', 'asc')->paginate($perPage);
@@ -1423,7 +1435,7 @@ class TasksRepository implements TasksInterface
         $curl = curl_init();
 
         curl_setopt_array($curl, array(
-            CURLOPT_URL => 'http://172.19.20.4:24004/equipment/equipment?client_number='.$id_client,
+            CURLOPT_URL => 'http://phc.brvr.pt:443/equipment/equipment?client_number='.$id_client,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
             CURLOPT_MAXREDIRS => 10,
@@ -1450,7 +1462,7 @@ class TasksRepository implements TasksInterface
         $curl = curl_init();
 
         curl_setopt_array($curl, array(
-            CURLOPT_URL => 'http://172.19.20.4:24004/equipment/equipment?id='.$serialNumber,
+            CURLOPT_URL => 'http://phc.brvr.pt:443/equipment/equipment?id='.$serialNumber,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
             CURLOPT_MAXREDIRS => 10,
@@ -1477,7 +1489,7 @@ class TasksRepository implements TasksInterface
         $curl = curl_init();
 
         curl_setopt_array($curl, array(
-            CURLOPT_URL => 'http://172.19.20.4:24004/products/products',
+            CURLOPT_URL => 'http://phc.brvr.pt:443/products/products',
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
             CURLOPT_MAXREDIRS => 10,
@@ -1506,7 +1518,7 @@ class TasksRepository implements TasksInterface
         $reference = str_replace(" ","%20",$reference);
 
         curl_setopt_array($curl, array(
-            CURLOPT_URL => 'http://172.19.20.4:24004/products/products?id='.$reference,
+            CURLOPT_URL => 'http://phc.brvr.pt:443/products/products?id='.$reference,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
             CURLOPT_MAXREDIRS => 10,
@@ -1535,7 +1547,7 @@ class TasksRepository implements TasksInterface
         $curl = curl_init();
 
         curl_setopt_array($curl, array(
-            CURLOPT_URL => 'http://172.19.20.4:24004/equipment/equipment',
+            CURLOPT_URL => 'http://phc.brvr.pt:443/equipment/equipment',
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
             CURLOPT_MAXREDIRS => 10,
@@ -1565,7 +1577,7 @@ class TasksRepository implements TasksInterface
         $curl = curl_init();
 
         curl_setopt_array($curl, array(
-            CURLOPT_URL => 'http://172.19.20.4:24004/equipment/equipment',
+            CURLOPT_URL => 'http://phc.brvr.pt:443/equipment/equipment',
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
             CURLOPT_MAXREDIRS => 10,

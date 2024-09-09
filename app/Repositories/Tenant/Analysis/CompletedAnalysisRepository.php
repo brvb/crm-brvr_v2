@@ -214,12 +214,17 @@ class CompletedAnalysisRepository implements CompletedAnalysisInterface
                 ->whereHas('servicesToDo', function ($query) use ($searchString)
                 {
                 
-                    if($searchString != "")
-                    {
-                        $query->where('name', 'like', '%' . $searchString . '%');
-                    }
+                    // if($searchString != "")
+                    // {
+                    //     $query->where('name', 'like', '%' . $searchString . '%');
+                    // }
     
-                })
+                });
+                
+                if($searchString != "")
+                    {
+                        $reportsFinished = $reportsFinished->where('reference', $searchString);
+                    }
                 // ->whereHas('customer', function ($query) use ($searchString)
                 // {
                 //     if($searchString != "")
@@ -227,7 +232,7 @@ class CompletedAnalysisRepository implements CompletedAnalysisInterface
                 //         $query->where('short_name', 'like', '%' . $searchString . '%');
                 //     }
                 // })
-                ->with('location')
+                $reportsFinished = $reportsFinished->with('location')
                 ->orderBy('created_at','desc')
                 ->get();
             }
@@ -239,12 +244,16 @@ class CompletedAnalysisRepository implements CompletedAnalysisInterface
                 ->whereHas('servicesToDo', function ($query) use ($searchString)
                 {
                 
-                    if($searchString != "")
-                    {
-                        $query->where('name', 'like', '%' . $searchString . '%');
-                    }
+                    // if($searchString != "")
+                    // {
+                    //     $query->where('name', 'like', '%' . $searchString . '%');
+                    // }
     
-                })
+                });
+                  if($searchString != "")
+                    {
+                        $reportsFinished = $reportsFinished->where('reference', $searchString);
+                    }
                 // ->whereHas('customer', function ($query) use ($searchString)
                 // {
                 //     if($searchString != "")
@@ -252,7 +261,7 @@ class CompletedAnalysisRepository implements CompletedAnalysisInterface
                 //         $query->where('short_name', 'like', '%' . $searchString . '%');
                 //     }
                 // })
-                ->with('location')
+                 $reportsFinished = $reportsFinished->with('location')
                 ->orderBy('created_at','desc')
                 ->get();
             }
@@ -268,20 +277,24 @@ class CompletedAnalysisRepository implements CompletedAnalysisInterface
                 ->whereHas('servicesToDo', function ($query) use ($searchString)
                 {
                 
-                    if($searchString != "")
-                    {
-                        $query->where('name', 'like', '%' . $searchString . '%');
-                    }
+                    // if($searchString != "")
+                    // {
+                    //     $query->where('name', 'like', '%' . $searchString . '%');
+                    // }
     
                 })
                 ->whereHas('customer', function ($query) use ($searchString)
                 {
-                    if($searchString != "")
+                    // if($searchString != "")
+                    // {
+                    //     $query->where('short_name', 'like', '%' . $searchString . '%');
+                    // }
+                });
+                 if($searchString != "")
                     {
-                        $query->where('short_name', 'like', '%' . $searchString . '%');
+                        $reportsFinished = $reportsFinished->where('reference', $searchString);
                     }
-                })
-                ->with('location')
+                $reportsFinished = $reportsFinished->with('location')
                 ->orderBy('created_at','desc')
                 ->get();
             }
@@ -293,20 +306,24 @@ class CompletedAnalysisRepository implements CompletedAnalysisInterface
                 ->whereHas('servicesToDo', function ($query) use ($searchString)
                 {
                 
-                    if($searchString != "")
-                    {
-                        $query->where('name', 'like', '%' . $searchString . '%');
-                    }
+                    // if($searchString != "")
+                    // {
+                    //     $query->where('name', 'like', '%' . $searchString . '%');
+                    // }
     
                 })
                 ->whereHas('customer', function ($query) use ($searchString)
                 {
-                    if($searchString != "")
+                    // if($searchString != "")
+                    // {
+                    //     $query->where('short_name', 'like', '%' . $searchString . '%');
+                    // }
+                });
+                if($searchString != "")
                     {
-                        $query->where('short_name', 'like', '%' . $searchString . '%');
+                        $reportsFinished = $reportsFinished->where('reference', $searchString);
                     }
-                })
-                ->with('location')
+                 $reportsFinished = $reportsFinished->with('location')
                 ->orderBy('created_at','desc')
                 ->get();
             }
@@ -322,19 +339,24 @@ class CompletedAnalysisRepository implements CompletedAnalysisInterface
                 ->whereHas('servicesToDo', function ($query) use ($searchString)
                 {
                 
-                    if($searchString != "")
-                    {
-                        $query->where('name', 'like', '%' . $searchString . '%');
-                    }
+                    // if($searchString != "")
+                    // {
+                    //     $query->where('name', 'like', '%' . $searchString . '%');
+                    // }
     
                 })
                 ->whereHas('customer', function ($query) use ($searchString)
                 {
-                    if($searchString != "")
+                    // if($searchString != "")
+                    // {
+                    //     $query->where('short_name', 'like', '%' . $searchString . '%');
+                    // }
+                });
+                 if($searchString != "")
                     {
-                        $query->where('short_name', 'like', '%' . $searchString . '%');
+                        $reportsFinished = $reportsFinished->where('reference', $searchString);
                     }
-                })
+                 $reportsFinished = $reportsFinished
                 ->with('location')
                 ->orderBy('created_at','desc')
                 ->get();
@@ -347,19 +369,24 @@ class CompletedAnalysisRepository implements CompletedAnalysisInterface
                 ->whereHas('servicesToDo', function ($query) use ($searchString)
                 {
                 
-                    if($searchString != "")
-                    {
-                        $query->where('name', 'like', '%' . $searchString . '%');
-                    }
+                    // if($searchString != "")
+                    // {
+                    //     $query->where('name', 'like', '%' . $searchString . '%');
+                    // }
     
                 })
                 ->whereHas('customer', function ($query) use ($searchString)
                 {
-                    if($searchString != "")
+                    // if($searchString != "")
+                    // {
+                    //     $query->where('short_name', 'like', '%' . $searchString . '%');
+                    // }
+                });
+                 if($searchString != "")
                     {
-                        $query->where('short_name', 'like', '%' . $searchString . '%');
+                        $reportsFinished = $reportsFinished->where('reference', $searchString);
                     }
-                })
+                 $reportsFinished = $reportsFinished
                 ->with('location')
                 ->orderBy('created_at','desc')
                 ->get();
@@ -395,10 +422,10 @@ class CompletedAnalysisRepository implements CompletedAnalysisInterface
                          $query->where('id',$work);
                     }
 
-                    if($searchString != "")
-                    {
-                        $query->where('name', 'like', '%' . $searchString . '%');
-                    }
+                    // if($searchString != "")
+                    // {
+                    //     $query->where('name', 'like', '%' . $searchString . '%');
+                    // }
 
               
               
@@ -451,6 +478,11 @@ class CompletedAnalysisRepository implements CompletedAnalysisInterface
                 {
                     $tasks = $tasks;
                 }
+                
+                if($searchString == "")
+                {
+                    $tasks = $tasks->where('reference', $searchString);
+                }
     
                 if($ordenation == "asc"){
                     $tasks = $tasks->with('tech')->with('servicesToDo')->with('tipoEstado')->with('customer')->with('location')->orderBy('created_at', 'asc')->get();
@@ -485,10 +517,10 @@ class CompletedAnalysisRepository implements CompletedAnalysisInterface
                     {
                          $query->where('id',$work);
                     }
-                    if($searchString != "")
-                    {
-                        $query->orwhere('name', 'like', '%' . $searchString . '%');
-                    }
+                    // if($searchString != "")
+                    // {
+                    //     $query->orwhere('name', 'like', '%' . $searchString . '%');
+                    // }
 
               
             });
@@ -529,6 +561,11 @@ class CompletedAnalysisRepository implements CompletedAnalysisInterface
                 else
                 {
                     $tasks = $tasks;
+                }
+                
+                 if($searchString == "")
+                {
+                    $tasks = $tasks->where('reference', $searchString);
                 }
     
                 if($ordenation == "asc"){
