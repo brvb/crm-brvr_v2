@@ -73,10 +73,10 @@ class ExportTasksExcel implements FromCollection, WithHeadings, WithEvents,Shoul
                 $minutosSomados += $result;
 
                 if($hora["descontos"][0] == "+"){ 
-                    $minutosSomados += substr($hora->descontos, 1);
+                    $minutosSomados += floatval(substr($hora->descontos, 1));
                 } 
                 else { 
-                    $minutosSomados -= substr($hora->descontos, 1);
+                    $minutosSomados -= floatval(substr($hora->descontos, 1));
                 }
             
                 if($minutosSomados == "")
@@ -186,10 +186,11 @@ class ExportTasksExcel implements FromCollection, WithHeadings, WithEvents,Shoul
                 $minutosSomados += $result;
     
                 if($hora["descontos"][0] == "+"){ 
-                    $minutosSomados += substr($hora->descontos, 1);
+                    $minutosSomados += floatval(substr($hora->descontos, 1));
                 } 
-                else { 
-                    $minutosSomados -= substr($hora->descontos, 1);
+                else {
+                    $minutosSomados -= floatval(substr($hora->descontos, 1));
+
                 }
               
                 /*********************** */           
