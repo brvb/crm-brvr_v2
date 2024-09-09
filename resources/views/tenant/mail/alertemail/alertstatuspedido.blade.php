@@ -60,7 +60,7 @@
                                                     <span>Telefone: {{$cliente->customers->phone}}</span><br>
                                                     <span>Email: {{$cliente->customers->email}}</span><br>
                                                     <span>Técnico designado: {{$task->tech->name}}</span><br>
-                                                    <span>Assunto: {{$task->descricao}}</span><br>
+                                                    <span>Descriçao do pedido: {{$task->descricao}}</span><br>
                                                 </p>
                                                 @if($mensagem != "")
                                                     <p><span style="font-weight:bolder;">Observações:</span> {{$mensagem}}</p>

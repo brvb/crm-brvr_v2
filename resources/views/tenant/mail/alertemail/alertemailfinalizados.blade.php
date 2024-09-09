@@ -113,27 +113,12 @@
                     
                                                 @endphp
                                                 <p>O seu pedido {{strtolower($task->tipoPedido->name)}} #{{$task->reference}} foi <b>FINALIZADO</b> dia {{ date('Y-m-d') }} às {{ date('H:i:s') }}.</p>
-
-                                                
-                                                <p>Cliente: {{$cst->customers->name}}</p>
-                                                
-
-
                                                 @if($cst->customers->type == "Faturação Normal")
-                                                {{-- <p>O pedido teve uma duração de {{ $resultBlocos }} minutos.</p><br> --}}
-
-                                                <p>O pedido teve uma duração de {{ sprintf('%02d',floor($resultBlocos / 60)) }}:{{ sprintf('%02d', fmod($resultBlocos, 60)) }} horas.</p><br>
-                                           
+                                                <p>O pedido teve uma duração de {{ $horas }} minutos.</p><br>
                                                 @elseif($cst->customers->type == "Bolsa de Horas")
-                                                    @php
-                                                        $minutosBolsa = $cst->customers->balance_hours - $resultBlocos;
-                                                    @endphp
-                                                <p>Atualmente dispõe de {{ sprintf('%02d',floor($minutosBolsa / 60)) }}:{{ sprintf('%02d',fmod($minutosBolsa, 60)) }} horas.</p><!-- No caso de cliente com bolsa de horas (falta adicionar no banco de dados e verificar aqui)-->
+                                                <p>Atualmente o seu saldo é de {{date('H:i:s',strtotime($cst->customers->balance_hours))}} horas.</p><!-- No caso de cliente com bolsa de horas (falta adicionar no banco de dados e verificar aqui)-->
                                                 @else
-                                                    @php
-                                                        $minutosAvenca = $cst->customers->hours_spent + $resultBlocos;
-                                                    @endphp
-                                                <p>Neste mês já dispôs de {{ sprintf('%02d',floor($minutosAvenca / 60)) }}:{{ sprintf('%02d',fmod($minutosAvenca, 60)) }} horas.</p><!-- No caso de cliente com avença mensal -->
+                                                <p>Neste mês já consumiu {{date('H:i:s',strtotime($cst->customers->hours_spent))}} horas.</p><!-- No caso de cliente com avença mensal -->
                                                 @endif
                                             </div>
                                             <hr>

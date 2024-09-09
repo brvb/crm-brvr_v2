@@ -73,8 +73,9 @@
                                                 <p>
                                                     <small>
                                                         <label style="font-size: 1.5em;font-weight: bold;text-decoration: underline;">Não responda a este email. </label><br>
-                                                        Para qualquer esclarecimento use os contactos habituais.<br>
-                                                        Identifique sempre o número de pedido.
+                                                    Para qualquer esclarecimento use os contactos habituais:<br>
+                                                            Telefone: 252646260 Email: suporte@brvr.pt <br>
+                                                            Identifique sempre o número de pedido.
                                                     </small>
                                                 </p>
                                         </td>
